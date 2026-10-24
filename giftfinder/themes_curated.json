@@ -1,0 +1,691 @@
+{
+  "reviewed_on": "2026-10-24",
+  "themes": [
+    {
+      "key": "minecraft",
+      "title": "Minecraft",
+      "subtitle": "Узнаваемые предметы, мобы и миры Minecraft",
+      "color": "#75b673",
+      "members": [
+        [
+          "Artisan Brick",
+          "Buzzy Bee"
+        ],
+        [
+          "Artisan Brick",
+          "Grass Block"
+        ],
+        [
+          "Big Year",
+          "The Nether"
+        ],
+        [
+          "Chill Flame",
+          "Pixel Art"
+        ],
+        [
+          "Easter Egg",
+          "Chicken"
+        ],
+        [
+          "Easter Egg",
+          "Creeper"
+        ],
+        [
+          "Input Key",
+          "Creeper"
+        ],
+        [
+          "Joyful Bundle",
+          "Steve’s Pet"
+        ],
+        [
+          "Light Sword",
+          "Steve"
+        ],
+        [
+          "Lunar Snake",
+          "Ender Snake"
+        ],
+        [
+          "Rare Bird",
+          "Zombie Rider"
+        ],
+        [
+          "Resistance Dog",
+          "Creeper"
+        ],
+        [
+          "Scared Cat",
+          "Creeper"
+        ],
+        [
+          "Scared Cat",
+          "Endercat"
+        ],
+        [
+          "Signet Ring",
+          "Dirt Diamond"
+        ],
+        [
+          "Snow Globe",
+          "Bedrock"
+        ],
+        [
+          "Snow Globe",
+          "Crimson Cabin"
+        ],
+        [
+          "Snow Globe",
+          "Ender Estate"
+        ],
+        [
+          "Snow Globe",
+          "Minehouse"
+        ],
+        [
+          "Snow Globe",
+          "Nether House"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "cheese",
+      "title": "Сырные подарки",
+      "subtitle": "Сырные формы, дырочки, мыши и сырные детали",
+      "color": "#e9bd68",
+      "members": [
+        [
+          "B-Day Candle",
+          "Mouse Brunch"
+        ],
+        [
+          "Bonded Ring",
+          "Cheese"
+        ],
+        [
+          "Clover Pin",
+          "Cheese"
+        ],
+        [
+          "Cookie Heart",
+          "Cheesecake"
+        ],
+        [
+          "Eternal Candle",
+          "Gruyere"
+        ],
+        [
+          "Ginger Cookie",
+          "Cheesecake"
+        ],
+        [
+          "Homemade Cake",
+          "Cheesecake"
+        ],
+        [
+          "Love Candle",
+          "Gouda Wax"
+        ],
+        [
+          "Lunar Snake",
+          "Fromage"
+        ],
+        [
+          "Lunar Snake",
+          "Golden Bleu"
+        ],
+        [
+          "Lunar Snake",
+          "Red Cheddar"
+        ],
+        [
+          "Mousse Cake",
+          "Cheesecake"
+        ],
+        [
+          "Snake Box",
+          "Cheese"
+        ],
+        [
+          "Spiced Wine",
+          "High Class"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "watermelon",
+      "title": "Арбузные",
+      "subtitle": "Арбузные дольки, семечки и полоски",
+      "color": "#89bc8b",
+      "members": [
+        [
+          "Artisan Brick",
+          "Watermelon"
+        ],
+        [
+          "Bunny Muffin",
+          "Watermelon"
+        ],
+        [
+          "Clover Pin",
+          "Watermelon"
+        ],
+        [
+          "Cookie Heart",
+          "Watermelon"
+        ],
+        [
+          "Heroic Helmet",
+          "Watermelon"
+        ],
+        [
+          "Hypno Lollipop",
+          "Watermelon"
+        ],
+        [
+          "Ice Cream",
+          "Watermelon"
+        ],
+        [
+          "Joyful Bundle",
+          "Watermelon"
+        ],
+        [
+          "Lol Pop",
+          "Watermelon"
+        ],
+        [
+          "Mad Pumpkin",
+          "Watermelon"
+        ],
+        [
+          "Record Player",
+          "Watermelon"
+        ],
+        [
+          "Star Notepad",
+          "Watermelon"
+        ],
+        [
+          "Toy Bear",
+          "Watermelon"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "strawberry",
+      "title": "Клубничные",
+      "subtitle": "Клубника и узнаваемое клубничное оформление",
+      "color": "#e793a5",
+      "members": [
+        [
+          "Bow Tie",
+          "Strawberry"
+        ],
+        [
+          "Cookie Heart",
+          "Strawberry"
+        ],
+        [
+          "Cookie Heart",
+          "Strawberry-1"
+        ],
+        [
+          "Ginger Cookie",
+          "Strawberry"
+        ],
+        [
+          "Happy Brownie",
+          "Strawberry"
+        ],
+        [
+          "Homemade Cake",
+          "Strawberry"
+        ],
+        [
+          "Hypno Lollipop",
+          "Strawberry"
+        ],
+        [
+          "Ice Cream",
+          "Strawberry"
+        ],
+        [
+          "Jingle Bells",
+          "Strawberry"
+        ],
+        [
+          "Joyful Bundle",
+          "Strawberry"
+        ],
+        [
+          "Neko Helmet",
+          "Strawberry"
+        ],
+        [
+          "Record Player",
+          "Strawberry"
+        ],
+        [
+          "Tama Gadget",
+          "Strawberry"
+        ],
+        [
+          "Xmas Stocking",
+          "Strawberry"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "pumpkin",
+      "title": "Тыквы",
+      "subtitle": "Тыквенные формы и фонари, без случайных Jack-названий",
+      "color": "#e9ab75",
+      "members": [
+        [
+          "Holiday Drink",
+          "Pumpkin Juice"
+        ],
+        [
+          "Liberty Figure",
+          "Pumpkin"
+        ],
+        [
+          "Lol Pop",
+          "Pumpkin"
+        ],
+        [
+          "Mini Oscar",
+          "Pumpkin"
+        ],
+        [
+          "Money Pot",
+          "Pumpkin"
+        ],
+        [
+          "Plush Pepe",
+          "Pumpkin"
+        ],
+        [
+          "Trapped Heart",
+          "Jack-o-Love"
+        ],
+        [
+          "Vice Cream",
+          "Pumpkin Spice"
+        ],
+        [
+          "Voodoo Doll",
+          "Pumpkin"
+        ],
+        [
+          "Winter Wreath",
+          "Pumpkin"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "bee",
+      "title": "Пчёлы и мёд",
+      "subtitle": "Пчёлы, соты и видимые медовые детали",
+      "color": "#d9b863",
+      "members": [
+        [
+          "Artisan Brick",
+          "Buzzy Bee"
+        ],
+        [
+          "Bunny Muffin",
+          "Honey Bee"
+        ],
+        [
+          "Candy Cane",
+          "Honeycomb"
+        ],
+        [
+          "Durov's Cap",
+          "Honey Bee"
+        ],
+        [
+          "Eternal Candle",
+          "Honeycomb"
+        ],
+        [
+          "Eternal Candle",
+          "Thick Honey"
+        ],
+        [
+          "Heart Locket",
+          "Queen Bee"
+        ],
+        [
+          "Hex Pot",
+          "Honeydew"
+        ],
+        [
+          "Homemade Cake",
+          "Honey Cake"
+        ],
+        [
+          "Jester Hat",
+          "Harley-Bee"
+        ],
+        [
+          "Joyful Bundle",
+          "Honey Bear"
+        ],
+        [
+          "Kissed Frog",
+          "Honeyhop"
+        ],
+        [
+          "Lol Pop",
+          "Honey Bee"
+        ],
+        [
+          "Mad Pumpkin",
+          "Bee Movie"
+        ],
+        [
+          "Magic Potion",
+          "Queen Bee"
+        ],
+        [
+          "Mousse Cake",
+          "Honey Cake"
+        ],
+        [
+          "Neko Helmet",
+          "Queen Bee"
+        ],
+        [
+          "Restless Jar",
+          "Honey Bees"
+        ],
+        [
+          "Sky Stilettos",
+          "Queen Bee"
+        ],
+        [
+          "Snake Box",
+          "Honey Bee"
+        ],
+        [
+          "Victory Medal",
+          "Queen Bee"
+        ],
+        [
+          "Whip Cupcake",
+          "Honey Bee"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "sakura",
+      "title": "Сакура",
+      "subtitle": "Цветки, лепестки и цветочные узоры сакуры",
+      "color": "#e9adc9",
+      "members": [
+        [
+          "Clover Pin",
+          "Sakura"
+        ],
+        [
+          "Heart Locket",
+          "Sakura"
+        ],
+        [
+          "Hypno Lollipop",
+          "Sakura"
+        ],
+        [
+          "Sakura Flower",
+          "Sakura"
+        ],
+        [
+          "Signet Ring",
+          "Sakura Gold"
+        ],
+        [
+          "Tama Gadget",
+          "Sakura"
+        ],
+        [
+          "Valentine Box",
+          "Sakura"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "snowman",
+      "title": "Снеговики",
+      "subtitle": "Узнаваемые снеговики и их оформление",
+      "color": "#a5d5e2",
+      "members": [
+        [
+          "Bunny Muffin",
+          "Snowman"
+        ],
+        [
+          "Ginger Cookie",
+          "Snowman"
+        ],
+        [
+          "Hanging Star",
+          "Snowman"
+        ],
+        [
+          "Happy Brownie",
+          "Snowman"
+        ],
+        [
+          "Jelly Bunny",
+          "Snowman"
+        ],
+        [
+          "Toy Bear",
+          "Snowman"
+        ],
+        [
+          "Winter Wreath",
+          "Snowman"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "skeleton",
+      "title": "Кости и скелеты",
+      "subtitle": "Изображённые кости, черепа и скелеты",
+      "color": "#c4c6d5",
+      "members": [
+        [
+          "Bling Binky",
+          "Tribal Skull"
+        ],
+        [
+          "Crystal Ball",
+          "Red Skull"
+        ],
+        [
+          "Crystal Ball",
+          "Skullberry"
+        ],
+        [
+          "Electric Skull",
+          "Bone White"
+        ],
+        [
+          "Electric Skull",
+          "Ink Skull"
+        ],
+        [
+          "Eternal Candle",
+          "Sugar Skull"
+        ],
+        [
+          "Fine Pen",
+          "Bony Skull"
+        ],
+        [
+          "Ginger Cookie",
+          "Bone Appétit"
+        ],
+        [
+          "Hanging Star",
+          "Skeleton"
+        ],
+        [
+          "Heroic Helmet",
+          "Punk Skull"
+        ],
+        [
+          "Homemade Cake",
+          "Bonecake"
+        ],
+        [
+          "Lucky Locket",
+          "Skeleton"
+        ],
+        [
+          "Lush Bouquet",
+          "Skull Flowers"
+        ],
+        [
+          "Mighty Arm",
+          "Bone Warrior"
+        ],
+        [
+          "Mini Oscar",
+          "Skeleton"
+        ],
+        [
+          "Restless Jar",
+          "Snack Bones"
+        ],
+        [
+          "Signet Ring",
+          "Skull"
+        ],
+        [
+          "Vice Cream",
+          "Chilly Bones"
+        ],
+        [
+          "Westside Sign",
+          "Sugar Bone"
+        ],
+        [
+          "Winter Wreath",
+          "Crossbones"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "rainbow",
+      "title": "Радужные",
+      "subtitle": "Видимая многоцветная радуга и радужные градиенты",
+      "color": "#b9a0e0",
+      "members": [
+        [
+          "B-Day Candle",
+          "Rainbow"
+        ],
+        [
+          "Bonded Ring",
+          "Rainbow"
+        ],
+        [
+          "Bonded Ring",
+          "Rainbow Halo"
+        ],
+        [
+          "Clover Pin",
+          "Glass Rainbow"
+        ],
+        [
+          "Cookie Heart",
+          "Dark Rainbow"
+        ],
+        [
+          "Cookie Heart",
+          "Rainbow"
+        ],
+        [
+          "Crystal Ball",
+          "Rainbow"
+        ],
+        [
+          "Diamond Ring",
+          "Rainbow"
+        ],
+        [
+          "Eternal Candle",
+          "Rainbow"
+        ],
+        [
+          "Hanging Star",
+          "Rainbows"
+        ],
+        [
+          "Hex Pot",
+          "Rainbow Pearl"
+        ],
+        [
+          "Homemade Cake",
+          "Rainbow Glow"
+        ],
+        [
+          "Jester Hat",
+          "Rainbow Joy"
+        ],
+        [
+          "Lol Pop",
+          "Rainbow Dash"
+        ],
+        [
+          "Lunar Snake",
+          "Rainbow Scale"
+        ],
+        [
+          "Moon Pendant",
+          "Glass Rainbow"
+        ],
+        [
+          "Nail Bracelet",
+          "Rainbow Pills"
+        ],
+        [
+          "Pet Snake",
+          "Rainbow"
+        ],
+        [
+          "Spy Agaric",
+          "Rainbow Glow"
+        ],
+        [
+          "Star Notepad",
+          "Rainbow"
+        ],
+        [
+          "Vintage Cigar",
+          "Rainbow Road"
+        ],
+        [
+          "Witch Hat",
+          "Rainbow"
+        ]
+      ],
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+color|all_colors|err_color|color_black|color_gray|color_white|color_brown|color_red|color_orange|color_yellow|color_green|color_teal|color_blue|color_violet|color_purple|color_pink
+ru|Цвет|Все цвета|Неизвестный цвет монохромок|Чёрные|Серые|Белые|Коричневые|Красные|Оранжевые|Жёлтые|Зелёные|Бирюзовые|Синие|Фиолетовые|Пурпурные|Розовые
+uk|Колір|Усі кольори|Невідомий колір монохромних|Чорні|Сірі|Білі|Коричневі|Червоні|Помаранчеві|Жовті|Зелені|Бірюзові|Сині|Фіолетові|Пурпурові|Рожеві
+de|Farbe|Alle Farben|Unbekannte monochrome Farbe|Schwarz|Grau|Weiß|Braun|Rot|Orange|Gelb|Grün|Türkis|Blau|Violett|Purpur|Rosa
+fr|Couleur|Toutes les couleurs|Couleur monochrome inconnue|Noir|Gris|Blanc|Marron|Rouge|Orange|Jaune|Vert|Turquoise|Bleu|Violet|Pourpre|Rose
+es|Color|Todos los colores|Color monocromo desconocido|Negro|Gris|Blanco|Marrón|Rojo|Naranja|Amarillo|Verde|Turquesa|Azul|Violeta|Púrpura|Rosa
+it|Colore|Tutti i colori|Colore monocromatico sconosciuto|Nero|Grigio|Bianco|Marrone|Rosso|Arancione|Giallo|Verde|Turchese|Blu|Viola|Porpora|Rosa
+pt_PT|Cor|Todas as cores|Cor monocromática desconhecida|Preto|Cinzento|Branco|Castanho|Vermelho|Laranja|Amarelo|Verde|Turquesa|Azul|Violeta|Púrpura|Rosa
+pt_BR|Cor|Todas as cores|Cor monocromática desconhecida|Preto|Cinza|Branco|Marrom|Vermelho|Laranja|Amarelo|Verde|Turquesa|Azul|Violeta|Púrpura|Rosa
+pl|Kolor|Wszystkie kolory|Nieznany kolor monochromatyczny|Czarne|Szare|Białe|Brązowe|Czerwone|Pomarańczowe|Żółte|Zielone|Turkusowe|Niebieskie|Fioletowe|Purpurowe|Różowe
+cs|Barva|Všechny barvy|Neznámá jednobarevná barva|Černá|Šedá|Bílá|Hnědá|Červená|Oranžová|Žlutá|Zelená|Tyrkysová|Modrá|Fialová|Purpurová|Růžová
+nl|Kleur|Alle kleuren|Onbekende monochrome kleur|Zwart|Grijs|Wit|Bruin|Rood|Oranje|Geel|Groen|Turkoois|Blauw|Violet|Paars|Roze
+sv|Färg|Alla färger|Okänd monokrom färg|Svart|Grå|Vit|Brun|Röd|Orange|Gul|Grön|Turkos|Blå|Violett|Purpur|Rosa
+tr|Renk|Tüm renkler|Bilinmeyen tek renk|Siyah|Gri|Beyaz|Kahverengi|Kırmızı|Turuncu|Sarı|Yeşil|Turkuaz|Mavi|Menekşe|Mor|Pembe
+ar|اللون|كل الألوان|لون أحادي غير معروف|أسود|رمادي|أبيض|بني|أحمر|برتقالي|أصفر|أخضر|فيروزي|أزرق|بنفسجي|أرجواني|وردي
+he|צבע|כל הצבעים|צבע מונוכרום לא מוכר|שחור|אפור|לבן|חום|אדום|כתום|צהוב|ירוק|טורקיז|כחול|סגול בהיר|סגול|ורוד
+fa|رنگ|همه رنگ‌ها|رنگ تک‌رنگ ناشناخته|سیاه|خاکستری|سفید|قهوه‌ای|قرمز|نارنجی|زرد|سبز|فیروزه‌ای|آبی|بنفش روشن|ارغوانی|صورتی
+hi|रंग|सभी रंग|अज्ञात एकरंगी रंग|काला|धूसर|सफ़ेद|भूरा|लाल|नारंगी|पीला|हरा|फ़िरोज़ी|नीला|बैंगनी|जामुनी|गुलाबी
+bn|রং|সব রং|অজানা একরঙা রং|কালো|ধূসর|সাদা|বাদামি|লাল|কমলা|হলুদ|সবুজ|ফিরোজা|নীল|বেগুনি|জামুনি|গোলাপি
+ur|رنگ|تمام رنگ|نامعلوم یک رنگ|سیاہ|سرمئی|سفید|بھورا|سرخ|نارنجی|پیلا|سبز|فیروزی|نیلا|ہلکا بنفشی|ارغوانی|گلابی
+id|Warna|Semua warna|Warna monokrom tidak dikenal|Hitam|Abu-abu|Putih|Cokelat|Merah|Oranye|Kuning|Hijau|Toska|Biru|Violet|Ungu|Merah muda
+ms|Warna|Semua warna|Warna monokrom tidak diketahui|Hitam|Kelabu|Putih|Coklat|Merah|Jingga|Kuning|Hijau|Firuz|Biru|Violet|Ungu|Merah jambu
+vi|Màu|Tất cả màu|Màu đơn sắc không xác định|Đen|Xám|Trắng|Nâu|Đỏ|Cam|Vàng|Xanh lá|Ngọc lam|Xanh dương|Tím violet|Tím|Hồng
+th|สี|ทุกสี|ไม่รู้จักสีเดียวนี้|ดำ|เทา|ขาว|น้ำตาล|แดง|ส้ม|เหลือง|เขียว|ฟ้าอมเขียว|น้ำเงิน|ม่วงอ่อน|ม่วง|ชมพู
+zh_CN|颜色|所有颜色|未知单色搭配颜色|黑色|灰色|白色|棕色|红色|橙色|黄色|绿色|青色|蓝色|紫罗兰色|紫色|粉色
+zh_TW|顏色|所有顏色|未知單色搭配顏色|黑色|灰色|白色|棕色|紅色|橙色|黃色|綠色|青色|藍色|紫羅蘭色|紫色|粉色
+ja|色|すべての色|不明な同系色|黒|グレー|白|茶色|赤|オレンジ|黄色|緑|ターコイズ|青|すみれ色|紫|ピンク
+ko|색상|모든 색상|알 수 없는 단색 조합 색상|검정|회색|흰색|갈색|빨강|주황|노랑|초록|청록|파랑|바이올렛|보라|분홍

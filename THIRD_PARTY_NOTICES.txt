@@ -1,0 +1,82 @@
+GiftFinder 0.6.0 — third-party components
+
+This distribution includes Python and third-party libraries. The application code and build recipe are supplied separately.
+The Qt libraries are dynamically linked; the source package allows rebuilding with replacement Qt libraries.
+
+Python source: https://www.python.org/downloads/source/
+Qt source: https://code.qt.io/cgit/qt/qtbase.git/
+PySide/Shiboken source: https://code.qt.io/cgit/pyside/pyside-setup.git/
+
+PySide6_Essentials 6.12.0
+License: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Homepage, https://pyside.org
+Documentation, https://doc.qt.io/qtforpython
+Repository, https://code.qt.io/cgit/pyside/pyside-setup.git/
+Changelog, https://code.qt.io/cgit/pyside/pyside-setup.git/tree/doc/changelogs
+Tracker, https://qt-project.atlassian.net/browse/PYSIDE
+
+shiboken6 6.12.0
+License: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+Homepage, https://pyside.org
+Documentation, https://doc.qt.io/qtforpython
+Repository, https://code.qt.io/cgit/pyside/pyside-setup.git/
+Changelog, https://code.qt.io/cgit/pyside/pyside-setup.git/tree/doc/changelogs
+Tracker, https://qt-project.atlassian.net/browse/PYSIDE
+
+requests 2.34.2
+License: Apache-2.0
+Documentation, https://requests.readthedocs.io
+Source, https://github.com/psf/requests
+
+beautifulsoup4 4.15.0
+License: MIT License
+Download, https://www.crummy.com/software/BeautifulSoup/bs4/download/
+Homepage, https://www.crummy.com/software/BeautifulSoup/bs4/
+
+soupsieve 3.0.4
+License: MIT
+Homepage, https://github.com/facelessuser/soupsieve
+
+certifi 2026.10.23
+License: MPL-2.0
+Source, https://github.com/certifi/python-certifi
+
+charset-normalizer 3.5.2
+License: MIT
+Changelog, https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
+Documentation, https://charset-normalizer.readthedocs.io/
+Code, https://github.com/jawah/charset_normalizer
+Issue tracker, https://github.com/jawah/charset_normalizer/issues
+
+idna 3.20
+License: BSD-3-Clause
+Changelog, https://github.com/kjd/idna/blob/master/HISTORY.md
+Issue tracker, https://github.com/kjd/idna/issues
+Source, https://github.com/kjd/idna
+
+urllib3 2.8.0
+License: MIT
+Changelog, https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
+Documentation, https://urllib3.readthedocs.io
+Code, https://github.com/urllib3/urllib3
+Issue tracker, https://github.com/urllib3/urllib3/issues
+Security policy, https://urllib3.readthedocs.io/en/latest/security.html
+
+typing_extensions 4.16.0
+License: PSF-2.0
+Bug Tracker, https://github.com/python/typing_extensions/issues
+Changes, https://github.com/python/typing_extensions/blob/main/CHANGELOG.md
+Documentation, https://typing-extensions.readthedocs.io/
+Home, https://github.com/python/typing_extensions
+Q & A, https://github.com/python/typing/discussions
+Repository, https://github.com/python/typing_extensions
+
+flag-icons: flag SVG artwork, MIT License, Copyright (c) 2013 Panayiotis Lipiridis.
+Source: https://github.com/lipis/flag-icons
+License: third-party/flag-icons-MIT.txt
+Bundled files and checksums: giftfinder/flags/SOURCES.json
+
+Currency names and symbols: Unicode CLDR, generated at build time using Babel 2.18.0.
+Babel source and BSD license: https://github.com/python-babel/babel
+Unicode license: https://www.unicode.org/license.txt
+License texts are included in third-party. Babel itself is not required by the EXE.

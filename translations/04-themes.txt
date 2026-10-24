@@ -1,0 +1,28 @@
+currency|market|source|source_time|link|yes|no|theme_minecraft|theme_cheese|theme_watermelon|theme_strawberry|theme_pumpkin|theme_bee|theme_sakura|theme_snowman|theme_skeleton|theme_rainbow
+ru|Валюта|Площадка|Источник|Время источника|Ссылка|Да|Нет|Minecraft|Сырные|Арбузные|Клубничные|Тыквы|Пчёлы и мёд|Сакура|Снеговики|Кости и скелеты|Радужные
+uk|Валюта|Майданчик|Джерело|Час джерела|Посилання|Так|Ні|Minecraft|Сирні|Кавунові|Полуничні|Гарбузи|Бджоли й мед|Сакура|Сніговики|Кістки й скелети|Веселкові
+de|Währung|Marktplatz|Quelle|Quellenzeit|Link|Ja|Nein|Minecraft|Käse|Wassermelone|Erdbeere|Kürbisse|Bienen und Honig|Sakura|Schneemänner|Skelette|Regenbogen
+fr|Devise|Marché|Source|Date de la source|Lien|Oui|Non|Minecraft|Fromage|Pastèque|Fraise|Citrouilles|Abeilles et miel|Sakura|Bonshommes de neige|Squelettes|Arc-en-ciel
+es|Moneda|Mercado|Fuente|Fecha de la fuente|Enlace|Sí|No|Minecraft|Queso|Sandía|Fresa|Calabazas|Abejas y miel|Sakura|Muñecos de nieve|Esqueletos|Arcoíris
+it|Valuta|Mercato|Fonte|Data della fonte|Link|Sì|No|Minecraft|Formaggio|Anguria|Fragola|Zucche|Api e miele|Sakura|Pupazzi di neve|Scheletri|Arcobaleno
+pt_PT|Moeda|Mercado|Fonte|Data da fonte|Ligação|Sim|Não|Minecraft|Queijo|Melancia|Morango|Abóboras|Abelhas e mel|Sakura|Bonecos de neve|Esqueletos|Arco-íris
+pt_BR|Moeda|Mercado|Fonte|Data da fonte|Link|Sim|Não|Minecraft|Queijo|Melancia|Morango|Abóboras|Abelhas e mel|Sakura|Bonecos de neve|Esqueletos|Arco-íris
+pl|Waluta|Rynek|Źródło|Czas źródła|Link|Tak|Nie|Minecraft|Ser|Arbuz|Truskawka|Dynie|Pszczoły i miód|Sakura|Bałwany|Szkielety|Tęcza
+cs|Měna|Tržiště|Zdroj|Čas zdroje|Odkaz|Ano|Ne|Minecraft|Sýr|Meloun|Jahoda|Dýně|Včely a med|Sakura|Sněhuláci|Kostry|Duha
+nl|Valuta|Marktplaats|Bron|Brontijd|Link|Ja|Nee|Minecraft|Kaas|Watermeloen|Aardbei|Pompoenen|Bijen en honing|Sakura|Sneeuwpoppen|Skeletten|Regenboog
+sv|Valuta|Marknadsplats|Källa|Källans tid|Länk|Ja|Nej|Minecraft|Ost|Vattenmelon|Jordgubbe|Pumpor|Bin och honung|Sakura|Snögubbar|Skelett|Regnbåge
+tr|Para birimi|Pazar|Kaynak|Kaynak zamanı|Bağlantı|Evet|Hayır|Minecraft|Peynir|Karpuz|Çilek|Kabaklar|Arılar ve bal|Sakura|Kardan adamlar|İskeletler|Gökkuşağı
+ar|العملة|السوق|المصدر|وقت المصدر|الرابط|نعم|لا|Minecraft|الجبن|البطيخ|الفراولة|القرع|النحل والعسل|ساكورا|رجال الثلج|الهياكل العظمية|قوس قزح
+he|מטבע|שוק|מקור|זמן המקור|קישור|כן|לא|Minecraft|גבינה|אבטיח|תות|דלעות|דבורים ודבש|סאקורה|אנשי שלג|שלדים|קשת בענן
+fa|ارز|بازار|منبع|زمان منبع|پیوند|بله|خیر|Minecraft|پنیر|هندوانه|توت‌فرنگی|کدوها|زنبورها و عسل|ساکورا|آدم‌برفی‌ها|اسکلت‌ها|رنگین‌کمان
+hi|मुद्रा|बाज़ार|स्रोत|स्रोत का समय|लिंक|हाँ|नहीं|Minecraft|चीज़|तरबूज़|स्ट्रॉबेरी|कद्दू|मधुमक्खियाँ और शहद|सकुरा|हिममानव|कंकाल|इंद्रधनुष
+bn|মুদ্রা|বাজার|উৎস|উৎসের সময়|লিঙ্ক|হ্যাঁ|না|Minecraft|চিজ|তরমুজ|স্ট্রবেরি|কুমড়া|মৌমাছি ও মধু|সাকুরা|তুষারমানব|কঙ্কাল|রংধনু
+ur|کرنسی|بازار|ذریعہ|ذریعے کا وقت|لنک|ہاں|نہیں|Minecraft|پنیر|تربوز|اسٹرابیری|کدو|شہد کی مکھیاں اور شہد|ساکورا|برفانی آدمی|ڈھانچے|قوس قزح
+id|Mata uang|Pasar|Sumber|Waktu sumber|Tautan|Ya|Tidak|Minecraft|Keju|Semangka|Stroberi|Labu|Lebah dan madu|Sakura|Manusia salju|Kerangka|Pelangi
+ms|Mata wang|Pasaran|Sumber|Masa sumber|Pautan|Ya|Tidak|Minecraft|Keju|Tembikai|Strawberi|Labu|Lebah dan madu|Sakura|Orang salji|Rangka|Pelangi
+vi|Tiền tệ|Chợ|Nguồn|Thời gian nguồn|Liên kết|Có|Không|Minecraft|Phô mai|Dưa hấu|Dâu tây|Bí ngô|Ong và mật|Hoa anh đào|Người tuyết|Bộ xương|Cầu vồng
+th|สกุลเงิน|ตลาด|แหล่งข้อมูล|เวลาของแหล่งข้อมูล|ลิงก์|ใช่|ไม่|Minecraft|ชีส|แตงโม|สตรอว์เบอร์รี|ฟักทอง|ผึ้งและน้ำผึ้ง|ซากุระ|ตุ๊กตาหิมะ|โครงกระดูก|สายรุ้ง
+zh_CN|货币|市场|来源|来源时间|链接|是|否|Minecraft|奶酪|西瓜|草莓|南瓜|蜜蜂与蜂蜜|樱花|雪人|骷髅|彩虹
+zh_TW|貨幣|市場|來源|來源時間|連結|是|否|Minecraft|起司|西瓜|草莓|南瓜|蜜蜂與蜂蜜|櫻花|雪人|骷髏|彩虹
+ja|通貨|マーケット|情報源|情報源の時刻|リンク|はい|いいえ|Minecraft|チーズ|スイカ|イチゴ|カボチャ|ミツバチと蜂蜜|桜|雪だるま|スケルトン|虹
+ko|통화|마켓|출처|출처 시간|링크|예|아니요|Minecraft|치즈|수박|딸기|호박|벌과 꿀|벚꽃|눈사람|해골|무지개

@@ -1,0 +1,38 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.test-work/
+.test-*/
+.qa*/
+.coverage
+htmlcov/
+
+# Build output and release downloads belong in GitHub Releases
+build/
+dist/
+*.exe
+*.zip
+
+# Local profiles, sessions and credentials
+.env
+.env.*
+!.env.example
+*.session
+*.session-*
+*.sqlite*
+*.db
+*.db-*
+*.log
+*.pem
+*.key
+preferences.json
+startup-error.txt
+
+# Editor and OS metadata
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
