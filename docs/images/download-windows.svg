@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="96" viewBox="0 0 480 96" role="img" aria-labelledby="title desc">
   <title id="title">Скачать GiftFinder</title>
-  <desc id="desc">Windows, macOS и Linux</desc>
+  <desc id="desc">Windows, macOS, Linux и Android preview</desc>
   <defs>
     <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#16a34a"/>
@@ -15,6 +15,6 @@
   </g>
   <g fill="#ffffff" font-family="Segoe UI, Arial, sans-serif">
     <text x="86" y="43" font-size="24" font-weight="700">Скачать GiftFinder</text>
-    <text x="86" y="68" font-size="15" fill-opacity=".9">Windows · macOS · Linux</text>
+    <text x="86" y="68" font-size="15" fill-opacity=".9">Windows · macOS · Linux · Android</text>
   </g>
 </svg>

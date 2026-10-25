@@ -6,17 +6,19 @@
 
 <p align="center"><strong>Найдите нужный подарок Telegram и сравните предложения шести площадок в одном окне.</strong></p>
 
-<p align="center">Windows · macOS · Linux · Open source · 28 языков</p>
+<p align="center">Windows · macOS · Linux · Android preview · Open source · 28 языков</p>
 
 <p align="center">
-  <a href="https://github.com/Misha20062006/giftfinder/releases/latest">
-    <img src="docs/images/download-windows.svg" width="400" alt="Скачать GiftFinder для Windows, macOS и Linux">
+  <a href="https://github.com/Misha20062006/giftfinder/releases">
+    <img src="docs/images/download-windows.svg" width="400" alt="Скачать GiftFinder для Windows, macOS, Linux и Android">
   </a>
 </p>
 
 <p align="center">
   Выберите пакет для своей системы в релизе<br>
-  <a href="https://github.com/Misha20062006/giftfinder/releases/latest">Все файлы релиза</a>
+  <a href="https://github.com/Misha20062006/giftfinder/releases/latest">Версии для компьютера</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Misha20062006/giftfinder/releases/tag/v0.7.0-android.1">Android APK</a>
   &nbsp;·&nbsp;
   <a href="docs/USER_GUIDE.md">Руководство</a>
   &nbsp;·&nbsp;
@@ -70,13 +72,14 @@ GiftFinder сам разбирает страницы Fragment и получае
 
 | Система | Пакет и запуск |
 |---|---|
-| Windows 10/11 x64 | ZIP → `GiftFinder.exe`; также есть отдельный EXE |
-| macOS 14+, Apple Silicon | DMG `macOS-arm64` → перенести приложение в Applications |
-| macOS 14+, Intel | DMG `macOS-x64` → перенести приложение в Applications |
-| Linux x64 | tar.gz `Linux-x64` → `start-giftfinder.sh`; glibc 2.35+ |
-| Linux ARM64 | tar.gz `Linux-arm64` → `start-giftfinder.sh`; glibc 2.39+ |
+| Windows 10/11 x64 | [Скачать ZIP](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-Windows-x64.zip) → `GiftFinder.exe`; также есть отдельный EXE |
+| macOS 14+, Apple Silicon | [Скачать DMG](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-macOS-arm64.dmg) → перенести приложение в Applications |
+| macOS 14+, Intel | [Скачать DMG](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-macOS-x64.dmg) → перенести приложение в Applications |
+| Linux x64 | [Скачать tar.gz](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-Linux-x64.tar.gz) → `start-giftfinder.sh`; glibc 2.35+ |
+| Linux ARM64 | [Скачать tar.gz](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-Linux-arm64.tar.gz) → `start-giftfinder.sh`; glibc 2.39+ |
+| Android 9+, ARM64 · preview | [Скачать APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0-android.1/GiftFinder-0.7.0-Android-arm64-v8a.apk) → открыть файл и разрешить установку из выбранного источника |
 
-Python для готовых сборок не нужен. Сборки без коммерческой цифровой подписи. При обновлении настройки, избранное и сохранённые поиски остаются в пользовательском профиле. [Подробности запуска, системные требования и статус Android/iOS](docs/PLATFORMS.md).
+Python для готовых сборок не нужен. Настольные пакеты без коммерческой подписи; Android APK подписан постоянным ключом проекта. При обновлении настройки, избранное и сохранённые поиски остаются в пользовательском профиле. Android получил отдельный сенсорный интерфейс; это предварительная версия, проверенная в эмуляторе, пока без проверки на физическом ARM64-телефоне и живого поиска по всем площадкам. [Подробности запуска, системные требования и статус iOS](docs/PLATFORMS.md).
 
 ## Открытый код — используйте свободно
 
