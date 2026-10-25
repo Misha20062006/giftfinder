@@ -36,6 +36,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Configure the preinstalled Android SDK commands
+        run: |
+          android_sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          test -x "$android_sdk/cmdline-tools/latest/bin/sdkmanager"
+          echo "ANDROID_HOME=$android_sdk" >> "$GITHUB_ENV"
+          echo "$android_sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$android_sdk/platform-tools" >> "$GITHUB_PATH"
       - name: Install Android build dependencies
         run: |
           sudo apt-get update -q
@@ -44,7 +51,8 @@ jobs:
           sdkmanager --licenses < <(yes) > /dev/null
           sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0' 'ndk;28.2.13676358'
       - name: Restore Android compilation cache
-        uses: actions/cache@v5
+        id: android-cache
+        uses: actions/cache/restore@v5
         with:
           path: |
             ~/.buildozer/cache
@@ -110,8 +118,19 @@ jobs:
             build/android/x86_64/emulator/*.json
             build/android/x86_64/emulator/*.png
             build/android/x86_64/emulator/*.txt
+            build/android/x86_64/emulator/*.xml
           if-no-files-found: ignore
           retention-days: 7
+      - name: Keep public compilation outputs even after a failed build
+        if: always() && steps.android-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.buildozer/cache
+            ~/.buildozer/android/packages
+            build/android/wheels
+            build/android/${{ matrix.arch }}/compilation
+          key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2
       - name: Remove the temporary signing keystore
         if: always()
         run: rm -f -- "$RUNNER_TEMP/giftfinder-android-signing.jks"

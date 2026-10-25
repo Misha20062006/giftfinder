@@ -20,6 +20,7 @@ import sys
 import tarfile
 import time
 import urllib.request
+import xml.etree.ElementTree as ET
 import zipfile
 
 
@@ -322,8 +323,31 @@ def emulator_test(args):
     colors = {image.pixelColor(x, y).rgba() for x in range(0, image.width(), 17) for y in range(0, image.height(), 19)}
     if len(colors) < 16:
         raise RuntimeError('Android screenshot is blank or nearly blank')
+    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-ui.xml'])
+    hierarchy = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-ui.xml'], capture=True)
+    (output / 'home-accessibility.xml').write_text(hierarchy, encoding='utf-8')
+    tree = ET.fromstring(hierarchy)
+    filters = next((node for node in tree.iter('node') if
+                    node.get('text') == 'Filters' or node.get('content-desc') == 'Filters'), None)
+    if filters is None:
+        raise RuntimeError('The mobile Filters button is missing from Android accessibility')
+    bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]', filters.get('bounds', ''))
+    if not bounds:
+        raise RuntimeError('The Android Filters button has invalid screen bounds')
+    left, top, right, bottom = map(int, bounds.groups())
+    run([adb, 'shell', 'input', 'tap', str((left + right) // 2), str((top + bottom) // 2)])
+    time.sleep(3)
+    tapped_logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
+    (output / 'application-logcat.txt').write_text(tapped_logs, encoding='utf-8')
+    if 'GIFTFINDER_ANDROID_FILTERS_OPEN' not in tapped_logs:
+        raise RuntimeError('Tapping the Android Filters button did not open its sheet')
+    if any(marker in tapped_logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
+        raise RuntimeError('Crash detected while opening the mobile filter sheet')
+    with (output / 'android-filters.png').open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream)
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
+                'accessible_filters_button_tapped': True, 'mobile_filters_sheet_opened': True,
                 'no_python_crash_in_application_log': True, 'screenshot_size': [image.width(), image.height()],
                 'sampled_colors': len(colors), 'offline_smoke_package': True,
                 'physical_arm64_device_tested': False, 'live_marketplace_search_tested': False}

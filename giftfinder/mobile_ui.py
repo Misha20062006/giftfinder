@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 from dataclasses import replace
 import io
+import os
 
 from PySide6.QtCore import QEvent, QFile, QIODevice, QPoint, QRect, QRectF, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QPainter, QPen
@@ -188,7 +189,7 @@ class MobileFilterDialog(FilterDialog):
         advanced.addLayout(prices)
         self.number.setMaximumWidth(16777215); advanced.addWidget(touch(self.number)); form.addWidget(self.advanced); form.addStretch(1)
         self.advanced.setVisible(bool(self.minimum.text() or self.maximum.text() or self.number.text()))
-        self.advanced_toggle.setChecked(self.advanced.isVisible())
+        self.advanced_toggle.setChecked(not self.advanced.isHidden())
         scroll.setWidget(content); layout.addWidget(scroll, 1)
         QScroller.grabGesture(scroll.viewport(), QScroller.ScrollerGestureType.TouchGesture)
         self.form_scroll = scroll
@@ -353,6 +354,8 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         dialog = MobileFilterDialog(self, draft, extra); self.filter_dialog = dialog
         dialog.applied.connect(self.apply_filters); dialog.finished.connect(lambda _: setattr(self, 'filter_dialog', None))
         dialog.change_tab(category); self.keep_dialog(dialog)
+        if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1':
+            print('GIFTFINDER_ANDROID_FILTERS_OPEN', flush=True)
 
     def fit_dialog(self, dialog):
         dialog.setMinimumSize(0, 0); dialog.setMaximumSize(16777215, 16777215)
@@ -362,7 +365,11 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
     def keep_dialog(self, dialog):
         dialog.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.FramelessWindowHint)
         for grip in dialog.findChildren(QSizeGrip): grip.hide()
-        for child in dialog.findChildren(MotionButton): touch(child)
+        for child in dialog.findChildren(MotionButton):
+            fixed_width = child.minimumWidth() if child.minimumWidth() == child.maximumWidth() else None
+            touch(child)
+            if fixed_width:
+                child.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.fit_dialog(dialog)
         super().keep_dialog(dialog)
         self.fit_dialog(dialog)
@@ -385,6 +392,9 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         dialog = self.simple_dialog('rate_title', lambda: self.rate_label.text()+'\n\n'+self.ratebook.details())
         dialog.is_rate_dialog = True
         dialog.layout().insertWidget(dialog.layout().count()-1, touch(button('refresh', self.refresh_rates)))
+        credit = QLabel('<a href="https://www.exchangerate-api.com">'+tr('rate_credit')+'</a>')
+        credit.setWordWrap(True); credit.setOpenExternalLinks(True)
+        dialog.layout().insertWidget(dialog.layout().count()-1, credit)
 
     def language_menu(self):
         dialog = QDialog(self); layout = QVBoxLayout(dialog); layout.setContentsMargins(10,8,10,8)
