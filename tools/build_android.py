@@ -275,6 +275,7 @@ def patch_buildozer(stage, output, app_version, architecture):
         'android.accept_sdk_license': 'True', 'android.permissions': ','.join(sorted(permissions)),
         'android.release_artifact': 'apk', 'android.debug_artifact': 'apk',
         'android.no-byte-compile-python': 'True', 'orientation': 'all', 'fullscreen': '0',
+        'p4a.hook': str(ROOT / 'mobile/android_hook.py'),
     }
     if architecture == 'x86_64':
         # A separate launcher only adds lifecycle logs to the labelled smoke APK.
@@ -336,8 +337,15 @@ def inspect_apk(apk, architecture):
         tls_plugin = f'lib/{architecture}/libplugins_tls_qopensslbackend_{architecture}.so'
         if tls_plugin not in names:
             raise RuntimeError('APK is missing its native Qt OpenSSL TLS backend')
+        binding_names = [f'lib/{architecture}/libQt{module}.abi3.so'
+                         for module in ('Core', 'Gui', 'Widgets', 'Network', 'Svg')]
+        if any(name not in names for name in binding_names):
+            raise RuntimeError('APK is missing installable lib-prefixed Qt binding preload libraries')
+        if any(re.fullmatch(rf'lib/{re.escape(architecture)}/Qt\w+\.abi3\.so', name) for name in names):
+            raise RuntimeError('APK contains Qt binding preload libraries that Android will not extract')
     return {'resources_and_dependencies_present': True, 'native_architecture': architecture,
-            'qt_openssl_tls_plugin_packaged': True}
+            'qt_openssl_tls_plugin_packaged': True,
+            'qt_binding_preloads_use_installable_library_names': True}
 
 
 def manifest_metadata(badging):
@@ -556,6 +564,26 @@ def emulator_test(args):
         raise RuntimeError('System Back exited the application instead of only closing Filters')
     with (output / 'android-after-back.png').open('wb') as stream:
         subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream)
+    run([adb, 'shell', 'settings', 'put', 'system', 'accelerometer_rotation', '0'], timeout=15)
+    run([adb, 'shell', 'settings', 'put', 'system', 'user_rotation', '1'], timeout=15)
+    landscape_path = output / 'android-landscape.png'
+    landscape = QImage()
+    for _ in range(10):
+        time.sleep(1)
+        with landscape_path.open('wb') as stream:
+            subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+        landscape = QImage(str(landscape_path))
+        if not landscape.isNull() and landscape.width() > landscape.height():
+            break
+    if landscape.isNull() or landscape.width() <= landscape.height():
+        raise RuntimeError('The Android viewport did not rotate to landscape')
+    rotated_pid = run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip()
+    if rotated_pid != pid:
+        raise RuntimeError('Rotating the Android viewport stopped or restarted the application')
+    rotated_logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
+    (output / 'application-logcat.txt').write_text(rotated_logs, encoding='utf-8')
+    if any(marker in rotated_logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
+        raise RuntimeError('Crash detected after rotating the mobile viewport')
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
                 'python_ssl_and_sqlite_runtime_checks': True, 'qt_ssl_backend_runtime_check': True,
@@ -563,6 +591,8 @@ def emulator_test(args):
                 'accessible_filters_button_tapped': True, 'mobile_filters_sheet_opened': True,
                 'filters_closed_by_system_back': True, 'process_alive_after_filter_back': True,
                 'soft_keyboard_was_visible': ime_was_visible, 'system_back_presses_including_keyboard_dismissal': back_presses,
+                'landscape_rotation_kept_application_running': True,
+                'landscape_screenshot_size': [landscape.width(), landscape.height()],
                 'no_python_crash_in_application_log': True, 'screenshot_size': [image.width(), image.height()],
                 'sampled_colors': len(colors), 'offline_smoke_package': True,
                 'physical_arm64_device_tested': False, 'live_marketplace_search_tested': False}

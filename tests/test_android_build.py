@@ -8,6 +8,7 @@ import zipfile
 import pytest
 
 from tools import build_android
+from mobile import android_hook
 
 
 def test_modern_sdk_compatibility_adds_only_a_missing_legacy_command(tmp_path):
@@ -71,6 +72,7 @@ def test_buildozer_patch_preserves_official_qt_recipe_and_includes_runtime(tmp_p
     assert app['package.domain'] + '.' + app['package.name'] == build_android.PACKAGE_ID
     assert app['android.release_artifact'] == 'apk'
     assert app['android.numeric_version'] == '70000'
+    assert app['p4a.hook'].endswith('android_hook.py')
 
 
 def test_compilers_never_receive_signing_secrets(monkeypatch):
@@ -157,6 +159,9 @@ def fake_apk(path, *, omit=None):
         archive.writestr('assets/private.tar', buffer.getvalue())
         archive.writestr('lib/arm64-v8a/libQt6Core_arm64-v8a.so', b'placeholder')
         archive.writestr('lib/arm64-v8a/libplugins_tls_qopensslbackend_arm64-v8a.so', b'placeholder')
+        for module in ('Core', 'Gui', 'Widgets', 'Network', 'Svg'):
+            if omit != 'Qt' + module:
+                archive.writestr(f'lib/arm64-v8a/libQt{module}.abi3.so', b'binding-placeholder')
 
 
 def test_apk_validation_reads_packaged_resources_without_extracting(tmp_path):
@@ -166,6 +171,68 @@ def test_apk_validation_reads_packaged_resources_without_extracting(tmp_path):
     fake_apk(apk, omit='cacert.pem')
     with pytest.raises(RuntimeError, match='missing'):
         build_android.inspect_apk(apk, 'arm64-v8a')
+    fake_apk(apk, omit='QtNetwork')
+    with pytest.raises(RuntimeError, match='lib-prefixed'):
+        build_android.inspect_apk(apk, 'arm64-v8a')
+
+
+@pytest.mark.parametrize('architecture', ['arm64-v8a', 'x86_64'])
+def test_qt_binding_preload_hook_keeps_library_bytes_and_loading_order(tmp_path, architecture):
+    xml = tmp_path / 'src/main/res/values/libs.xml'
+    xml.parent.mkdir(parents=True)
+    initial = (f'<resources><array name="load_local_libs"><item>{architecture};libpyside6.abi3.so</item>'
+               f'<item>{architecture};QtCore.abi3.so</item><item>{architecture};QtNetwork.abi3.so</item>'
+               '</array></resources>')
+    xml.write_text(initial, encoding='utf-8')
+    libraries = tmp_path / 'libs' / architecture
+    libraries.mkdir(parents=True)
+    for name in ('QtCore.abi3.so', 'QtNetwork.abi3.so'):
+        (libraries / name).write_bytes(b'original-compiled-' + name.encode())
+    assert android_hook.fix_binding_library_names(tmp_path) == ['libQtCore.abi3.so', 'libQtNetwork.abi3.so']
+    from xml.etree import ElementTree
+    loaded = [item.text for item in ElementTree.parse(xml).findall('.//item')]
+    assert loaded == [architecture + ';' + name for name in
+                      ('libpyside6.abi3.so', 'libQtCore.abi3.so', 'libQtNetwork.abi3.so')]
+    assert (libraries / 'libQtNetwork.abi3.so').read_bytes() == b'original-compiled-QtNetwork.abi3.so'
+    assert not (libraries / 'QtNetwork.abi3.so').exists()
+    # A warm p4a distribution re-renders libs.xml but keeps the transformed files.
+    xml.write_text(initial, encoding='utf-8')
+    android_hook.fix_binding_library_names(tmp_path)
+    assert ';QtNetwork.abi3.so' not in xml.read_text(encoding='utf-8')
+    (libraries / 'libQtNetwork.abi3.so').unlink()
+    xml.write_text(initial, encoding='utf-8')
+    with pytest.raises(RuntimeError, match='missing'):
+        android_hook.fix_binding_library_names(tmp_path)
+
+
+def test_qt_activity_hook_preserves_listeners_and_lifecycle_and_is_idempotent(tmp_path):
+    activity = tmp_path / 'src/main/java/org/kivy/android/PythonActivity.java'
+    activity.parent.mkdir(parents=True)
+    listener_body = '''
+        this.onResume();
+        synchronized (this.activityResultListeners) {
+            for (ActivityResultListener listener : this.activityResultListeners)
+                listener.onActivityResult(requestCode, resultCode, intent);
+        }
+    }
+    public void onDestroy() {
+        super.onDestroy();
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+'''
+    activity.write_text(android_hook.LEGACY_KEY_HANDLER + '\n' +
+                        android_hook.LEGACY_RESULT_PREFIX + listener_body, encoding='utf-8')
+    android_hook.fix_qt_activity_delegation(tmp_path)
+    fixed = activity.read_text(encoding='utf-8')
+    assert 'Click again' not in fixed and 'lastBackClick' not in fixed
+    assert 'return super.onKeyDown(keyCode, event);' in fixed
+    assert 'super.onActivityResult(requestCode, resultCode, intent);\n        if' in fixed
+    assert listener_body in fixed
+    android_hook.fix_qt_activity_delegation(tmp_path)
+    assert activity.read_text(encoding='utf-8') == fixed
+    activity.write_text(fixed.replace('super.onKeyDown(keyCode, event)', 'changedUpstreamHandler()'), encoding='utf-8')
+    with pytest.raises(RuntimeError, match='changed; review'):
+        android_hook.fix_qt_activity_delegation(tmp_path)
 
 
 def test_actual_manifest_metadata_is_extracted_from_aapt_badging():
