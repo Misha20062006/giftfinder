@@ -253,7 +253,7 @@ class MobileDetailsDialog(DetailsDialog):
 class MobileWindow(MainWindow):
     def __init__(self, offline=False):
         super().__init__(offline=offline)
-        self.setMinimumSize(320, 400); self.resize(360, 800)
+        self.setMinimumSize(320, 240); self.resize(360, 800)
         self.setStyleSheet(self.styleSheet()+'''
 QLineEdit, QComboBox { min-height: 28px; }
 QLineEdit#search { min-height: 24px; padding: 8px 10px; }
@@ -261,11 +261,13 @@ QMenu::item { padding: 14px 20px; }
 QComboBox QAbstractItemView::item { min-height: 44px; }
 ''')
         QApplication.instance().installEventFilter(self)
+        self.adapt_mobile_layout()
 
     def build_ui(self):
         super().build_ui()
         old = self.takeCentralWidget()
         root = QWidget(); outer = QVBoxLayout(root); outer.setContentsMargins(10, 8, 10, 8); outer.setSpacing(8)
+        self.mobile_outer = outer; self.compact_search_row = False
         old.setParent(root); old.hide(); self._desktop_shell = old
         header = QHBoxLayout(); brand = label('GiftFinder', 'brand'); brand.setFixedWidth(100); header.addWidget(brand)
         header.addStretch(1)
@@ -274,6 +276,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         header.addWidget(self.mobile_menu_button); outer.addLayout(header)
         outer.addWidget(touch(self.search_edit))
         search = QHBoxLayout()
+        self.mobile_search_row = search
         for widget in (self.filter_button, self.find_button, self.stop_button):
             widget.setMinimumWidth(0); search.addWidget(touch(widget), 1)
         self.filter_button.setObjectName('mobileFiltersButton'); self.filter_button.setAccessibleName('Filters')
@@ -314,8 +317,34 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
     def update_theme_height(self):
         self.theme_grid.setFixedHeight(188)
 
+    def update_theme_visibility(self):
+        if hasattr(self, 'mobile_outer') and self.height() < 600:
+            self.theme_grid.hide()
+            self.theme_toggle.setText(tr('themes')); self.theme_toggle.glyph = 'chevron'
+        else:
+            super().update_theme_visibility()
+
+    def toggle_themes(self):
+        if self.height() < 600:
+            self.open_filters('themes')
+        else:
+            super().toggle_themes()
+
+    def adapt_mobile_layout(self):
+        if not hasattr(self, 'mobile_search_row'):
+            return
+        compact = self.width() >= 600 and self.height() < 600
+        if compact != self.compact_search_row:
+            if compact:
+                self.mobile_search_row.insertWidget(0, self.search_edit, 3)
+            else:
+                self.mobile_outer.insertWidget(1, self.search_edit)
+            self.compact_search_row = compact
+        self.update_theme_visibility()
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        self.adapt_mobile_layout()
         for name, height in (('home_grid',92), ('theme_grid',92), ('view',148)):
             view = getattr(self, name, None)
             if view: view.setGridSize(QSize(max(1, self.width()-22), height))

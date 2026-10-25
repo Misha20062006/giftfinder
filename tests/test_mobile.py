@@ -77,6 +77,33 @@ def test_filter_sheet_exposes_every_category_and_six_markets(window, app):
     assert dialog.grid.horizontalScrollBar().maximum() == 0
 
 
+@pytest.mark.parametrize('size', [(640,360),(360,480)])
+def test_short_screens_keep_navigation_and_catalog_reachable_without_changing_queries(window, app, size):
+    original = SearchQuery(collection='Input Key', models=('Creeper',), mono_colors=('green',), monochrome=True)
+    window.filter_query = original; window.filter_extra = {'min':'2','max':'50','unit':'USD'}
+    collapsed = window.themes_collapsed
+    stored = window.store.data['settings'].get('themes_collapsed')
+    window.resize(*size); settle(window)
+    assert (window.width(), window.height()) == size
+    for name in ('language_button','mobile_menu_button','search_edit','filter_button','find_button','nav_catalog','nav_favorites','mobile_saved_button','home_grid'):
+        assert window.rect().contains(inside(window, getattr(window,name))), name
+    assert window.home_grid.height() >= 92
+    assert not window.theme_grid.isVisible()
+    window.theme_toggle.click(); settle(window)
+    assert window.filter_dialog.category == 'themes'
+    window.filter_dialog.number.setText('123')
+    draft = window.filter_dialog.state
+    window.resize(360,800); settle(window)
+    assert window.filter_dialog.width() == 360 and window.filter_dialog.height() == 800
+    assert window.filter_dialog.state == draft and window.filter_dialog.number.text() == '123'
+    window.handle_back(); app.processEvents()
+    assert window.theme_grid.isVisible() == (not collapsed)
+    assert window.themes_collapsed == collapsed
+    assert window.store.data['settings'].get('themes_collapsed') == stored
+    assert window.filter_query == original
+    assert window.filter_extra == {'min':'2','max':'50','unit':'USD'}
+
+
 def test_phone_filters_keep_multiple_traits_colors_price_currency_number_and_markets(window, app):
     calls = []
     window.start_search = lambda: calls.append(window.current_query())
