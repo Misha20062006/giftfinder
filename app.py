@@ -3,6 +3,8 @@ import os
 import sys
 from pathlib import Path
 
+from giftfinder import __version__
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -13,7 +15,7 @@ def main():
         os.environ['GIFT_FINDER_DATA_DIR'] = str(Path(args.smoke_test) / 'profile')
         from giftfinder.qa import settle
     from giftfinder.ui import MainWindow, application
-    from PySide6.QtCore import QTimer
+    from PySide6.QtCore import Qt
     app = application()
     window = MainWindow(offline=bool(args.smoke_test))
     if args.smoke_test:
@@ -35,9 +37,10 @@ def main():
         assert window.assets.decoded>0 and window.assets.network_started==0
         from giftfinder.design import MotionButton
         assert isinstance(window.find_button,MotionButton)
-        from giftfinder.i18n import LANGUAGES,tr,language_code
+        from giftfinder.i18n import LANGUAGES,language_code,resolve_language
         from giftfinder.icons import flag_icon,currency_icon,symbols
         assert len(LANGUAGES)==28
+        assert language_code()==resolve_language('system')
         for code in LANGUAGES:assert not flag_icon(code).pixmap(36,28).isNull()
         for code in symbols():assert not currency_icon(code).pixmap(32,32).isNull()
         assert not any('QtWebEngine' in name or 'QtWebView' in name for name in sys.modules)
@@ -53,14 +56,17 @@ def main():
         colors.choose(colors.rows.index(row));assert colors.state.mono_colors==('black',)
         colors.grab().save(str(target/'monochrome-colors.png'));colors.apply();app.processEvents()
         assert window.filter_query.mono_colors==('black',) and not window.filter_query.collection
-        window.currency.showPopup();window.currency.search.setText('рубль');app.processEvents()
-        assert window.currency.items.count()==2
+        window.currency.showPopup();window.currency.search.setText('RUB');app.processEvents()
+        matches={window.currency.itemData(window.currency.items.item(i).data(Qt.ItemDataRole.UserRole))
+                 for i in range(window.currency.items.count())}
+        assert 'RUB' in matches and 'USD' not in matches
         window.currency.popup.grab().save(str(target/'currencies.png'));window.currency.hidePopup()
         window.change_language('ar');app.processEvents();settle(window);window.grab().save(str(target/'rtl.png'))
-        assert app.layoutDirection()==__import__('PySide6').QtCore.Qt.LayoutDirection.RightToLeft
+        assert app.layoutDirection()==Qt.LayoutDirection.RightToLeft
         window.change_language('system')
+        assert language_code()==resolve_language('system')
         window.close()
-        (target / 'result.txt').write_text('PASS: GiftFinder 0.6, Qt Widgets without WebEngine, full catalog, 7806 models, 80 backdrops, 11 themes, monochrome exact triples, color-first picker, 13 colors, global color query, 166 currencies, 28 language variants, system default, flags, native currency icons, searchable dropdown, RTL, native resizable filters, background image pipeline, animated theme hover, full labels, isolated offscreen render\n', encoding='utf-8')
+        (target / 'result.txt').write_text(f'PASS: GiftFinder {__version__}, Qt Widgets without WebEngine, full catalog, 7806 models, 80 backdrops, 11 themes, monochrome exact triples, color-first picker, 13 colors, global color query, 166 currencies, 28 language variants, system default, flags, native currency icons, searchable dropdown, RTL, native resizable filters, background image pipeline, animated theme hover, full labels, isolated offscreen render\n', encoding='utf-8')
         return 0
     window.show()
     return app.exec()
@@ -77,7 +83,8 @@ if __name__ == '__main__':
             destination.mkdir(parents=True, exist_ok=True)
             (destination / 'failure.txt').write_text(traceback.format_exc(), encoding='utf-8')
         else:
-            destination = Path(os.environ.get('LOCALAPPDATA', str(Path.cwd()))) / 'GiftFinder' / 'GiftFinder'
+            from giftfinder.platform_support import data_directory
+            destination = data_directory()
             destination.mkdir(parents=True, exist_ok=True)
             (destination / 'startup-error.txt').write_text(traceback.format_exc(), encoding='utf-8')
         raise SystemExit(1)

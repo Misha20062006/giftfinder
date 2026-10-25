@@ -13,6 +13,7 @@ htmlcov/
 # Build output and release downloads belong in GitHub Releases
 build/
 dist/
+release-dist/
 *.exe
 *.zip
 

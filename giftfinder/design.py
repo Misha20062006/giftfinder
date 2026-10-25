@@ -11,7 +11,7 @@ from .i18n import EN, bind
 BG='#1a2026';PANEL='#212a33';FIELD='#242e38';ACCENT='#4db2ff';PRIMARY='#248bda';TEXT='#f2f5f8';MUTED='#95a3b2'
 
 STYLE='''
-QWidget { background: #1a2026; color: #edf2f7; font-family: "Segoe UI"; font-size: 14px; }
+QWidget { background: #1a2026; color: #edf2f7; font-size: 14px; }
 QMainWindow { background: #1a2026; }
 QLabel, DragHeader, QSizeGrip { background: transparent; }
 QFrame#topbar { background: #1a2026; border: 0; border-bottom: 1px solid #2b3640; }
@@ -59,7 +59,7 @@ QMenu::separator { height:1px; background:#3a4855; margin:5px; }
 
 @lru_cache(maxsize=64)
 def font(px,weight=QFont.Weight.Normal):
-    f=QFont('Segoe UI');f.setPixelSize(px);f.setWeight(weight);return f
+    f=QFont(QApplication.font());f.setPixelSize(px);f.setWeight(weight);return f
 
 
 @lru_cache(maxsize=1)

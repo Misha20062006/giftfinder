@@ -3,14 +3,13 @@ from __future__ import annotations
 import csv
 from collections import OrderedDict
 import io
-import os
 import threading
 import time
 from dataclasses import asdict, replace
 from decimal import Decimal
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QSize, QRectF, QPointF, QStandardPaths, QThreadPool, QTimer, QUrl
+from PySide6.QtCore import Qt, QSize, QRectF, QPointF, QThreadPool, QTimer, QUrl
 from PySide6.QtGui import QColor, QFont, QPainter, QPen, QDesktopServices, QIcon, QAction, QKeySequence, QStaticText, QTransform, QTextOption
 from PySide6.QtWidgets import (QMainWindow, QFrame, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QLineEdit, QComboBox, QListView, QListWidget, QListWidgetItem, QStackedWidget,
@@ -28,6 +27,7 @@ from .ui_common import STYLE, label, button, Task, OfferModel, SourceChip, appli
 from .controls import SearchSelector, SortCombo, FilterFlow
 from .i18n import tr, bind, refresh_tree, set_language, language_code, LANGUAGES, theme_name, age_text, format_number, message
 from .icons import flag_icon
+from .platform_support import data_directory
 
 
 STYLE_V2 = ''
@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
     def __init__(self, offline=False):
         super().__init__()
         self.offline = offline
-        self.data_dir = Path(os.environ.get('GIFT_FINDER_DATA_DIR') or QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation))
+        self.data_dir = data_directory()
         self.store = Store(self.data_dir)
         set_language(self.store.data['settings'].get('language','system'))
         self.catalog = Catalog(self.data_dir)
@@ -134,7 +134,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(str(Path(__file__).parent/'icon.png')))
         self.setStyleSheet(MODERN_STYLE)
         self.build_ui(); self.populate_catalog(); self.filter_summary(); self.update_rates_text()
-        self.add_shortcut('Ctrl+F', self.search_edit.setFocus)
+        self.add_shortcut(QKeySequence.StandardKey.Find, self.search_edit.setFocus)
         self.add_shortcut('F5', self.start_search)
         if not offline:
             if any((self.filter_query.collection,self.filter_query.theme,self.filter_query.models,self.filter_query.targets,self.filter_query.text,self.filter_query.monochrome,self.filter_query.mono_colors)):

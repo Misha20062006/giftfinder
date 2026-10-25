@@ -1,4 +1,7 @@
-GiftFinder 0.6.0 — third-party components
+GiftFinder 0.7.0 — third-party components
+
+GiftFinder's original source code is released under the Unlicense; see UNLICENSE.
+Third-party components, data and artwork retain their own licenses and terms.
 
 This distribution includes Python and third-party libraries. The application code and build recipe are supplied separately.
 The Qt libraries are dynamically linked; the source package allows rebuilding with replacement Qt libraries.

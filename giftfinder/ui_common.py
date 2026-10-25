@@ -135,11 +135,12 @@ def application():
     QApplication.setOrganizationName('GiftFinder')
     QImageReader.setAllocationLimit(96)
     app = QApplication(sys.argv)
-    if os.environ.get('QT_QPA_PLATFORM') == 'offscreen':
+    if sys.platform == 'win32' and os.environ.get('QT_QPA_PLATFORM') == 'offscreen':
         fonts_dir = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Fonts'
         for name in ('segoeui.ttf','segoeuib.ttf','segoeuil.ttf','seguisym.ttf','arial.ttf','tahoma.ttf',
                      'Nirmala.ttf','Nirmala.ttc','LeelawUI.ttf','msyh.ttc','malgun.ttf','YuGothM.ttc','meiryo.ttc'):
             if (fonts_dir/name).exists():QFontDatabase.addApplicationFont(str(fonts_dir/name))
     app.setStyle('Fusion')
-    app.setFont(QFont('Segoe UI', 10))
+    app.setFont(QFont('Segoe UI', 10) if sys.platform == 'win32'
+                else QFontDatabase.systemFont(QFontDatabase.SystemFont.GeneralFont))
     return app

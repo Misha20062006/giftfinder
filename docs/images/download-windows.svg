@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="96" viewBox="0 0 480 96" role="img" aria-labelledby="title desc">
-  <title id="title">Скачать для Windows</title>
-  <desc id="desc">GiftFinder 0.6, Windows x64, ZIP</desc>
+  <title id="title">Скачать GiftFinder</title>
+  <desc id="desc">Windows, macOS и Linux</desc>
   <defs>
-    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ef4444"/>
-      <stop offset="1" stop-color="#b91c1c"/>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16a34a"/>
+      <stop offset="1" stop-color="#15803d"/>
     </linearGradient>
   </defs>
-  <rect width="480" height="96" rx="18" fill="url(#red)"/>
+  <rect width="480" height="96" rx="18" fill="url(#green)"/>
   <rect x=".5" y=".5" width="479" height="95" rx="17.5" fill="none" stroke="#ffffff" stroke-opacity=".18"/>
   <g fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
     <path d="M48 28v27m-10-10 10 10 10-10"/>
     <path d="M33 62v7h30v-7"/>
   </g>
   <g fill="#ffffff" font-family="Segoe UI, Arial, sans-serif">
-    <text x="86" y="43" font-size="24" font-weight="700">Скачать для Windows</text>
-    <text x="86" y="68" font-size="15" fill-opacity=".9">GiftFinder 0.6 · x64 · ZIP</text>
+    <text x="86" y="43" font-size="24" font-weight="700">Скачать GiftFinder</text>
+    <text x="86" y="68" font-size="15" fill-opacity=".9">Windows · macOS · Linux</text>
   </g>
 </svg>

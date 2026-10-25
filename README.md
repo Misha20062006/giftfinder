@@ -6,16 +6,16 @@
 
 <p align="center"><strong>Найдите нужный подарок Telegram и сравните предложения шести площадок в одном окне.</strong></p>
 
-<p align="center">Windows x64 · Open source · Без установки и Python · 28 языков</p>
+<p align="center">Windows · macOS · Linux · Open source · 28 языков</p>
 
 <p align="center">
-  <a href="https://github.com/Misha20062006/giftfinder/releases/download/v0.6.0/GiftFinder-0.6-Windows.zip">
-    <img src="docs/images/download-windows.svg" width="400" alt="Скачать GiftFinder для Windows — ZIP, версия 0.6">
+  <a href="https://github.com/Misha20062006/giftfinder/releases/latest">
+    <img src="docs/images/download-windows.svg" width="400" alt="Скачать GiftFinder для Windows, macOS и Linux">
   </a>
 </p>
 
 <p align="center">
-  Версия 0.6 · Распакуйте ZIP и запустите <code>GiftFinder.exe</code><br>
+  Выберите пакет для своей системы в релизе<br>
   <a href="https://github.com/Misha20062006/giftfinder/releases/latest">Все файлы релиза</a>
   &nbsp;·&nbsp;
   <a href="docs/USER_GUIDE.md">Руководство</a>
@@ -64,11 +64,19 @@ GiftFinder сам разбирает страницы Fragment и получае
 
 ## Как начать
 
-1. Нажмите **«Скачать для Windows»**, распакуйте архив и запустите `GiftFinder.exe`.
+1. Нажмите **«Скачать GiftFinder»** и выберите пакет для своей системы.
 2. Выберите коллекцию, подборку или нужные фильтры и нажмите **«Показать»**.
 3. Сравните цены и откройте подходящее предложение на площадке.
 
-Python, установка и права администратора не нужны. EXE без цифровой подписи. При обновлении замените файл приложения: настройки, избранное и сохранённые поиски остаются в `%LOCALAPPDATA%\GiftFinder\GiftFinder`.
+| Система | Пакет и запуск |
+|---|---|
+| Windows 10/11 x64 | ZIP → `GiftFinder.exe`; также есть отдельный EXE |
+| macOS 14+, Apple Silicon | DMG `macOS-arm64` → перенести приложение в Applications |
+| macOS 14+, Intel | DMG `macOS-x64` → перенести приложение в Applications |
+| Linux x64 | tar.gz `Linux-x64` → `start-giftfinder.sh`; glibc 2.35+ |
+| Linux ARM64 | tar.gz `Linux-arm64` → `start-giftfinder.sh`; glibc 2.39+ |
+
+Python для готовых сборок не нужен. Сборки без коммерческой цифровой подписи. При обновлении настройки, избранное и сохранённые поиски остаются в пользовательском профиле. [Подробности запуска, системные требования и статус Android/iOS](docs/PLATFORMS.md).
 
 ## Открытый код — используйте свободно
 
@@ -81,7 +89,7 @@ GiftFinder — **open source**. Собственный код проекта д�
 <details>
 <summary><strong>Для разработчиков: запуск, проверка и сборка</strong></summary>
 
-Python 3.12 x64 · PySide6 / Qt Widgets · Requests · Beautiful Soup · SQLite. Без встроенного Chromium, WebEngine и WebView.
+Python 3.12 · PySide6 / Qt Widgets · Requests · Beautiful Soup · SQLite. Без встроенного Chromium, WebEngine и WebView.
 
 PowerShell, из корня репозитория:
 
@@ -99,11 +107,10 @@ $env:GIFT_FINDER_DATA_DIR = Join-Path $PWD '.qa\profile'
 .\.venv\Scripts\python.exe -m pytest tests -q --basetemp .test-work
 ```
 
-Сборка и проверка EXE без видимого окна:
+Нативная сборка, проверка без видимого окна и упаковка для текущей ОС:
 
 ```powershell
-.\.venv\Scripts\python.exe -m PyInstaller GiftFinder.spec --distpath dist --workpath build
-.\dist\GiftFinder.exe --smoke-test .qa-exe
+.\.venv\Scripts\python.exe tools/build_release.py
 ```
 
 Подробнее: [как устроен поиск](SEARCH_TECHNICAL.txt), [руководство](docs/USER_GUIDE.md). Скриншот получен вне экрана из версии 0.6. Условия использования компонентов: [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) и [third-party/](third-party/).
