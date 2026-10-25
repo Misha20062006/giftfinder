@@ -131,8 +131,11 @@ def test_theme_hover_reuses_collection_timing_and_reduced_motion(window,app,monk
     from giftfinder import views
     view=window.theme_grid;assert view.hover_animation.duration()==window.home_grid.hover_animation.duration()==140
     monkeypatch.setattr(views,'motion_enabled',lambda:True)
-    view.reset_hover();view.set_hover_row(0);QTest.qWait(60)
+    view.reset_hover();view.set_hover_row(0)
+    # Sample Qt's animation clock directly: loaded CI hosts may skip frames.
+    view.hover_animation.setCurrentTime(60)
     assert 0<view.hover_amount<1
-    QTest.qWait(130);assert view.hover_animation.state()==view.hover_animation.State.Stopped
+    view.hover_animation.setCurrentTime(140)
+    assert view.hover_animation.state()==view.hover_animation.State.Stopped
     monkeypatch.setattr(views,'motion_enabled',lambda:False)
     view.set_hover_row(-1);assert view.hover_amount==1 and view.hover_animation.state()==view.hover_animation.State.Stopped
