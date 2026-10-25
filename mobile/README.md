@@ -7,7 +7,7 @@
 ## Сборка
 
 Официальный `pyside6-android-deploy` работает на Linux и macOS. В CI
-используется Ubuntu, Python 3.11, JDK 17, Android SDK/build-tools 35 и NDK
+используется Ubuntu, Python 3.12, JDK 17, Android SDK/build-tools 35 и NDK
 28c (`28.2.13676358`). Android-приложение запускается с Python, собранным
 закреплённой версией python-for-android, и PySide6 6.12.0.
 

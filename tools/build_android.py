@@ -159,6 +159,7 @@ def prepare_official_config(stage, output, sdk, ndk, wheels):
                 'input_file': str(stage / 'main.py'), 'exec_directory': str(output),
                 'icon': str(stage / 'giftfinder/icon.png')},
         'android': {'wheel_pyside': str(wheels[0]), 'wheel_shiboken': str(wheels[1])},
+        'python': {'android_packages': 'buildozer==1.6.0,cython==0.29.37'},
         'buildozer': {'ndk_path': str(ndk), 'sdk_path': str(sdk), 'mode': 'debug'},
     }
     for section, values in fields.items():
