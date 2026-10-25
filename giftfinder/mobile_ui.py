@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import replace
+from decimal import Decimal
 import io
 import os
 
@@ -13,7 +14,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QFileDialog, QG
     QScrollArea, QScroller, QSizeGrip, QSizePolicy, QStyledItemDelegate, QVBoxLayout, QWidget)
 
 from .controls import SearchSelector
-from .core import MARKETS, safe_url
+from .core import MARKETS, Offer, safe_url
 from .design import MotionButton, font
 from .i18n import LANGUAGES, age_text, bind, language_code, message, refresh_tree, tr
 from .icons import flag_icon
@@ -91,7 +92,8 @@ class MobileTileDelegate(QStyledItemDelegate):
         painter.drawText(QRectF(left, rect.top()+10, width, 38), Qt.TextFlag.TextWordWrap, row['name'])
         painter.setPen(QColor('#9badbb'))
         painter.setFont(font(12))
-        painter.drawText(QRectF(left, rect.top()+51, width, 29), Qt.TextFlag.TextWordWrap, row.get('subtitle', ''))
+        subtitle = tr('models_count', count=len(row.get('members', ()))) if kind == 'theme' else row.get('subtitle', '')
+        painter.drawText(QRectF(left, rect.top()+51, width, 29), Qt.TextFlag.TextWordWrap, subtitle)
         painter.restore()
 
 
@@ -438,8 +440,10 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
     def mobile_menu(self):
         menu = QMenu(self)
         for title, callback in (('rates',self.rates_info), ('sources',self.sources_info), ('save_search',self.save_search), ('export',self.export_csv), ('refresh',self.start_search)):
+            smoke_export = title == 'export' and os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1'
+            if smoke_export: callback = self.smoke_export_csv
             action = menu.addAction(tr(title)); action.triggered.connect(callback)
-            if title == 'export': action.setEnabled(bool(self.offer_model.offers))
+            if title == 'export': action.setEnabled(bool(self.offer_model.offers) or smoke_export)
         menu.exec(self.mobile_menu_button.mapToGlobal(QPoint(0,self.mobile_menu_button.height())))
         menu.deleteLater()
 
@@ -460,6 +464,35 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         written = target.write(payload); target.close()
         if written != len(payload): self.show_notice(target.errorString()); return
         self.status.setText(tr('csv_saved')); self.show_notice(tr('csv_saved'))
+        return path
+
+    def smoke_export_csv(self):
+        """Exercise Android's ordinary native export with an isolated CI fixture."""
+        if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') != '1':
+            raise RuntimeError('Synthetic CSV diagnostics require explicit Android smoke mode')
+        fixture = Offer('CIExport-1', 'CI synthetic offer', 1, 'fragment', Decimal('1.23456789'),
+                        'TON', 'CI ONLY', 'CI BACKDROP', source='ci-synthetic')
+        previous = list(self.offer_model.offers)
+        self.offer_model.replace([fixture])
+        try:
+            path = self.export_csv()
+        finally:
+            self.offer_model.replace(previous)
+        if not path: return
+        if not path.startswith('content://'):
+            raise RuntimeError('Android smoke CSV export must use a native content document URI')
+        saved = QFile(path)
+        if not saved.open(QIODevice.OpenModeFlag.ReadOnly):
+            raise RuntimeError('Android smoke CSV readback failed: '+saved.errorString())
+        try:
+            rows = list(csv.reader(io.StringIO(bytes(saved.readAll()).decode('utf-8-sig')), delimiter=';'))
+        finally:
+            saved.close()
+        if (len(rows) != 2 or len(rows[1]) != 13 or rows[1][0] != 'CI synthetic offer'
+                or rows[1][2] != 'CI ONLY' or rows[1][6] != '1.23456789'
+                or rows[1][7] != 'GRAM' or rows[1][10] != 'ci-synthetic'):
+            raise RuntimeError('Android smoke CSV readback did not match the synthetic fixture')
+        print('GIFTFINDER_ANDROID_CSV_SAVED', flush=True)
 
     def show_notice(self, text):
         translated = message(str(text)); self.notice.setText(translated); self.notice.setToolTip(translated); self.notice.setVisible(bool(translated))

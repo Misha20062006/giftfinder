@@ -239,12 +239,16 @@ def test_actual_manifest_metadata_is_extracted_from_aapt_badging():
     metadata = build_android.manifest_metadata(
         "package: name='org.giftfinder.giftfinder' versionCode='70000' versionName='0.7.0'\n"
         "sdkVersion:'28'\ntargetSdkVersion:'35'\n"
+        "launchable-activity: name='org.kivy.android.PythonActivity' label='GiftFinder' icon=''\n"
         "uses-permission: name='android.permission.INTERNET'\n"
         "uses-permission: name='android.permission.ACCESS_NETWORK_STATE'\n")
     assert metadata['minimum_android_sdk'] == 28
     assert metadata['target_android_sdk'] == 35
     assert metadata['android_version_code'] == 70000
     assert metadata['android_permissions'] == ['android.permission.ACCESS_NETWORK_STATE', 'android.permission.INTERNET']
+    assert metadata['application_debuggable'] is False
+    assert metadata['launcher_activity'] == 'org.kivy.android.PythonActivity'
+    assert build_android.manifest_metadata('application-debuggable\n')['application_debuggable'] is True
 
 
 def test_only_cached_installer_venv_is_removed_and_compiled_recipes_are_preserved(tmp_path):

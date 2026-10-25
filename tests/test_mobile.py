@@ -217,6 +217,50 @@ def test_android_content_uri_is_passed_to_qt_without_filesystem_conversion(windo
     assert 'Easter Egg;42' in saved['payload'].decode('utf-8-sig')
 
 
+def test_synthetic_csv_requires_smoke_mode_and_does_not_open_picker_in_normal_mode(window, monkeypatch):
+    monkeypatch.delenv('GIFT_FINDER_ANDROID_SMOKE', raising=False)
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *args: pytest.fail('Normal mode must not start a synthetic export'))
+    with pytest.raises(RuntimeError, match='explicit Android smoke mode'):
+        window.smoke_export_csv()
+    assert not window.offer_model.offers
+
+
+def test_smoke_csv_uses_native_export_readback_and_restores_offers_without_profile_writes(window, tmp_path, monkeypatch, capsys):
+    from PySide6.QtCore import QFile as RealFile
+    import giftfinder.mobile_ui as mobile
+    monkeypatch.setenv('GIFT_FINDER_ANDROID_SMOKE', '1')
+    uri = 'content://com.android.providers.downloads.documents/document/ci-export'
+    destination = tmp_path / 'ci-native-export.csv'
+    monkeypatch.setattr(QFileDialog, 'getSaveFileName', lambda *args: (uri, 'CSV (*.csv)'))
+    def native_file(path):
+        assert path == uri
+        return RealFile(str(destination))
+    monkeypatch.setattr(mobile, 'QFile', native_file)
+    previous = [offer()]; window.offer_model.replace(previous)
+    profile = {path.relative_to(window.data_dir): path.read_bytes() for path in window.data_dir.rglob('*') if path.is_file()}
+    window.smoke_export_csv()
+    assert capsys.readouterr().out.count('GIFTFINDER_ANDROID_CSV_SAVED') == 1
+    assert window.offer_model.offers == previous and not window.offers
+    assert {path.relative_to(window.data_dir): path.read_bytes() for path in window.data_dir.rglob('*') if path.is_file()} == profile
+    assert 'CI synthetic offer' in destination.read_text(encoding='utf-8-sig')
+
+
+def test_smoke_csv_rejects_bad_native_readback_without_success_marker(window, monkeypatch, capsys):
+    import giftfinder.mobile_ui as mobile
+    monkeypatch.setenv('GIFT_FINDER_ANDROID_SMOKE', '1')
+    monkeypatch.setattr(window, 'export_csv', lambda: 'content://documents/ci-export')
+    class WrongDocument:
+        def __init__(self, path): pass
+        def open(self, flags): return True
+        def readAll(self): return b'wrong;data\n'
+        def close(self): pass
+    monkeypatch.setattr(mobile, 'QFile', WrongDocument)
+    with pytest.raises(RuntimeError, match='did not match the synthetic fixture'):
+        window.smoke_export_csv()
+    assert 'GIFTFINDER_ANDROID_CSV_SAVED' not in capsys.readouterr().out
+    assert not window.offer_model.offers
+
+
 def test_filter_price_currency_picker_reuses_full_currency_catalog(window, app):
     window.open_filters(); dialog = window.filter_dialog
     assert dialog.unit.count() >= 160

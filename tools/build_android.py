@@ -357,6 +357,8 @@ def manifest_metadata(badging):
         'target_android_sdk': integer_field(r"^targetSdkVersion:'(\d+)'"),
         'android_version_code': integer_field(r"^package:.*?versionCode='(\d+)'"),
         'android_permissions': sorted(set(re.findall(r"^uses-permission(?:-sdk-\d+)?: name='([^']+)'", badging, re.MULTILINE))),
+        'application_debuggable': bool(re.search(r'^application-debuggable\b', badging, re.MULTILINE)),
+        'launcher_activity': next(iter(re.findall(r"^launchable-activity: name='([^']+)'", badging, re.MULTILINE)), None),
     }
 
 
@@ -368,6 +370,58 @@ def input_method_visible(dump):
     if visibility:
         return bool(int(visibility.group(1), 16) & 2)
     raise RuntimeError('Cannot determine the Android input-method visibility for the Back test')
+
+
+def csv_picker_test(adb, output, pid):
+    """Save the explicitly synthetic smoke offer through Android's real SAF UI."""
+    def hierarchy(name):
+        run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-csv.xml'], timeout=45)
+        source = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-csv.xml'], capture=True)
+        (output / (name + '.xml')).write_text(source, encoding='utf-8')
+        return ET.fromstring(source)
+
+    def tap(tree, predicate, purpose):
+        nodes = [node for node in tree.iter('node') if predicate(node) and node.get('enabled') == 'true']
+        if len(nodes) != 1:
+            raise RuntimeError(f'Cannot locate the unique Android {purpose} control')
+        bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]', nodes[0].get('bounds', ''))
+        if not bounds:
+            raise RuntimeError(f'Invalid bounds for Android {purpose}')
+        x1, y1, x2, y2 = map(int, bounds.groups())
+        run([adb, 'shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2)], timeout=15)
+
+    tap(hierarchy('csv-home-accessibility'),
+        lambda node: node.get('text') == 'Actions' or node.get('content-desc') == 'Actions', 'Actions menu')
+    time.sleep(1)
+    tap(hierarchy('csv-menu-accessibility'),
+        lambda node: node.get('text') == 'Export CSV' or node.get('content-desc') == 'Export CSV', 'CSV export action')
+    time.sleep(2)
+    picker = hierarchy('csv-native-picker')
+    if not any('documentsui' in node.get('package', '').lower() for node in picker.iter('node')):
+        raise RuntimeError('CSV export did not open the native Android document picker')
+    with (output / 'android-csv-picker.png').open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+    tap(picker, lambda node: any(node.get(key, '').strip().casefold() == 'save'
+                                for key in ('text', 'content-desc')) and
+        (node.get('clickable') == 'true' or node.get('class', '').endswith('Button')), 'document Save button')
+    deadline = time.monotonic() + 30
+    logs = ''
+    while time.monotonic() < deadline:
+        logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
+        if 'GIFTFINDER_ANDROID_CSV_SAVED' in logs:
+            break
+        if any(marker in logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
+            break
+        time.sleep(1)
+    (output / 'application-logcat.txt').write_text(logs, encoding='utf-8')
+    if 'GIFTFINDER_ANDROID_CSV_SAVED' not in logs:
+        raise RuntimeError('Native Android CSV save and content URI readback did not complete')
+    if any(marker in logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
+        raise RuntimeError('Crash detected during native Android CSV export')
+    if run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip() != pid:
+        raise RuntimeError('The Android application did not survive native CSV document creation')
+    with (output / 'android-csv-saved.png').open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
 
 
 def build(args):
@@ -436,6 +490,12 @@ def build(args):
     if f"name='{PACKAGE_ID}'" not in badging:
         raise RuntimeError('The APK application ID does not match GiftFinder')
     metadata = manifest_metadata(badging)
+    if metadata['application_debuggable']:
+        raise RuntimeError('Release APK must not be debuggable, including the offline smoke package')
+    expected_activity = ('org.giftfinder.diagnostics.GiftFinderDiagnosticsActivity' if args.smoke
+                         else 'org.kivy.android.PythonActivity')
+    if metadata['launcher_activity'] != expected_activity:
+        raise RuntimeError('The signed Android package has an unexpected launcher activity')
     if any(permission.rsplit('.', 1)[-1] in {'READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE'}
            for permission in metadata['android_permissions']):
         raise RuntimeError('APK still declares unnecessary legacy external storage access')
@@ -568,15 +628,20 @@ def emulator_test(args):
     run([adb, 'shell', 'settings', 'put', 'system', 'user_rotation', '1'], timeout=15)
     landscape_path = output / 'android-landscape.png'
     landscape = QImage()
-    for _ in range(10):
+    landscape_colors = set()
+    for _ in range(20):
         time.sleep(1)
         with landscape_path.open('wb') as stream:
             subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
         landscape = QImage(str(landscape_path))
         if not landscape.isNull() and landscape.width() > landscape.height():
-            break
-    if landscape.isNull() or landscape.width() <= landscape.height():
-        raise RuntimeError('The Android viewport did not rotate to landscape')
+            landscape_colors = {landscape.pixelColor(x, y).rgba()
+                                for x in range(0, landscape.width(), 17)
+                                for y in range(0, landscape.height(), 19)}
+            if len(landscape_colors) >= 16:
+                break
+    if landscape.isNull() or landscape.width() <= landscape.height() or len(landscape_colors) < 16:
+        raise RuntimeError('The Android viewport did not paint its interface in landscape')
     rotated_pid = run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip()
     if rotated_pid != pid:
         raise RuntimeError('Rotating the Android viewport stopped or restarted the application')
@@ -584,6 +649,19 @@ def emulator_test(args):
     (output / 'application-logcat.txt').write_text(rotated_logs, encoding='utf-8')
     if any(marker in rotated_logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
         raise RuntimeError('Crash detected after rotating the mobile viewport')
+    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-landscape.xml'], timeout=45)
+    landscape_hierarchy = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-landscape.xml'], capture=True)
+    (output / 'landscape-accessibility.xml').write_text(landscape_hierarchy, encoding='utf-8')
+    landscape_filters = next((node for node in ET.fromstring(landscape_hierarchy).iter('node')
+                              if node.get('text') == 'Filters' or node.get('content-desc') == 'Filters'), None)
+    landscape_bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]',
+                                   landscape_filters.get('bounds', '') if landscape_filters is not None else '')
+    if not landscape_bounds:
+        raise RuntimeError('The rotated Android interface has no accessible Filters button')
+    lx1, ly1, lx2, ly2 = map(int, landscape_bounds.groups())
+    if not (0 <= lx1 < lx2 <= landscape.width() and 0 <= ly1 < ly2 <= landscape.height()):
+        raise RuntimeError('The rotated Android Filters button is outside its viewport')
+    csv_picker_test(adb, output, pid)
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
                 'python_ssl_and_sqlite_runtime_checks': True, 'qt_ssl_backend_runtime_check': True,
@@ -593,6 +671,9 @@ def emulator_test(args):
                 'soft_keyboard_was_visible': ime_was_visible, 'system_back_presses_including_keyboard_dismissal': back_presses,
                 'landscape_rotation_kept_application_running': True,
                 'landscape_screenshot_size': [landscape.width(), landscape.height()],
+                'landscape_sampled_colors': len(landscape_colors), 'landscape_filters_button_inside_viewport': True,
+                'native_csv_document_picker_opened': True, 'native_csv_content_uri_written_and_read_back': True,
+                'csv_export_uses_explicit_synthetic_smoke_offer': True,
                 'no_python_crash_in_application_log': True, 'screenshot_size': [image.width(), image.height()],
                 'sampled_colors': len(colors), 'offline_smoke_package': True,
                 'physical_arm64_device_tested': False, 'live_marketplace_search_tested': False}

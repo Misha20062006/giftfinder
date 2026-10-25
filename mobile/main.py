@@ -66,11 +66,15 @@ def smoke_runtime_checks(window):
 
 
 def main():
-    from PySide6.QtCore import QTimer
+    from PySide6.QtCore import QTimer, Qt
     from giftfinder.mobile_ui import MobileWindow
     from giftfinder.ui_common import application
 
     app = application()
+    if app.platformName() == 'android':
+        # Qt's Android platform theme forwards this app-only hint to its status
+        # and navigation bar appearance; it does not change the device theme.
+        app.styleHints().setColorScheme(Qt.ColorScheme.Dark)
     smoke = os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1'
     window = MobileWindow(offline=smoke)
     if smoke:

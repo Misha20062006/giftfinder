@@ -83,3 +83,24 @@ Currency names and symbols: Unicode CLDR, generated at build time using Babel 2.
 Babel source and BSD license: https://github.com/python-babel/babel
 Unicode license: https://www.unicode.org/license.txt
 License texts are included in third-party. Babel itself is not required by the EXE.
+
+Android-specific runtime components (built from the pinned python-for-android recipes):
+python-for-android 58d21141f17c889bf8585f5665921d72028f8831
+License: MIT, Copyright (c) 2010-2025 Kivy Team and other contributors.
+Source: https://github.com/kivy/python-for-android/tree/58d21141f17c889bf8585f5665921d72028f8831
+License: third-party/python-for-android-MIT.txt
+
+libffi 3.4.2
+License: MIT, Copyright (c) 1996-2021 Anthony Green, Red Hat, Inc and others.
+Source: https://github.com/libffi/libffi/tree/v3.4.2
+License: third-party/libffi-MIT.txt
+
+OpenSSL 3.3.1
+License: Apache-2.0, Copyright The OpenSSL Project Authors.
+Source: https://github.com/openssl/openssl/tree/openssl-3.3.1
+License: third-party/OpenSSL-Apache-2.0.txt
+
+The Android source package includes the build recipe and Qt binding patches.
+It can be rebuilt with replacement dynamically linked Qt/PySide libraries and
+signed with your own key for a separate installation. The original release
+signing key is private and is not required to modify or rebuild the source.
