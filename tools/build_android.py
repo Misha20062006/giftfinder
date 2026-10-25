@@ -149,6 +149,19 @@ def ensure_sdk_compatibility(sdk):
     legacy.chmod(0o755)
 
 
+def clear_cached_installer_environment(base, architecture):
+    """Regenerate p4a's disposable pip venv, preserving every compiled recipe."""
+    if architecture not in ARCHITECTURES:
+        raise RuntimeError('Unknown Android architecture')
+    installer = base / 'compilation/android/platform' / f'build-{architecture}' / 'build/venv'
+    if not installer.exists():
+        return False
+    if installer.is_symlink() or not installer.resolve().is_relative_to(base.resolve()):
+        raise RuntimeError('Refusing to remove an installer environment outside its managed build directory')
+    shutil.rmtree(installer)
+    return True
+
+
 def prepare_official_config(stage, output, sdk, ndk, wheels):
     import PySide6
     template = Path(PySide6.__file__).parent / 'scripts/deploy_lib/default.spec'
@@ -255,7 +268,9 @@ def patch_buildozer(stage, output, app_version, architecture):
         'source.dir': str(stage), 'source.include_exts': 'py,png,jpg,jpeg,json,svg,txt,md,pem,qml,js',
         'source.include_patterns': 'third-party/*,third-party/**/*,UNLICENSE,THIRD_PARTY_NOTICES.txt',
         'source.exclude_dirs': '.git,.buildozer,deployment,__pycache__',
-        'requirements': 'python3,sqlite3,openssl,shiboken6,PySide6,' + ','.join(PURE_REQUIREMENTS),
+        # p4a records recipe names in lowercase and compares them case-sensitively
+        # when choosing an existing native distribution.
+        'requirements': 'python3,sqlite3,openssl,shiboken6,pyside6,' + ','.join(PURE_REQUIREMENTS),
         'android.archs': architecture, 'android.api': '35', 'android.minapi': '28', 'android.ndk_api': '28',
         'android.accept_sdk_license': 'True', 'android.permissions': ','.join(sorted(permissions)),
         'android.release_artifact': 'apk', 'android.debug_artifact': 'apk',
@@ -341,6 +356,7 @@ def build(args):
         run(initialize, cwd=stage, env=environment)
     app_version = version()
     patch_buildozer(stage, binary, app_version, args.arch)
+    clear_cached_installer_environment(base, args.arch)
     run([sys.executable, '-m', 'buildozer', '-v', 'android', 'release'], cwd=stage, env=environment)
     apks = list(binary.glob('*.apk'))
     if len(apks) != 1:

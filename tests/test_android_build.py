@@ -64,7 +64,7 @@ def test_buildozer_patch_preserves_official_qt_recipe_and_includes_runtime(tmp_p
     app = config['app']
     assert app['p4a.local_recipes'] == '/official/recipes'
     assert app['p4a.commit'] == 'pinned'
-    assert app['requirements'].startswith('python3,sqlite3,openssl,shiboken6,PySide6,')
+    assert app['requirements'].startswith('python3,sqlite3,openssl,shiboken6,pyside6,')
     assert 'requests==' in app['requirements'] and 'beautifulsoup4==' in app['requirements']
     assert all(ext in app['source.include_exts'].split(',') for ext in ('json', 'png', 'svg', 'pem'))
     assert set(app['android.permissions'].split(',')) == {'INTERNET', 'ACCESS_NETWORK_STATE'}
@@ -156,3 +156,17 @@ def test_actual_manifest_metadata_is_extracted_from_aapt_badging():
     assert metadata['target_android_sdk'] == 35
     assert metadata['android_version_code'] == 70000
     assert metadata['android_permissions'] == ['android.permission.ACCESS_NETWORK_STATE', 'android.permission.INTERNET']
+
+
+def test_only_cached_installer_venv_is_removed_and_compiled_recipes_are_preserved(tmp_path):
+    build = tmp_path / 'compilation/android/platform/build-x86_64/build'
+    installer = build / 'venv'
+    installer.mkdir(parents=True)
+    (installer / 'pip-placeholder').write_text('old installer', encoding='utf-8')
+    library = build / 'other_builds/openssl/libssl.so'
+    library.parent.mkdir(parents=True)
+    library.write_bytes(b'compiled-library')
+    assert build_android.clear_cached_installer_environment(tmp_path, 'x86_64')
+    assert not installer.exists()
+    assert library.read_bytes() == b'compiled-library'
+    assert not build_android.clear_cached_installer_environment(tmp_path, 'x86_64')
