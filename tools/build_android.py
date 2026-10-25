@@ -47,11 +47,11 @@ def compilation_environment():
     return environment
 
 
-def run(command, *, cwd=ROOT, capture=False, env=None):
+def run(command, *, cwd=ROOT, capture=False, env=None, timeout=None):
     # No command accepts a password or a token in its argument list.
     print('+', ' '.join(map(str, command)), flush=True)
     result = subprocess.run(list(map(str, command)), cwd=cwd, env=env,
-                            text=True, check=True, capture_output=capture)
+                            text=True, check=True, capture_output=capture, timeout=timeout)
     return result.stdout if capture else ''
 
 
@@ -173,6 +173,70 @@ def prepare_official_config(stage, output, sdk, ndk, wheels):
     return target
 
 
+def ensure_declared_qt_plugins(config_path, wheel, architecture):
+    """Honor both ./plugins and plugins paths in the wheel dependency manifests.
+
+    The Qt 6.12 deploy helper currently recognizes only the former spelling,
+    although the 6.12 Network manifest uses the latter for TLS and networking.
+    """
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(config_path, encoding='utf-8')
+    modules = [value.strip() for value in config.get('qt', 'modules').split(',') if value.strip()]
+    previous = {value.strip() for value in config.get('android', 'plugins', fallback='').split(',') if value.strip()}
+    selected = set(previous)
+    suffix = '_' + architecture + '.so'
+    with zipfile.ZipFile(wheel) as package:
+        members = package.namelist()
+        for module in modules:
+            manifest_suffix = f'Qt6{module}_{architecture}-android-dependencies.xml'
+            manifests = [name for name in members if name.endswith('/' + manifest_suffix)]
+            for manifest in manifests:
+                root = ET.fromstring(package.read(manifest))
+                for element in root.iter('bundled'):
+                    directory = element.get('file', '').removeprefix('./').rstrip('/')
+                    if not directory.startswith('plugins/') or '..' in directory.split('/'):
+                        continue
+                    prefix = 'PySide6/Qt/' + directory + '/'
+                    for name in members:
+                        basename = name.rsplit('/', 1)[-1]
+                        if name.startswith(prefix) and basename.startswith('libplugins_') and basename.endswith(suffix):
+                            selected.add(basename[len('libplugins_'):-len(suffix)])
+    if selected == previous:
+        return False
+    config.set('android', 'plugins', ','.join(sorted(selected)))
+    with config_path.open('w', encoding='utf-8') as stream:
+        config.write(stream)
+    return True
+
+
+def include_native_qt_plugins(apk, config_path, wheel, architecture):
+    """Include declared plugins even when an older native recipe cache is reused.
+
+    The input APK is unsigned. Alignment and signing happen only after this step.
+    """
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(config_path, encoding='utf-8')
+    plugins = [value.strip() for value in config.get('android', 'plugins', fallback='').split(',') if value.strip()]
+    added = []
+    with zipfile.ZipFile(wheel) as source, zipfile.ZipFile(apk, 'a') as destination:
+        names = set(destination.namelist())
+        for plugin in plugins:
+            if not re.fullmatch(r'[A-Za-z0-9_]+', plugin):
+                raise RuntimeError('Invalid Qt plugin name in generated configuration')
+            category, _, _ = plugin.partition('_')
+            filename = f'libplugins_{plugin}_{architecture}.so'
+            member = f'lib/{architecture}/{filename}'
+            if member in names:
+                continue
+            origin = f'PySide6/Qt/plugins/{category}/{filename}'
+            info = zipfile.ZipInfo(member)
+            info.external_attr = 0o100644 << 16
+            # Uncompressed libraries are required when extractNativeLibs is false.
+            destination.writestr(info, source.read(origin), compress_type=zipfile.ZIP_STORED)
+            added.append(plugin)
+    return added
+
+
 def patch_buildozer(stage, output, app_version, architecture):
     target = stage / 'buildozer.spec'
     config = configparser.ConfigParser(interpolation=None, strict=False)
@@ -223,7 +287,23 @@ def inspect_apk(apk, architecture):
             raise RuntimeError(f'APK missing application resources or dependencies: {missing}')
         if not any(name.startswith(f'lib/{architecture}/') for name in names):
             raise RuntimeError(f'APK does not contain {architecture} native libraries')
-    return {'resources_and_dependencies_present': True, 'native_architecture': architecture}
+        tls_plugin = f'lib/{architecture}/libplugins_tls_qopensslbackend_{architecture}.so'
+        if tls_plugin not in names:
+            raise RuntimeError('APK is missing its native Qt OpenSSL TLS backend')
+    return {'resources_and_dependencies_present': True, 'native_architecture': architecture,
+            'qt_openssl_tls_plugin_packaged': True}
+
+
+def manifest_metadata(badging):
+    def integer_field(pattern):
+        match = re.search(pattern, badging, re.MULTILINE)
+        return int(match.group(1)) if match else None
+    return {
+        'minimum_android_sdk': integer_field(r"^sdkVersion:'(\d+)'"),
+        'target_android_sdk': integer_field(r"^targetSdkVersion:'(\d+)'"),
+        'android_version_code': integer_field(r"^package:.*?versionCode='(\d+)'"),
+        'android_permissions': sorted(set(re.findall(r"^uses-permission(?:-sdk-\d+)?: name='([^']+)'", badging, re.MULTILINE))),
+    }
 
 
 def build(args):
@@ -251,13 +331,19 @@ def build(args):
     if not deploy:
         raise RuntimeError('Install PySide6-Essentials 6.12.0 on this Linux/macOS host')
     environment = compilation_environment()
-    run([deploy, '--config-file', config, '--init', '--keep-deployment-files', '--no-install', '--force'], cwd=stage, env=environment)
+    initialize = [deploy, '--config-file', config, '--init', '--keep-deployment-files', '--no-install', '--force']
+    run(initialize, cwd=stage, env=environment)
+    if ensure_declared_qt_plugins(config, wheels[0], args.arch):
+        # Regenerate only the tiny official recipes. Native compilation lives outside
+        # the staging deployment directory, so its cache is preserved.
+        run(initialize, cwd=stage, env=environment)
     app_version = version()
     patch_buildozer(stage, binary, app_version, args.arch)
     run([sys.executable, '-m', 'buildozer', '-v', 'android', 'release'], cwd=stage, env=environment)
     apks = list(binary.glob('*.apk'))
     if len(apks) != 1:
         raise RuntimeError(f'Expected one built APK, found {len(apks)}')
+    added_plugins = include_native_qt_plugins(apks[0], config, wheels[0], args.arch)
     checks = inspect_apk(apks[0], args.arch)
     destination = ROOT / 'release-dist'
     destination.mkdir(exist_ok=True)
@@ -290,7 +376,9 @@ def build(args):
                 'offline_smoke_package': args.smoke, 'qt_version': QT_VERSION,
                 'tracked_application_files': len(tracked), 'apk': target.name, 'sha256': digest,
                 'signature_verified': True, 'zip_alignment_16kb_verified': True,
-                'certificate_sha256': certificate.group(1), **checks}
+                'certificate_sha256': certificate.group(1),
+                'qt_native_plugins_added_after_cached_recipe': added_plugins,
+                **manifest_metadata(badging), **checks}
     (base / 'verification.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(evidence, indent=2), flush=True)
 
@@ -303,16 +391,18 @@ def emulator_test(args):
     adb = shutil.which('adb')
     if not adb:
         raise RuntimeError('adb must be available')
-    run([adb, 'install', '-r', apk])
+    run([adb, 'install', '-r', apk], timeout=120)
     run([adb, 'logcat', '-c'])
     run([adb, 'shell', 'am', 'force-stop', PACKAGE_ID])
     resolved = run([adb, 'shell', 'cmd', 'package', 'resolve-activity', '--brief', PACKAGE_ID], capture=True)
     activities = [line.strip() for line in resolved.splitlines() if line.strip().startswith(PACKAGE_ID + '/')]
     if len(activities) != 1:
         raise RuntimeError('Unable to resolve the installed Android launcher activity')
-    run([adb, 'shell', 'am', 'start', '-W', '-n', activities[0]])
+    run([adb, 'shell', 'am', 'start', '-W', '-n', activities[0]], timeout=120)
     deadline = time.monotonic() + 90
     logs = ''
+    required_markers = ('GIFTFINDER_ANDROID_READY', 'GIFTFINDER_ANDROID_TLS_READY',
+                        'GIFTFINDER_ANDROID_IMAGE_READY')
     while time.monotonic() < deadline:
         process = subprocess.run([adb, 'shell', 'pidof', PACKAGE_ID], text=True, capture_output=True)
         current_pid = process.stdout.strip().split()
@@ -321,14 +411,15 @@ def emulator_test(args):
             log_command += ['--pid', current_pid[0]]
         result = subprocess.run(log_command, text=True, capture_output=True, check=True)
         logs = result.stdout
-        if 'GIFTFINDER_ANDROID_READY' in logs:
+        if all(marker in logs for marker in required_markers):
             break
         if current_pid and any(marker in logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
             break
         time.sleep(2)
     (output / 'startup-logcat.txt').write_text(logs, encoding='utf-8')
-    if 'GIFTFINDER_ANDROID_READY' not in logs:
-        raise RuntimeError('The Android application did not reach its ready marker; inspect logcat')
+    missing_markers = [marker for marker in required_markers if marker not in logs]
+    if missing_markers:
+        raise RuntimeError(f'Android startup/network checks did not complete: {missing_markers}; inspect logcat')
     time.sleep(5)
     pid = run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip()
     if not pid:
@@ -347,7 +438,7 @@ def emulator_test(args):
     colors = {image.pixelColor(x, y).rgba() for x in range(0, image.width(), 17) for y in range(0, image.height(), 19)}
     if len(colors) < 16:
         raise RuntimeError('Android screenshot is blank or nearly blank')
-    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-ui.xml'])
+    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-ui.xml'], timeout=45)
     hierarchy = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-ui.xml'], capture=True)
     (output / 'home-accessibility.xml').write_text(hierarchy, encoding='utf-8')
     tree = ET.fromstring(hierarchy)
@@ -371,6 +462,8 @@ def emulator_test(args):
         subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream)
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
+                'python_ssl_and_sqlite_runtime_checks': True, 'qt_ssl_backend_runtime_check': True,
+                'uncached_public_image_loaded_over_https': True,
                 'accessible_filters_button_tapped': True, 'mobile_filters_sheet_opened': True,
                 'no_python_crash_in_application_log': True, 'screenshot_size': [image.width(), image.height()],
                 'sampled_colors': len(colors), 'offline_smoke_package': True,

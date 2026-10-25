@@ -9,7 +9,7 @@ on:
       - '!giftfinder/mobile_ui.py'
       - 'tests/**'
       - '!tests/test_android_build.py'
-      - '!tests/test_mobile.py'
+      - '!tests/test_mobile*.py'
       - 'GiftFinder.spec'
       - 'requirements*.txt'
       - 'version-info.txt'

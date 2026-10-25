@@ -84,6 +84,40 @@ def test_compilers_never_receive_signing_secrets(monkeypatch):
     assert environment['ANDROID_HOME'] == '/sdk'
 
 
+def test_qt_plugin_selection_accepts_actual_network_manifest_spelling(tmp_path):
+    spec = tmp_path / 'pysidedeploy.spec'
+    spec.write_text('[qt]\nmodules = Core,Network\n[android]\nplugins = platforms_qtforandroid\n', encoding='utf-8')
+    wheel = tmp_path / 'qt.whl'
+    with zipfile.ZipFile(wheel, 'w') as archive:
+        archive.writestr('PySide6/Qt/lib/Qt6Network_x86_64-android-dependencies.xml',
+                         '<rules><bundled file="plugins/tls"/><bundled file="./plugins/networkinformation"/></rules>')
+        archive.writestr('PySide6/Qt/plugins/tls/libplugins_tls_qopensslbackend_x86_64.so', b'placeholder')
+        archive.writestr('PySide6/Qt/plugins/networkinformation/libplugins_networkinformation_qandroidnetworkinformation_x86_64.so', b'placeholder')
+    assert build_android.ensure_declared_qt_plugins(spec, wheel, 'x86_64')
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(spec, encoding='utf-8')
+    assert set(config['android']['plugins'].split(',')) == {
+        'platforms_qtforandroid', 'tls_qopensslbackend', 'networkinformation_qandroidnetworkinformation'}
+    assert not build_android.ensure_declared_qt_plugins(spec, wheel, 'x86_64')
+
+
+def test_missing_declared_plugin_is_added_before_apk_alignment_and_signing(tmp_path):
+    spec = tmp_path / 'pysidedeploy.spec'
+    spec.write_text('[android]\nplugins = tls_qopensslbackend\n', encoding='utf-8')
+    wheel = tmp_path / 'qt.whl'
+    filename = 'libplugins_tls_qopensslbackend_x86_64.so'
+    with zipfile.ZipFile(wheel, 'w') as archive:
+        archive.writestr('PySide6/Qt/plugins/tls/' + filename, b'native-qt-plugin')
+    apk = tmp_path / 'app.apk'
+    with zipfile.ZipFile(apk, 'w') as archive:
+        archive.writestr('assets/private.tar', b'original-application')
+    assert build_android.include_native_qt_plugins(apk, spec, wheel, 'x86_64') == ['tls_qopensslbackend']
+    assert build_android.include_native_qt_plugins(apk, spec, wheel, 'x86_64') == []
+    with zipfile.ZipFile(apk) as archive:
+        assert archive.read('assets/private.tar') == b'original-application'
+        assert archive.getinfo('lib/x86_64/' + filename).compress_type == zipfile.ZIP_STORED
+
+
 def fake_apk(path, *, omit=None):
     names = ['giftfinder/catalog_full.json', 'giftfinder/monochrome_pairs.json',
              'giftfinder/rates_seed.json', 'giftfinder/themes_curated.json',
@@ -100,6 +134,7 @@ def fake_apk(path, *, omit=None):
     with zipfile.ZipFile(path, 'w') as archive:
         archive.writestr('assets/private.tar', buffer.getvalue())
         archive.writestr('lib/arm64-v8a/libQt6Core_arm64-v8a.so', b'placeholder')
+        archive.writestr('lib/arm64-v8a/libplugins_tls_qopensslbackend_arm64-v8a.so', b'placeholder')
 
 
 def test_apk_validation_reads_packaged_resources_without_extracting(tmp_path):
@@ -109,3 +144,15 @@ def test_apk_validation_reads_packaged_resources_without_extracting(tmp_path):
     fake_apk(apk, omit='cacert.pem')
     with pytest.raises(RuntimeError, match='missing'):
         build_android.inspect_apk(apk, 'arm64-v8a')
+
+
+def test_actual_manifest_metadata_is_extracted_from_aapt_badging():
+    metadata = build_android.manifest_metadata(
+        "package: name='org.giftfinder.giftfinder' versionCode='70000' versionName='0.7.0'\n"
+        "sdkVersion:'28'\ntargetSdkVersion:'35'\n"
+        "uses-permission: name='android.permission.INTERNET'\n"
+        "uses-permission: name='android.permission.ACCESS_NETWORK_STATE'\n")
+    assert metadata['minimum_android_sdk'] == 28
+    assert metadata['target_android_sdk'] == 35
+    assert metadata['android_version_code'] == 70000
+    assert metadata['android_permissions'] == ['android.permission.ACCESS_NETWORK_STATE', 'android.permission.INTERNET']

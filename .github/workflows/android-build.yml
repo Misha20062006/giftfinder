@@ -56,7 +56,7 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
           GIFT_FINDER_DATA_DIR: ${{ github.workspace }}/.qa-android-host/profile
-        run: python -m pytest tests/test_android_build.py tests/test_mobile.py -q --basetemp .test-android-host
+        run: python -m pytest tests/test_android_build.py tests/test_mobile.py tests/test_mobile_smoke.py -q --basetemp .test-android-host
       - name: Restore Android compilation cache
         id: android-cache
         uses: actions/cache/restore@v5
@@ -98,13 +98,30 @@ jobs:
       - name: Boot emulator and verify the installed mobile application
         if: matrix.arch == 'x86_64'
         run: |
-          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader -camera-back none -camera-front none > "$RUNNER_TEMP/emulator.log" 2>&1 &
-          adb wait-for-device
-          for attempt in $(seq 1 90); do
-            if [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = '1' ]; then break; fi
+          evidence=build/android/x86_64/emulator
+          mkdir -p "$evidence"
+          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
+          emulator_pid=$!
+          trap 'timeout 10s adb emu kill >/dev/null 2>&1 || true' EXIT
+          deadline=$((SECONDS + 180))
+          booted=0
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            if ! kill -0 "$emulator_pid" 2>/dev/null; then
+              tail -n 80 "$evidence/emulator.log"
+              exit 1
+            fi
+            state=$(timeout 5s adb get-state 2>/dev/null || true)
+            if [ "$state" = 'device' ]; then
+              complete=$(timeout 5s adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+              if [ "$complete" = '1' ]; then booted=1; break; fi
+            fi
             sleep 2
           done
-          test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = '1'
+          if [ "$booted" != '1' ]; then
+            timeout 10s adb devices -l > "$evidence/adb-devices.txt" 2>&1 || true
+            tail -n 80 "$evidence/emulator.log"
+            exit 1
+          fi
           adb shell input keyevent 82
           python tools/build_android.py emulator-test --apk "$(find release-dist -name '*x86_64-smoke.apk' -print -quit)"
       - name: Upload signed Android package
@@ -127,6 +144,7 @@ jobs:
             build/android/x86_64/emulator/*.png
             build/android/x86_64/emulator/*.txt
             build/android/x86_64/emulator/*.xml
+            build/android/x86_64/emulator/*.log
           if-no-files-found: ignore
           retention-days: 7
       - name: Keep public compilation outputs even after a failed build
