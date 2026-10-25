@@ -159,6 +159,9 @@ def patch_buildozer(stage, output, app_version, architecture):
     config.read(target, encoding='utf-8')
     if not config.has_section('app') or config.get('app', 'p4a.bootstrap') != 'qt':
         raise RuntimeError('Official Qt bootstrap was not generated')
+    permissions = {value.strip() for value in config.get('app', 'android.permissions', fallback='').split(',') if value.strip()}
+    if not any(value.rsplit('.', 1)[-1] == 'INTERNET' for value in permissions):
+        permissions.add('INTERNET')
     major, minor, patch = map(int, app_version.split('.'))
     fields = {
         'package.name': 'giftfinder', 'package.domain': 'org.giftfinder',
@@ -168,7 +171,7 @@ def patch_buildozer(stage, output, app_version, architecture):
         'source.exclude_dirs': '.git,.buildozer,deployment,__pycache__',
         'requirements': 'python3,sqlite3,openssl,shiboken6,PySide6,' + ','.join(PURE_REQUIREMENTS),
         'android.archs': architecture, 'android.api': '35', 'android.minapi': '28', 'android.ndk_api': '28',
-        'android.accept_sdk_license': 'True', 'android.permissions': 'INTERNET',
+        'android.accept_sdk_license': 'True', 'android.permissions': ','.join(sorted(permissions)),
         'android.release_artifact': 'apk', 'android.debug_artifact': 'apk',
         'android.no-byte-compile-python': 'True', 'orientation': 'all', 'fullscreen': '0',
     }

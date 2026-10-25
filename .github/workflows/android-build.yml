@@ -47,7 +47,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y autoconf automake libtool pkg-config cmake ninja-build ccache zlib1g-dev libffi-dev libssl-dev libncurses-dev libtinfo6 libegl1 libopengl0
-          python -m pip install 'PySide6-Essentials==6.12.0' 'buildozer==1.6.0' 'Cython==0.29.33' 'Jinja2==3.1.6' 'pkginfo==1.12.1.2' 'packaging==26.3'
+          python -m pip install 'PySide6-Essentials==6.12.0' 'buildozer==1.6.0' 'Cython==0.29.33' 'Jinja2==3.1.6' 'pkginfo==1.12.1.2' 'packaging==24.1' 'tqdm==4.67.1'
           sdkmanager --licenses < <(yes) > /dev/null
           sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0' 'ndk;28.2.13676358'
       - name: Restore Android compilation cache

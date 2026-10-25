@@ -7,12 +7,11 @@ source_root = Path(__file__).resolve().parent.parent
 if (source_root / 'giftfinder').is_dir():
     sys.path.insert(0, str(source_root))
 
-from PySide6.QtCore import QTimer
-from giftfinder.mobile_ui import MobileWindow
-from giftfinder.ui_common import application
-
-
 def main():
+    from PySide6.QtCore import QTimer
+    from giftfinder.mobile_ui import MobileWindow
+    from giftfinder.ui_common import application
+
     app = application()
     window = MobileWindow(offline=os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1')
     window.show()

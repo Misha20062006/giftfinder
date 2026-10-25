@@ -173,7 +173,7 @@ class MobileFilterDialog(FilterDialog):
         form.addWidget(self.category_select); form.addWidget(touch(self.search))
         list_view(self.grid, MobileTileDelegate(self.renderer, self.grid, self.is_selected), 92)
         self.grid.setFixedHeight(276); form.addWidget(self.grid)
-        self.advanced_toggle = touch(button(tr('price')+' · '+tr('market'), self.toggle_advanced, 'quiet', 'chevron'))
+        self.advanced_toggle = touch(button(tr('price')+' · '+tr('number')+' · '+tr('market'), self.toggle_advanced, 'quiet', 'chevron'))
         self.advanced_toggle.setCheckable(True); form.addWidget(self.advanced_toggle)
         self.advanced = QWidget(); advanced = QVBoxLayout(self.advanced); advanced.setContentsMargins(0,0,0,0); advanced.setSpacing(8)
         markets = QGridLayout()
@@ -220,7 +220,7 @@ class MobileFilterDialog(FilterDialog):
         super().retranslate()
         for i, key in enumerate(('collection','model','backdrop','symbol','themes','color')):
             self.category_select.setItemText(i, tr(key))
-        self.advanced_toggle.setText(tr('price')+' · '+tr('market'))
+        self.advanced_toggle.setText(tr('price')+' · '+tr('number')+' · '+tr('market'))
 
 
 class MobileDetailsDialog(DetailsDialog):
@@ -270,7 +270,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         header = QHBoxLayout(); brand = label('GiftFinder', 'brand'); brand.setFixedWidth(100); header.addWidget(brand)
         header.addStretch(1)
         touch(self.language_button); self.language_button.setFixedWidth(124); self.language_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed); header.addWidget(self.language_button)
-        self.mobile_menu_button = touch(button('', self.mobile_menu, 'quiet', 'chevron')); self.mobile_menu_button.setFixedWidth(44); self.mobile_menu_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed); self.mobile_menu_button.setAccessibleName(tr('actions'))
+        self.mobile_menu_button = touch(button('⋮', self.mobile_menu, 'quiet')); self.mobile_menu_button.setFont(font(24)); self.mobile_menu_button.setFixedWidth(44); self.mobile_menu_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed); self.mobile_menu_button.setAccessibleName(tr('actions'))
         header.addWidget(self.mobile_menu_button); outer.addLayout(header)
         outer.addWidget(touch(self.search_edit))
         search = QHBoxLayout()
