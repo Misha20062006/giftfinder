@@ -243,7 +243,9 @@ def patch_buildozer(stage, output, app_version, architecture):
     config.read(target, encoding='utf-8')
     if not config.has_section('app') or config.get('app', 'p4a.bootstrap') != 'qt':
         raise RuntimeError('Official Qt bootstrap was not generated')
-    permissions = {value.strip() for value in config.get('app', 'android.permissions', fallback='').split(',') if value.strip()}
+    legacy_storage = {'READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE'}
+    permissions = {value.strip() for value in config.get('app', 'android.permissions', fallback='').split(',')
+                   if value.strip() and value.strip().rsplit('.', 1)[-1] not in legacy_storage}
     if not any(value.rsplit('.', 1)[-1] == 'INTERNET' for value in permissions):
         permissions.add('INTERNET')
     major, minor, patch = map(int, app_version.split('.'))
@@ -370,6 +372,10 @@ def build(args):
     badging = run([sdk / 'build-tools/35.0.0/aapt', 'dump', 'badging', target], capture=True)
     if f"name='{PACKAGE_ID}'" not in badging:
         raise RuntimeError('The APK application ID does not match GiftFinder')
+    metadata = manifest_metadata(badging)
+    if any(permission.rsplit('.', 1)[-1] in {'READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE'}
+           for permission in metadata['android_permissions']):
+        raise RuntimeError('APK still declares unnecessary legacy external storage access')
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     (destination / f'SHA256-Android-{args.arch}.txt').write_text(f'{digest}  {target.name}\n', encoding='ascii')
     evidence = {'version': app_version, 'package_id': PACKAGE_ID, 'architecture': args.arch,
@@ -378,7 +384,7 @@ def build(args):
                 'signature_verified': True, 'zip_alignment_16kb_verified': True,
                 'certificate_sha256': certificate.group(1),
                 'qt_native_plugins_added_after_cached_recipe': added_plugins,
-                **manifest_metadata(badging), **checks}
+                **metadata, **checks}
     (base / 'verification.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(evidence, indent=2), flush=True)
 

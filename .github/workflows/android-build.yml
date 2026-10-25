@@ -67,7 +67,7 @@ jobs:
             build/android/wheels
             build/android/${{ matrix.arch }}/compilation
           key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2
+          restore-keys: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-
       - name: Build and sign APK with the stable application key
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -93,8 +93,14 @@ jobs:
         if: matrix.arch == 'x86_64'
         run: |
           sudo chmod 666 /dev/kvm
+          export ANDROID_USER_HOME="$RUNNER_TEMP/giftfinder-android-user"
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/giftfinder-avd"
+          mkdir -p "$ANDROID_USER_HOME" "$ANDROID_AVD_HOME"
+          echo "ANDROID_USER_HOME=$ANDROID_USER_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_AVD_HOME=$ANDROID_AVD_HOME" >> "$GITHUB_ENV"
           sdkmanager 'emulator' 'system-images;android-35;google_apis;x86_64'
-          echo no | avdmanager create avd --force --name giftfinder --package 'system-images;android-35;google_apis;x86_64' --device pixel_5
+          echo no | avdmanager create avd --force --name giftfinder --path "$ANDROID_AVD_HOME/giftfinder.avd" --package 'system-images;android-35;google_apis;x86_64' --device pixel_5
+          "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fx giftfinder
       - name: Boot emulator and verify the installed mobile application
         if: matrix.arch == 'x86_64'
         run: |

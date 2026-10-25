@@ -57,7 +57,7 @@ def test_staging_uses_tracked_allowlist_and_keeps_future_import_valid(tmp_path, 
 def test_buildozer_patch_preserves_official_qt_recipe_and_includes_runtime(tmp_path):
     (tmp_path / 'buildozer.spec').write_text(
         '[app]\np4a.bootstrap = qt\np4a.local_recipes = /official/recipes\n'
-        'p4a.commit = pinned\nandroid.permissions = ACCESS_NETWORK_STATE\n[buildozer]\nbin_dir = bin\n', encoding='utf-8')
+        'p4a.commit = pinned\nandroid.permissions = ACCESS_NETWORK_STATE,android.permission.READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE\n[buildozer]\nbin_dir = bin\n', encoding='utf-8')
     build_android.patch_buildozer(tmp_path, tmp_path / 'bin', '0.7.0', 'arm64-v8a')
     config = configparser.ConfigParser(interpolation=None)
     config.read(tmp_path / 'buildozer.spec', encoding='utf-8')

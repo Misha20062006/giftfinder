@@ -16,6 +16,11 @@ dist/
 release-dist/
 *.exe
 *.zip
+*.apk
+*.aab
+*.dmg
+*.tar.gz
+*.AppImage
 
 # Local profiles, sessions and credentials
 .env
@@ -29,6 +34,11 @@ release-dist/
 *.log
 *.pem
 *.key
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.dpapi
 preferences.json
 startup-error.txt
 
