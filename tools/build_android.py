@@ -295,7 +295,9 @@ public class GiftFinderDiagnosticsActivity extends org.kivy.android.PythonActivi
         super.finish();
     }
     @Override public void onDestroy() {
-        Log.i("GiftFinderLifecycle", "Activity.onDestroy; finishing=" + isFinishing(),
+        Log.i("GiftFinderLifecycle", "Activity.onDestroy; finishing=" + isFinishing()
+              + "; changingConfigurations=" + isChangingConfigurations()
+              + "; configurationChanges=" + getChangingConfigurations(),
               new Throwable("destroy caller"));
         super.onDestroy();
     }
@@ -450,7 +452,9 @@ def emulator_test(args):
     adb = shutil.which('adb')
     if not adb:
         raise RuntimeError('adb must be available')
-    run([adb, 'install', '-r', apk], timeout=120)
+    # Incremental install can report success while APK blocks are still streaming.
+    # Test the normal, fully installed release package before launching Qt.
+    run([adb, 'install', '--no-incremental', '-r', apk], timeout=120)
     run([adb, 'logcat', '-c'])
     run([adb, 'shell', 'am', 'force-stop', PACKAGE_ID])
     resolved = run([adb, 'shell', 'cmd', 'package', 'resolve-activity', '--brief', PACKAGE_ID], capture=True)
