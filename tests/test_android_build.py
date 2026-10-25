@@ -10,6 +10,19 @@ import pytest
 from tools import build_android
 
 
+def test_modern_sdk_compatibility_adds_only_a_missing_legacy_command(tmp_path):
+    manager = tmp_path / 'cmdline-tools/latest/bin/sdkmanager'
+    manager.parent.mkdir(parents=True)
+    manager.write_text('#!/bin/sh\nexit 0\n', encoding='utf-8')
+    build_android.ensure_sdk_compatibility(tmp_path)
+    wrapper = tmp_path / 'tools/bin/sdkmanager'
+    assert wrapper.is_file()
+    assert str(manager) in wrapper.read_text(encoding='utf-8')
+    wrapper.write_text('existing sdk command', encoding='utf-8')
+    build_android.ensure_sdk_compatibility(tmp_path)
+    assert wrapper.read_text(encoding='utf-8') == 'existing sdk command'
+
+
 def test_staging_uses_tracked_allowlist_and_keeps_future_import_valid(tmp_path, monkeypatch):
     root = tmp_path / 'repo'
     root.mkdir()

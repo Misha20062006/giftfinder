@@ -46,10 +46,15 @@ jobs:
       - name: Install Android build dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y autoconf automake libtool pkg-config cmake ninja-build ccache zlib1g-dev libffi-dev libssl-dev libncurses-dev libtinfo6 libegl1 libopengl0
-          python -m pip install 'PySide6-Essentials==6.12.0' 'buildozer==1.6.0' 'Cython==0.29.33' 'Jinja2==3.1.6' 'pkginfo==1.12.1.2' 'packaging==24.1' 'tqdm==4.67.1'
+          sudo apt-get install -y autoconf automake libtool pkg-config cmake ninja-build ccache zlib1g-dev libffi-dev libssl-dev libncurses-dev libtinfo6 libegl1 libopengl0 fonts-dejavu-core fonts-noto-core
+          python -m pip install -r requirements.txt 'pytest==9.1.1' 'PySide6-Essentials==6.12.0' 'buildozer==1.6.0' 'Cython==0.29.33' 'Jinja2==3.1.6' 'pkginfo==1.12.1.2' 'packaging==24.1' 'tqdm==4.67.1'
           sdkmanager --licenses < <(yes) > /dev/null
           sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0' 'ndk;28.2.13676358'
+      - name: Verify Android packaging and mobile behavior on the host
+        env:
+          QT_QPA_PLATFORM: offscreen
+          GIFT_FINDER_DATA_DIR: ${{ github.workspace }}/.qa-android-host/profile
+        run: python -m pytest tests/test_android_build.py tests/test_mobile.py -q --basetemp .test-android-host
       - name: Restore Android compilation cache
         id: android-cache
         uses: actions/cache/restore@v5
@@ -59,7 +64,8 @@ jobs:
             ~/.buildozer/android/packages
             build/android/wheels
             build/android/${{ matrix.arch }}/compilation
-          key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2
+          key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2
       - name: Build and sign APK with the stable application key
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -130,7 +136,7 @@ jobs:
             ~/.buildozer/android/packages
             build/android/wheels
             build/android/${{ matrix.arch }}/compilation
-          key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2
+          key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Remove the temporary signing keystore
         if: always()
         run: rm -f -- "$RUNNER_TEMP/giftfinder-android-signing.jks"

@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -130,6 +131,24 @@ def download_wheel(component, architecture, cache):
     return target
 
 
+def ensure_sdk_compatibility(sdk):
+    """Bridge Buildozer's legacy tools/bin path to a modern Android SDK layout."""
+    sdk = sdk.resolve()
+    legacy = sdk / 'tools/bin/sdkmanager'
+    if legacy.is_file():
+        return
+    modern = sdk / 'cmdline-tools/latest/bin/sdkmanager'
+    if not modern.is_file():
+        modern = sdk / 'cmdline-tools/bin/sdkmanager'
+    if not modern.is_file():
+        raise RuntimeError('No modern Android SDK sdkmanager was found')
+    if legacy.exists() or legacy.is_symlink() or not legacy.parent.resolve().is_relative_to(sdk):
+        raise RuntimeError('Cannot safely create the legacy Android SDK command wrapper')
+    legacy.parent.mkdir(parents=True, exist_ok=True)
+    legacy.write_text('#!/bin/sh\nexec ' + shlex.quote(str(modern)) + ' "$@"\n', encoding='utf-8')
+    legacy.chmod(0o755)
+
+
 def prepare_official_config(stage, output, sdk, ndk, wheels):
     import PySide6
     template = Path(PySide6.__file__).parent / 'scripts/deploy_lib/default.spec'
@@ -215,6 +234,7 @@ def build(args):
     ndk = Path(args.ndk).resolve() if args.ndk else sdk / 'ndk' / NDK_VERSION
     if not (sdk / 'build-tools/35.0.0/apksigner').is_file() or not ndk.is_dir():
         raise RuntimeError('Android SDK build-tools 35.0.0 and NDK 28c must be installed first')
+    ensure_sdk_compatibility(sdk)
     base = ROOT / 'build/android' / args.arch
     base.mkdir(parents=True, exist_ok=True)
     stage = base / 'stage'
