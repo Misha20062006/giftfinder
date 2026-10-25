@@ -84,6 +84,28 @@ def test_compilers_never_receive_signing_secrets(monkeypatch):
     assert environment['ANDROID_HOME'] == '/sdk'
 
 
+def test_only_smoke_abi_adds_lifecycle_diagnostics_without_debugging(tmp_path):
+    stage = tmp_path / 'stage'
+    stage.mkdir()
+    spec = stage / 'buildozer.spec'
+    spec.write_text('[app]\np4a.bootstrap = qt\n[buildozer]\n', encoding='utf-8')
+    build_android.patch_buildozer(stage, tmp_path / 'bin', '0.7.0', 'x86_64')
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(spec, encoding='utf-8')
+    assert config['app']['android.entrypoint'].endswith('.GiftFinderDiagnosticsActivity')
+    assert not any('debuggable' in key for key in config['app'])
+    java = Path(config['app']['android.add_src']) / 'org/giftfinder/diagnostics/GiftFinderDiagnosticsActivity.java'
+    source = java.read_text(encoding='utf-8')
+    assert 'super.onCreate(state)' in source and 'super.finish()' in source
+    assert 'finish caller' in source and 'isFinishing()' in source
+    spec.write_text('[app]\np4a.bootstrap = qt\n[buildozer]\n', encoding='utf-8')
+    build_android.patch_buildozer(stage, tmp_path / 'bin', '0.7.0', 'arm64-v8a')
+    config.read(spec, encoding='utf-8')
+    clean = configparser.ConfigParser(interpolation=None)
+    clean.read(spec, encoding='utf-8')
+    assert 'android.entrypoint' not in clean['app'] and 'android.add_src' not in clean['app']
+
+
 def test_qt_plugin_selection_accepts_actual_network_manifest_spelling(tmp_path):
     spec = tmp_path / 'pysidedeploy.spec'
     spec.write_text('[qt]\nmodules = Core,Network\n[android]\nplugins = platforms_qtforandroid\n', encoding='utf-8')
@@ -170,3 +192,9 @@ def test_only_cached_installer_venv_is_removed_and_compiled_recipes_are_preserve
     assert not installer.exists()
     assert library.read_bytes() == b'compiled-library'
     assert not build_android.clear_cached_installer_environment(tmp_path, 'x86_64')
+
+
+@pytest.mark.parametrize('dump,visible', [('mInputShown=true', True), ('mInputShown=false', False),
+                                         ('mImeWindowVis=0x3', True), ('mImeWindowVis=0x1', False)])
+def test_android_back_check_distinguishes_keyboard_visibility(dump, visible):
+    assert build_android.input_method_visible(dump) is visible

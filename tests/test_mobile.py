@@ -141,6 +141,17 @@ def test_android_back_cancels_filter_draft_and_preserves_active_search(window, a
     assert window.filter_extra == {'min':'10','max':'20','unit':'USD'}
 
 
+def test_smoke_closed_marker_follows_actual_filter_finished_signal(window, app, monkeypatch, capsys):
+    monkeypatch.setenv('GIFT_FINDER_ANDROID_SMOKE', '1')
+    window.open_filters(); app.processEvents()
+    opened = capsys.readouterr().out
+    assert 'GIFTFINDER_ANDROID_FILTERS_OPEN' in opened
+    assert 'GIFTFINDER_ANDROID_FILTERS_CLOSED' not in opened
+    QTest.keyClick(window.filter_dialog.search, Qt.Key.Key_Back); app.processEvents()
+    assert capsys.readouterr().out.count('GIFTFINDER_ANDROID_FILTERS_CLOSED') == 1
+    assert window.filter_dialog is None and window.isVisible()
+
+
 def test_result_details_favorite_link_and_back_return_to_catalog(window, app, monkeypatch):
     item = offer(); window.mode = 'search'; window.offers = [item]; window.render_offers(); settle(window)
     assert window.offer_model.rowCount() == 1

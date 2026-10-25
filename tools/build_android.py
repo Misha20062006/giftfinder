@@ -276,6 +276,33 @@ def patch_buildozer(stage, output, app_version, architecture):
         'android.release_artifact': 'apk', 'android.debug_artifact': 'apk',
         'android.no-byte-compile-python': 'True', 'orientation': 'all', 'fullscreen': '0',
     }
+    if architecture == 'x86_64':
+        # A separate launcher only adds lifecycle logs to the labelled smoke APK.
+        # Normal ARM releases keep the official, non-debuggable Qt launcher.
+        java = stage.parent / 'smoke-java/org/giftfinder/diagnostics/GiftFinderDiagnosticsActivity.java'
+        java.parent.mkdir(parents=True, exist_ok=True)
+        java.write_text('''package org.giftfinder.diagnostics;
+import android.os.Bundle;
+import android.util.Log;
+public class GiftFinderDiagnosticsActivity extends org.kivy.android.PythonActivity {
+    @Override public void onCreate(Bundle state) {
+        Log.i("GiftFinderLifecycle", "before PythonActivity.onCreate");
+        super.onCreate(state);
+        Log.i("GiftFinderLifecycle", "after PythonActivity.onCreate; finishing=" + isFinishing());
+    }
+    @Override public void finish() {
+        Log.i("GiftFinderLifecycle", "Activity.finish requested", new Throwable("finish caller"));
+        super.finish();
+    }
+    @Override public void onDestroy() {
+        Log.i("GiftFinderLifecycle", "Activity.onDestroy; finishing=" + isFinishing(),
+              new Throwable("destroy caller"));
+        super.onDestroy();
+    }
+}
+''', encoding='utf-8')
+        fields['android.add_src'] = str(stage.parent / 'smoke-java')
+        fields['android.entrypoint'] = 'org.giftfinder.diagnostics.GiftFinderDiagnosticsActivity'
     for key, value in fields.items():
         config.set('app', key, value)
     config.set('buildozer', 'bin_dir', str(output))
@@ -321,6 +348,16 @@ def manifest_metadata(badging):
         'android_version_code': integer_field(r"^package:.*?versionCode='(\d+)'"),
         'android_permissions': sorted(set(re.findall(r"^uses-permission(?:-sdk-\d+)?: name='([^']+)'", badging, re.MULTILINE))),
     }
+
+
+def input_method_visible(dump):
+    shown = re.search(r'\bmInputShown\s*[=:]\s*(true|false)', dump, re.IGNORECASE)
+    if shown:
+        return shown.group(1).lower() == 'true'
+    visibility = re.search(r'\bmImeWindowVis\s*=\s*(0x[0-9a-f]+)', dump, re.IGNORECASE)
+    if visibility:
+        return bool(int(visibility.group(1), 16) & 2)
+    raise RuntimeError('Cannot determine the Android input-method visibility for the Back test')
 
 
 def build(args):
@@ -441,6 +478,11 @@ def emulator_test(args):
     (output / 'startup-logcat.txt').write_text(logs, encoding='utf-8')
     missing_markers = [marker for marker in required_markers if marker not in logs]
     if missing_markers:
+        with (output / 'android-startup-failure.png').open('wb') as stream:
+            subprocess.run([adb, 'exec-out', 'screencap', '-p'], stdout=stream, timeout=20)
+        diagnostics = subprocess.run([adb, 'shell', 'dumpsys', 'activity', 'activities'],
+                                     text=True, capture_output=True, timeout=20)
+        (output / 'startup-activities.txt').write_text(diagnostics.stdout, encoding='utf-8')
         raise RuntimeError(f'Android startup/network checks did not complete: {missing_markers}; inspect logcat')
     time.sleep(5)
     pid = run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip()
@@ -482,11 +524,41 @@ def emulator_test(args):
         raise RuntimeError('Crash detected while opening the mobile filter sheet')
     with (output / 'android-filters.png').open('wb') as stream:
         subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream)
+    ime_before = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
+    (output / 'input-method-before-back.txt').write_text(ime_before, encoding='utf-8')
+    ime_was_visible = input_method_visible(ime_before)
+    back_presses = 0
+    if ime_was_visible:
+        # The first system Back may legitimately dismiss the soft keyboard.
+        run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
+        back_presses += 1
+        time.sleep(1)
+        ime_after = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
+        (output / 'input-method-after-ime-back.txt').write_text(ime_after, encoding='utf-8')
+        if input_method_visible(ime_after):
+            raise RuntimeError('A system Back did not dismiss the visible Android keyboard')
+    back_logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
+    if 'GIFTFINDER_ANDROID_FILTERS_CLOSED' not in back_logs:
+        run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
+        back_presses += 1
+        time.sleep(1)
+        back_logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
+    (output / 'application-logcat.txt').write_text(back_logs, encoding='utf-8')
+    if any(marker in back_logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
+        raise RuntimeError('Crash detected while returning from the mobile filter sheet')
+    if 'GIFTFINDER_ANDROID_FILTERS_CLOSED' not in back_logs:
+        raise RuntimeError('One system Back with the keyboard closed did not close the filter sheet')
+    if not run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip():
+        raise RuntimeError('System Back exited the application instead of only closing Filters')
+    with (output / 'android-after-back.png').open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream)
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
                 'python_ssl_and_sqlite_runtime_checks': True, 'qt_ssl_backend_runtime_check': True,
                 'uncached_public_image_loaded_over_https': True,
                 'accessible_filters_button_tapped': True, 'mobile_filters_sheet_opened': True,
+                'filters_closed_by_system_back': True, 'process_alive_after_filter_back': True,
+                'soft_keyboard_was_visible': ime_was_visible, 'system_back_presses_including_keyboard_dismissal': back_presses,
                 'no_python_crash_in_application_log': True, 'screenshot_size': [image.width(), image.height()],
                 'sampled_colors': len(colors), 'offline_smoke_package': True,
                 'physical_arm64_device_tested': False, 'live_marketplace_search_tested': False}

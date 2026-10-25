@@ -69,6 +69,7 @@ jobs:
           key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-
       - name: Build and sign APK with the stable application key
+        id: android-build
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -131,6 +132,7 @@ jobs:
           adb shell input keyevent 82
           python tools/build_android.py emulator-test --apk "$(find release-dist -name '*x86_64-smoke.apk' -print -quit)"
       - name: Upload signed Android package
+        if: always() && steps.android-build.outcome == 'success'
         uses: actions/upload-artifact@v7
         with:
           name: GiftFinder-Android-${{ matrix.arch }}

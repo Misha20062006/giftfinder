@@ -384,6 +384,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         dialog.applied.connect(self.apply_filters); dialog.finished.connect(lambda _: setattr(self, 'filter_dialog', None))
         dialog.change_tab(category); self.keep_dialog(dialog)
         if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1':
+            dialog.finished.connect(lambda _: print('GIFTFINDER_ANDROID_FILTERS_CLOSED', flush=True))
             print('GIFTFINDER_ANDROID_FILTERS_OPEN', flush=True)
 
     def fit_dialog(self, dialog):
