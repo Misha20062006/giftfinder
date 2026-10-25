@@ -90,10 +90,13 @@ def test_failed_direct_source_preserves_labeled_cache(monkeypatch):
 def test_catalog_resolution_never_ignores_conflicting_filters(tmp_path):
     catalog = p.Catalog(tmp_path, tmp_path / 'none.json')
     catalog.data['collections'] = ['Easter Egg', 'Plush Pepe']
-    with pytest.raises(ValueError, match='не совпадают'):
+    from giftfinder.i18n import tr
+    with pytest.raises(ValueError) as conflict:
         catalog.resolve(SearchQuery(collection='Easter Egg', text='Plush Pepe'))
-    with pytest.raises(ValueError, match='другой коллекции'):
+    assert str(conflict.value) == tr('err_collection_conflict')
+    with pytest.raises(ValueError) as wrong_link:
         catalog.resolve(SearchQuery(collection='Plush Pepe', text='https://t.me/nft/EasterEgg-42'))
+    assert str(wrong_link.value) == tr('err_link')
     variants, _ = catalog.resolve(SearchQuery(text='https://t.me/nft/EasterEgg-42'))
     assert variants[0].collection == 'Easter Egg' and variants[0].number == 42
 
