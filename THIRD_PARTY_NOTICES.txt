@@ -1,4 +1,4 @@
-GiftFinder 0.7.0 — third-party components
+GiftFinder 0.7.1 — third-party components
 
 GiftFinder's original source code is released under the Unlicense; see UNLICENSE.
 Third-party components, data and artwork retain their own licenses and terms.
@@ -104,3 +104,14 @@ The Android source package includes the build recipe and Qt binding patches.
 It can be rebuilt with replacement dynamically linked Qt/PySide libraries and
 signed with your own key for a separate installation. The original release
 signing key is private and is not required to modify or rebuild the source.
+
+Android 0.7.1 regenerates and relinks the thin Shiboken extension from the
+same Qt 6.12.0 source, commit f50facb83fc3dc5f3240c854668c7a6dd93871b2:
+https://github.com/qtproject/pyside-pyside-setup/tree/f50facb83fc3dc5f3240c854668c7a6dd93871b2
+Its original LGPL/GPL terms remain applicable; this does not relicense Qt code.
+Pinned source checksums and linker flags: mobile/android-build-inputs.json.
+Rebuild implementation: mobile/android_runtime.py.
+
+Additional bundled model previews for the reviewed themes are Telegram gift
+artwork retrieved through Gift Changes. URLs and file hashes are recorded in
+giftfinder/preview_seed/SOURCES-new-themes.json; artwork is not under Unlicense.

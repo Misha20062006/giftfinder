@@ -1,0 +1,666 @@
+{
+  "downloaded_on": "2026-10-26",
+  "source": "Gift Changes / Telegram gift artwork",
+  "files": {
+    "2c6785956f37f2177ca6b3cba4638e230e3103ddf2a78c8b17ae74e6dd92c4d2.png": {
+      "collection": "Algorithm Cup",
+      "model": "Gold",
+      "url": "https://api.changes.tg/model/Algorithm%20Cup/Gold.png?size=256",
+      "sha256": "a3a635333e2ae9589c0497ca15608ef2b1f886dc42b89beab71d45e70d6ec850"
+    },
+    "b5e8c4ddc6070041d6aa57428f653cd39e68e0aa2c4368dc35eecc8714141773.png": {
+      "collection": "Algorithm Cup",
+      "model": "Silver",
+      "url": "https://api.changes.tg/model/Algorithm%20Cup/Silver.png?size=256",
+      "sha256": "89e4efd3ddcc42ca2abdd891765ee8d53c0ed607cf8cb9fb4c1d4744795bc854"
+    },
+    "5c2682d3ea2b3e05b82ec3768cbc57b3ac4f69807efa6c0f89dd08e2b3b9ea56.png": {
+      "collection": "Artisan Brick",
+      "model": "Gold Bar",
+      "url": "https://api.changes.tg/model/Artisan%20Brick/Gold%20Bar.png?size=256",
+      "sha256": "9770a18ff51675cb4cbbb8db2ebe31ccd04827a8ca0c1621c67401a41897b387"
+    },
+    "950ddeaccda4c548a7b549eca3f96551c970930f657107d9aee234c5217739f3.png": {
+      "collection": "Artisan Brick",
+      "model": "Gold Block",
+      "url": "https://api.changes.tg/model/Artisan%20Brick/Gold%20Block.png?size=256",
+      "sha256": "94e0601d8014c6c80fe44bf949dc8f7b58117993a4631dbd81219716ebdca23f"
+    },
+    "4e33498f5f766cfbc5ccc4a158e7932ae56dfc92e99e637d33ef8935adf9075e.png": {
+      "collection": "Astral Shard",
+      "model": "Gold 999",
+      "url": "https://api.changes.tg/model/Astral%20Shard/Gold%20999.png?size=256",
+      "sha256": "343cbce7dd6d9bac496c41c0deac8688b96c170a41391b3cf7b4f3054b867dd7"
+    },
+    "c4c9bfab052427a79a09615be5b9296c9507d8ce807367fa8b0d393cfd17ec70.png": {
+      "collection": "Big Year",
+      "model": "Pokeball",
+      "url": "https://api.changes.tg/model/Big%20Year/Pokeball.png?size=256",
+      "sha256": "5abea7210f8f4d5e4019933f160aee0a83935a037ca580e058b223d3e64042fb"
+    },
+    "3a28b18f055c9cffb0dad8690b0a9019999dfd8ed62b99a36f92704b46630a16.png": {
+      "collection": "Bonded Ring",
+      "model": "Froge Ring",
+      "url": "https://api.changes.tg/model/Bonded%20Ring/Froge%20Ring.png?size=256",
+      "sha256": "6fd079134e50eb0d17b13d14fe17c640fe18dab1420934059a28e6b9e173abec"
+    },
+    "0b26d8414026d04ca2e861fadfbfcdf255d01ef2bd9a8e0f691efeaf775161ba.png": {
+      "collection": "Bow Tie",
+      "model": "Baby Yoda",
+      "url": "https://api.changes.tg/model/Bow%20Tie/Baby%20Yoda.png?size=256",
+      "sha256": "0a55030fef7558eb96cb75e33dcb39f870a03357b7ffc4513aab2e6a28e4a590"
+    },
+    "8b4242949eea554495e5bff8873ec86f16d70cb94701a1d46b12b09de8fc9b9f.png": {
+      "collection": "Bow Tie",
+      "model": "Doge Gem",
+      "url": "https://api.changes.tg/model/Bow%20Tie/Doge%20Gem.png?size=256",
+      "sha256": "264b81c8034803c94ca3bf600c71540af30568ef9fdb12e56238c5bf7cd4917d"
+    },
+    "e1a342e15ceb993cc20b8a029c07c25c6c8dbd553edf1935c4cc77267a65ca8c.png": {
+      "collection": "Bow Tie",
+      "model": "Sailor Moon",
+      "url": "https://api.changes.tg/model/Bow%20Tie/Sailor%20Moon.png?size=256",
+      "sha256": "3995ba1dee516755a82ee57e521f803ad97171a6ff269e250462dc933dff4334"
+    },
+    "b12a54a3ce07fc0985ebddf52dd1a2eaad04806e638b1cf9ef6cf46533868ef9.png": {
+      "collection": "Bunny Muffin",
+      "model": "Froggy",
+      "url": "https://api.changes.tg/model/Bunny%20Muffin/Froggy.png?size=256",
+      "sha256": "13b4f50270876774fee7127557b721c8ec8a327e51841ed76f898ecc9ee4643e"
+    },
+    "e63234b470df8ac2c0c8e9ae6ad32c9e6b11615d8e7dbcc0da4a77c614fa8b54.png": {
+      "collection": "Bunny Muffin",
+      "model": "Gold",
+      "url": "https://api.changes.tg/model/Bunny%20Muffin/Gold.png?size=256",
+      "sha256": "e396493018d08773bd8fd380173cd4de20d616605bb825e35e8d1bb5c7fc0dfc"
+    },
+    "e684d768444f04c42a476a75a3d8620d0da51e83dc88cd040b76e3a72d7c5049.png": {
+      "collection": "Bunny Muffin",
+      "model": "Shiba Inu",
+      "url": "https://api.changes.tg/model/Bunny%20Muffin/Shiba%20Inu.png?size=256",
+      "sha256": "3129c8ab337a2ad560be83e00ba312666e9bc126b3508313850fffcb14749759"
+    },
+    "1ccfd3a8b9228ca869176a262242a7147767519fb330d310a22694760407fb8f.png": {
+      "collection": "Bunny Muffin",
+      "model": "Silver",
+      "url": "https://api.changes.tg/model/Bunny%20Muffin/Silver.png?size=256",
+      "sha256": "44821364dd106b99a4a6b1995359035bf570c16bd59455282d09a127e2c0ed2b"
+    },
+    "95cd9d71c873acf83dfea0141b9da68b892357cd805f1e5d7e4d4c57bba7d8d0.png": {
+      "collection": "Cookie Heart",
+      "model": "Gold Bar",
+      "url": "https://api.changes.tg/model/Cookie%20Heart/Gold%20Bar.png?size=256",
+      "sha256": "57d4aaf86be9153935d90a31816e0fbde40c65814f31baad46f1bf28982cf8db"
+    },
+    "bf98fa2d2fa55cab657da40e8486d6c42365d44ca01500f3ddbb38a3f4f5dcfb.png": {
+      "collection": "Cupid Charm",
+      "model": "Moon Prism",
+      "url": "https://api.changes.tg/model/Cupid%20Charm/Moon%20Prism.png?size=256",
+      "sha256": "efbe96de9e234920480260a9fe60698fc65553d9e6a18f83596957e52c47e23d"
+    },
+    "55e1bcfdd4b36ff95a7c25840be079e462b1295ff84a74c0bbdda6244496b9e2.png": {
+      "collection": "Cupid Charm",
+      "model": "Pepe Love",
+      "url": "https://api.changes.tg/model/Cupid%20Charm/Pepe%20Love.png?size=256",
+      "sha256": "bab8176004aaac5c29511cd5dd500c56a1c44df375474c804a890a03bc8058d8"
+    },
+    "f1d8151454879957fbf305aaec8db6cf620c0f0b3800aa3772ca6476cb3e6ec9.png": {
+      "collection": "Desk Calendar",
+      "model": "Pepe Plans",
+      "url": "https://api.changes.tg/model/Desk%20Calendar/Pepe%20Plans.png?size=256",
+      "sha256": "2307f1ed269ce7124912e7f61b994586cb06848b46bfa54aaa1096e8d09f0ab4"
+    },
+    "a86dcee611087922d8271675ce213cc0de0c48e8e886062685ab2b6124a9b2c9.png": {
+      "collection": "Diamond Ring",
+      "model": "Black Hole",
+      "url": "https://api.changes.tg/model/Diamond%20Ring/Black%20Hole.png?size=256",
+      "sha256": "4aa0050dd377383edc38ec461d58229786018c2c2daf21475126edceb32f8c28"
+    },
+    "3d3f36b9213f1906ca78f97fad5e9a39cdd87e32fb43c4216b1d63cf39d5d723.png": {
+      "collection": "Durov's Cap",
+      "model": "Pokemon",
+      "url": "https://api.changes.tg/model/Durov%27s%20Cap/Pokemon.png?size=256",
+      "sha256": "325c3cb6f9e75ffc3999059b6d0ba6b250b838f8b1a715026ada0422c1862ad4"
+    },
+    "91ef6322ea52e21e9e4761760eeba7083ae6c39b2bfddfa115e85f53c0b7fc58.png": {
+      "collection": "Durov's Glasses",
+      "model": "Pepe Dream",
+      "url": "https://api.changes.tg/model/Durov%27s%20Glasses/Pepe%20Dream.png?size=256",
+      "sha256": "6f8cf02f4e3f8edcfd2120afe23cc1c48ddf12986f2acab0e35d227ba1dadb32"
+    },
+    "03a03b174098277254c74a30739292205d5f231b14d6aaf7e848e839883b472b.png": {
+      "collection": "Easter Egg",
+      "model": "Boiled Pepe",
+      "url": "https://api.changes.tg/model/Easter%20Egg/Boiled%20Pepe.png?size=256",
+      "sha256": "3bcf17665e3f7b3f55db990f858800380a67975a116491ea875c133643123734"
+    },
+    "44922e9da2d47d000f4e9c1eb997e5849051ffb5fb6ce8f3b29106bbd7fdad8c.png": {
+      "collection": "Easter Egg",
+      "model": "Dogel Mogel",
+      "url": "https://api.changes.tg/model/Easter%20Egg/Dogel%20Mogel.png?size=256",
+      "sha256": "560b314b8370cd635e94710036001d62f5e9b72140240304e9e65c79f233c416"
+    },
+    "3806d589a51a45dc481beeb4626ec2c46ad204cc230164fbffd39dc0f71ed831.png": {
+      "collection": "Easter Egg",
+      "model": "Pure Gold",
+      "url": "https://api.changes.tg/model/Easter%20Egg/Pure%20Gold.png?size=256",
+      "sha256": "1017db6dfa9f0fc5935384b4990536bb33f605d4a52c53d66c630c0a2f9edc7e"
+    },
+    "0beb6a5a5646c0890e88093cb9c3786b25d1058c87d883623b830f2ce355e081.png": {
+      "collection": "Eternal Rose",
+      "model": "Silver Flower",
+      "url": "https://api.changes.tg/model/Eternal%20Rose/Silver%20Flower.png?size=256",
+      "sha256": "8a9601fc096fb146c02e0d199c87c9d09743780ac1abbd18893342246578c8ef"
+    },
+    "b33c2ca6cd42dbdc4e3e2de8e62f5a641911e5df7e62bd75dc22d5cdaa3d750c.png": {
+      "collection": "Flying Broom",
+      "model": "Gryffindor",
+      "url": "https://api.changes.tg/model/Flying%20Broom/Gryffindor.png?size=256",
+      "sha256": "70aeda3d971daeb20a7ce501a497c3c1bf8cff36c693f243d7bf29790b192e3a"
+    },
+    "058069ed267ed6a6fcf46033930cf290ce3e11f8954d42c7399755dc06e00828.png": {
+      "collection": "Flying Broom",
+      "model": "Hufflepuff",
+      "url": "https://api.changes.tg/model/Flying%20Broom/Hufflepuff.png?size=256",
+      "sha256": "a2e2eb6b11775e71874e6fc5795c1b59efb546402730670b4054a086b26d3216"
+    },
+    "99c0a7633f711cff84640194ce212b7f8d82ccca5e6ceef567a1a1bc2172b2c8.png": {
+      "collection": "Flying Broom",
+      "model": "Nimbus",
+      "url": "https://api.changes.tg/model/Flying%20Broom/Nimbus.png?size=256",
+      "sha256": "327af9eb44b13420dc071536e39a2049d37ee99d8e0e866ddb54eb8814932322"
+    },
+    "042159ba2328a5f88fbe640d1f8eab999b97af315e439813fbf07860dfc42ef4.png": {
+      "collection": "Flying Broom",
+      "model": "Ravenclaw",
+      "url": "https://api.changes.tg/model/Flying%20Broom/Ravenclaw.png?size=256",
+      "sha256": "695eb29fafdcfc711f1d61bb6fa51d98fb97f72a4da282462669ffca7aa3cec4"
+    },
+    "4e01b17084c62d6e74a6feb87e2ae7ddf68c3d037d86bba0aa33552ddf298b20.png": {
+      "collection": "Flying Broom",
+      "model": "Slytherin",
+      "url": "https://api.changes.tg/model/Flying%20Broom/Slytherin.png?size=256",
+      "sha256": "586ff28b2b9e4c7cc9e766704f94895169578cc6f74e5dcaba03cc9858676fc7"
+    },
+    "91049b18bee796572b44e1299e683db99a923218c5809c0d1276a8cf3207f297.png": {
+      "collection": "Fresh Socks",
+      "model": "Moon Prism",
+      "url": "https://api.changes.tg/model/Fresh%20Socks/Moon%20Prism.png?size=256",
+      "sha256": "214ea5e44b3fca145f1f72b3414b789c332dc0c203e06f13cb995e94f3969ef0"
+    },
+    "57e32073ed2bad7445853596a38eafb66925b1aee42be56a031dee1ba59438e1.png": {
+      "collection": "Fresh Socks",
+      "model": "Pepe Socks",
+      "url": "https://api.changes.tg/model/Fresh%20Socks/Pepe%20Socks.png?size=256",
+      "sha256": "ca8170624fdf3abfa08a22253fa8cad10d17e160f42a7fa8e52d62633647b8ab"
+    },
+    "34fe9c09b201eb375160eb360a09e125ed3e9fb3206f0ba9031cd7079d5990df.png": {
+      "collection": "Gem Signet",
+      "model": "Death Star",
+      "url": "https://api.changes.tg/model/Gem%20Signet/Death%20Star.png?size=256",
+      "sha256": "3a161b77a64dbb2b31cf5d6891a3c2a3b0c9b88baed9cbbb8de9e70437a129f6"
+    },
+    "4b3d2efaff9ef6630542340e79f1d1db3263bb1ec014b17794debd96fab0f2ba.png": {
+      "collection": "Ginger Cookie",
+      "model": "Pepe Pryanik",
+      "url": "https://api.changes.tg/model/Ginger%20Cookie/Pepe%20Pryanik.png?size=256",
+      "sha256": "e3b5594b922ed06cf7f993b23370fd863131d74733fba7c62aa15982352aabb7"
+    },
+    "05cc4fd277d05082c635c4126d17d16c52cd76350a0dd46138aa4db10c8466e6.png": {
+      "collection": "Ginger Cookie",
+      "model": "Pika Pika",
+      "url": "https://api.changes.tg/model/Ginger%20Cookie/Pika%20Pika.png?size=256",
+      "sha256": "289bed195276b7f3da01fd302a141510e69841b2ddd1d82cf8315a1345fd39d2"
+    },
+    "85476bb74e7d7f062632aaf82c9de5085a3818a03a6e599b29e39789e334836a.png": {
+      "collection": "Happy Brownie",
+      "model": "Gold Nugget",
+      "url": "https://api.changes.tg/model/Happy%20Brownie/Gold%20Nugget.png?size=256",
+      "sha256": "5e1fc2b840d1e5207221adbe4561fb10399e217c3be31555cd4a4f7d510ed4b2"
+    },
+    "1d85f57a25cd47f0d8d3a80f08f372fece02746a2563a886f47769a0721c4749.png": {
+      "collection": "Heroic Helmet",
+      "model": "King Midas",
+      "url": "https://api.changes.tg/model/Heroic%20Helmet/King%20Midas.png?size=256",
+      "sha256": "c15a5c5db2a81cdd2252aede724fe0fb798a9df0ba2cf23b99f40b83d997c0c3"
+    },
+    "2d217747f489efc53a6a72a51d77f4b70d140c993f32dafe6b881200e6839309.png": {
+      "collection": "Hex Pot",
+      "model": "Death Star",
+      "url": "https://api.changes.tg/model/Hex%20Pot/Death%20Star.png?size=256",
+      "sha256": "c474fce2c299cfa0ee44b57bc1a64931e04da8d6eac1f7a352a4563c0d5e3a85"
+    },
+    "9e6a945e95046d0d8d3b58265059a892ea113f63a050a9148441b07558cd477c.png": {
+      "collection": "Hex Pot",
+      "model": "Pikabrew",
+      "url": "https://api.changes.tg/model/Hex%20Pot/Pikabrew.png?size=256",
+      "sha256": "d2dbc9533f9ef8a92fd804f9123e5928268ffdc392d65b3d2d1804900abb80b7"
+    },
+    "cbf7f3b98a8bc5a85e337d41f1062948863cec88cabf70691be22455fafc9437.png": {
+      "collection": "Hypno Lollipop",
+      "model": "Saturn",
+      "url": "https://api.changes.tg/model/Hypno%20Lollipop/Saturn.png?size=256",
+      "sha256": "54ec87f9c6e934b24764687e0622b11ab206d263892f8687f5733ca3b9a95099"
+    },
+    "637d460b470c58a0660e7e900b7ef1555d8895cf57f122217a2c93e9ee98ebc5.png": {
+      "collection": "Ice Cream",
+      "model": "Cryo Pepe",
+      "url": "https://api.changes.tg/model/Ice%20Cream/Cryo%20Pepe.png?size=256",
+      "sha256": "c907ec9d590aa2ecc630fe96d18c31aec349b2cb8faf8a688923c596c7c9b03a"
+    },
+    "7ea51e4c316f991eebe71303a04f2d2a10a6fcae30ef3c7ea17e8473afdf86e1.png": {
+      "collection": "Ice Cream",
+      "model": "Gold Ingot",
+      "url": "https://api.changes.tg/model/Ice%20Cream/Gold%20Ingot.png?size=256",
+      "sha256": "48a33675722643a70fe2df0b8b94168c0b496e1147167a4e63786ac2ce9cad9d"
+    },
+    "3afccced70c6a15d96da28caeed0f4dbf858bfd26bb9daa814d37c24be74d315.png": {
+      "collection": "Instant Ramen",
+      "model": "Pika-Pika!",
+      "url": "https://api.changes.tg/model/Instant%20Ramen/Pika-Pika%21.png?size=256",
+      "sha256": "1d6b175c6cb7c49f2225a807d2157127565d931fd9dfac08f872125b5c17957d"
+    },
+    "b23df5276ebff2db5fedc74ad89642fb21f2bfac0571fab4aabdc98592cc8b11.png": {
+      "collection": "Intelligence Cup",
+      "model": "Gold",
+      "url": "https://api.changes.tg/model/Intelligence%20Cup/Gold.png?size=256",
+      "sha256": "443eaffae340fe599912d9d1152984d20f012021624e077163a362b03545cc27"
+    },
+    "7cc51cf2ebb86462ce5fe89a2d72c9119899fe2508b04e350072771ff37e6114.png": {
+      "collection": "Intelligence Cup",
+      "model": "Silver",
+      "url": "https://api.changes.tg/model/Intelligence%20Cup/Silver.png?size=256",
+      "sha256": "0ccb4f03c3c4ad40d56c55bdc715a291837c23eff9e3a933deecab313086d9b9"
+    },
+    "49b642b317b3d04acfd57dca04d5825701f8f1797ebfed660c8d3660ff6fe6d5.png": {
+      "collection": "Ion Gem",
+      "model": "King Midas",
+      "url": "https://api.changes.tg/model/Ion%20Gem/King%20Midas.png?size=256",
+      "sha256": "61e2473a459256412d25388143608bf41ddf25055e2f1b3265e9cd397d8dd9a9"
+    },
+    "8fb7d09d3fdd7d7f1d472f920f6e2cfb2bcb0e16f5f943886923288238578c70.png": {
+      "collection": "Jack-in-the-Box",
+      "model": "Shy Pepe",
+      "url": "https://api.changes.tg/model/Jack-in-the-Box/Shy%20Pepe.png?size=256",
+      "sha256": "53fc9d31ca17d69bc18c7949f5119ca1ece41e584be7d9cb0c158e3f97b88478"
+    },
+    "289f7a9ce10c74dde91c3f9075c692ea920956e01e8b482ea1072749d1b2a7b2.png": {
+      "collection": "Jester Hat",
+      "model": "Pepe Hop",
+      "url": "https://api.changes.tg/model/Jester%20Hat/Pepe%20Hop.png?size=256",
+      "sha256": "7769a31b88ca8d34fec2d62b149e327271623e8fc587b1ff379bb33416f43f6a"
+    },
+    "38600dcd04ee966002f92d9c4ac9735aaf600e2a0ee12d34f6d89f4b70f85cb8.png": {
+      "collection": "Jingle Bells",
+      "model": "Solid Gold",
+      "url": "https://api.changes.tg/model/Jingle%20Bells/Solid%20Gold.png?size=256",
+      "sha256": "c60cd1f72b55f2b50b16e99e54c448bc6b082fabe29d536962655bd3aa9e4c93"
+    },
+    "35ba7b6d0bb1ed3eac1c02f5b5b3ad88b46e67f36a31e94a7d59e3d0f664f7a6.png": {
+      "collection": "Jolly Chimp",
+      "model": "Golden Monkey",
+      "url": "https://api.changes.tg/model/Jolly%20Chimp/Golden%20Monkey.png?size=256",
+      "sha256": "ead9aa67109711c32d4869521aefc85a0679eab73d84de09cd453dbb859dbce5"
+    },
+    "a34bdc263ea438a3ff87f2193311bed67ef5d6431711cc8f79391005108f6e5d.png": {
+      "collection": "Joyful Bundle",
+      "model": "Pepe Bag",
+      "url": "https://api.changes.tg/model/Joyful%20Bundle/Pepe%20Bag.png?size=256",
+      "sha256": "31d8a9448e858b2ac9c10ec71fcea25accc8a06b15b5bbbb9733d207567890d5"
+    },
+    "b2adc9af7d56fa6cb33d6c673d712b72fc9e039137d0065d2ef13238e6ef76fe.png": {
+      "collection": "Joyful Bundle",
+      "model": "Pure Gold",
+      "url": "https://api.changes.tg/model/Joyful%20Bundle/Pure%20Gold.png?size=256",
+      "sha256": "ebcadbd4423f61aa34bf3c0001666e5d1453f42b0fb09ab651bc8e20f9669964"
+    },
+    "485eda79cce9493e5e2d9abb0e10bcc4f3269c835f7ee4e2bcab44e287817b31.png": {
+      "collection": "Joyful Bundle",
+      "model": "Sailor Moon",
+      "url": "https://api.changes.tg/model/Joyful%20Bundle/Sailor%20Moon.png?size=256",
+      "sha256": "1a8424a7a2664e374989c8e311a99ba372d083fc2e57e8e7c1119d471c53cf46"
+    },
+    "3e661118aa80e4d3baec25c673a354d576f75d27a5acc94c9f3691627ef41941.png": {
+      "collection": "Kissed Frog",
+      "model": "Happy Pepe",
+      "url": "https://api.changes.tg/model/Kissed%20Frog/Happy%20Pepe.png?size=256",
+      "sha256": "cb59358bdc582b587f6a62daf6018305efe9011ed4418ccdd52931e04b074da9"
+    },
+    "eb3678ee4a8ef652ac72e890f715842a1d0387add022627064196748f0ae4e1d.png": {
+      "collection": "Kissed Frog",
+      "model": "Silver",
+      "url": "https://api.changes.tg/model/Kissed%20Frog/Silver.png?size=256",
+      "sha256": "34298111483a6f6661ce2b2a03ca956dfadb6f24f7d86049d9c0e8b6cabf3733"
+    },
+    "3cdcaea3804e32367ffe16d05941726856953b90b5c0b212bcbbf69735ded465.png": {
+      "collection": "Light Sword",
+      "model": "Jedi Luke",
+      "url": "https://api.changes.tg/model/Light%20Sword/Jedi%20Luke.png?size=256",
+      "sha256": "8456562dcd7a83fe16e1f4e1eab7f7aaf2a7237fdd31630da19747131c29bf62"
+    },
+    "eace94e11fd60fad94d3367b346b32760eaaa1fc863200564b4636ce71decb80.png": {
+      "collection": "Light Sword",
+      "model": "Jedi Princess",
+      "url": "https://api.changes.tg/model/Light%20Sword/Jedi%20Princess.png?size=256",
+      "sha256": "3845d912a85b37a680c2a76967dc2cc0ae8602b5c60f24cbda3c170c6054ab4f"
+    },
+    "e932671b94090563e4490eae64faa673bd73fb71775c089815b42eb20c5c622a.png": {
+      "collection": "Light Sword",
+      "model": "Master Yoda",
+      "url": "https://api.changes.tg/model/Light%20Sword/Master%20Yoda.png?size=256",
+      "sha256": "497f33e1a419922ecbf059d847837a13b732283f8fc3155efbdb8029b8aa6fb1"
+    },
+    "c1b045ee9b7be57d5a32c3a1c19806879cf17f284ce580a7f6bc07e19d39baf8.png": {
+      "collection": "Light Sword",
+      "model": "The Skywalker",
+      "url": "https://api.changes.tg/model/Light%20Sword/The%20Skywalker.png?size=256",
+      "sha256": "1a5648bc70e40a665aafc9e7345c81f45fcdce2bad1d91ca168f7b00462af168"
+    },
+    "c15f6300db983204a605ea846779760a6e72304551be1f6acb95feeac4f78603.png": {
+      "collection": "Light Sword",
+      "model": "Wrath of Vader",
+      "url": "https://api.changes.tg/model/Light%20Sword/Wrath%20of%20Vader.png?size=256",
+      "sha256": "b710ebd6b1bec7f29497adbf2bc250711dae3d5aca7c2d39c5d7b359df7d52b4"
+    },
+    "b1c0a122f845712df21857f3c2ea347de94fc503d43d21458468faed702e2bf1.png": {
+      "collection": "Lol Pop",
+      "model": "Sailor Moon",
+      "url": "https://api.changes.tg/model/Lol%20Pop/Sailor%20Moon.png?size=256",
+      "sha256": "fd2b678ddd737073d71d91664b4c679b1b0d6298ea04d37db7ddb56c50982b2e"
+    },
+    "34472d08ac2e716a109dad06fbe5b8e49080b1fbec9c20a93642fbe896bd141a.png": {
+      "collection": "Loot Bag",
+      "model": "Pepe Bag",
+      "url": "https://api.changes.tg/model/Loot%20Bag/Pepe%20Bag.png?size=256",
+      "sha256": "48266b2983fe3ee151aa7895c219113f7a91da409f6d7d014c6941a1f885f6e4"
+    },
+    "55b58e3b4abdbd202ea0ccc233fb7c18d9c257c605a242a50105e01a07557963.png": {
+      "collection": "Love Potion",
+      "model": "Molten Gold",
+      "url": "https://api.changes.tg/model/Love%20Potion/Molten%20Gold.png?size=256",
+      "sha256": "894f82a4af3d2c5359bd0b3a0db69ee836e98de2df923d7f205af42634fdc537"
+    },
+    "562f989859cf3fd8b1032dc8f656b262e75f9bb0a5347eac27190eb3cba9770f.png": {
+      "collection": "Lucky Locket",
+      "model": "DOGE",
+      "url": "https://api.changes.tg/model/Lucky%20Locket/DOGE.png?size=256",
+      "sha256": "c343e450958025504c56798584d6579f0e24c51d6ae3ddee2276135fa64a6f56"
+    },
+    "be60ede5d8594a34e4ef0fba5e89bd246a4c01eca9551944635ac3965a8de5d4.png": {
+      "collection": "Lush Bouquet",
+      "model": "Mandrake",
+      "url": "https://api.changes.tg/model/Lush%20Bouquet/Mandrake.png?size=256",
+      "sha256": "2b3110d28e52ef8b0674c622de08c6671b98abadcce7a9ca36c8229ab8d638bc"
+    },
+    "c0b21ff492e86960895291d62af6960af8dad8160e58accf3be5947d9202df2a.png": {
+      "collection": "Mini Oscar",
+      "model": "Astronaut",
+      "url": "https://api.changes.tg/model/Mini%20Oscar/Astronaut.png?size=256",
+      "sha256": "702c40fc779fc921fd2c7295a2af1d8d458a3e7df8b348dfe58162f4dcd47460"
+    },
+    "36ae65633d36d51ec83551f4801ddc5900207537ee572ecd1a4b26d8d60cf3e4.png": {
+      "collection": "Money Pot",
+      "model": "Gold Miner",
+      "url": "https://api.changes.tg/model/Money%20Pot/Gold%20Miner.png?size=256",
+      "sha256": "ebcd4f1ae4905b21bf85cd0317910471901263867a4e5e2b81270671eff123e0"
+    },
+    "3d86202e60f5f5e721e116cfa4c19c278025b571cc6542bdf8087bd2f142cff6.png": {
+      "collection": "Mood Pack",
+      "model": "Pepe Unleashed",
+      "url": "https://api.changes.tg/model/Mood%20Pack/Pepe%20Unleashed.png?size=256",
+      "sha256": "ac9a4d8730f772ce06e3b95661037f799e0a2ab76ae81089d89e81dc2fab5bde"
+    },
+    "fffb7a0e54e1126f9588718a16a77b398d964b3deb6b85af6e435941f839417d.png": {
+      "collection": "Nail Bracelet",
+      "model": "Hachikō",
+      "url": "https://api.changes.tg/model/Nail%20Bracelet/Hachik%C5%8D.png?size=256",
+      "sha256": "7db4e842279cf495908e8740f06f4504422fbfbfabd0f84e82a65770bf6d570c"
+    },
+    "e11d0abfbbcfd0f01ab02ffafff2f442dbfa19807c7567c0ba09874438a95f36.png": {
+      "collection": "Nail Bracelet",
+      "model": "Pepe Band",
+      "url": "https://api.changes.tg/model/Nail%20Bracelet/Pepe%20Band.png?size=256",
+      "sha256": "a6e5863f22ed73d6f6ce6d53439f6e2c620e63ee185395ca4bd1415ca146bd1b"
+    },
+    "ec4815453d02569a66d45e0fa46c9f9407c3e81694e10d7746985c6fac2d48d3.png": {
+      "collection": "Neko Helmet",
+      "model": "Astronaut",
+      "url": "https://api.changes.tg/model/Neko%20Helmet/Astronaut.png?size=256",
+      "sha256": "863c8b4eacde4b628cb7de3893d63f021babec2d0c0a4a8a4666b0fe5917d408"
+    },
+    "dc9e49adb43235dd35842f1687414c1a3a565b92d52d9b75e21b6f0f80f8a773.png": {
+      "collection": "Neko Helmet",
+      "model": "Gold Rush",
+      "url": "https://api.changes.tg/model/Neko%20Helmet/Gold%20Rush.png?size=256",
+      "sha256": "0a9fe293c4fc4fc9bf4c62ebaff2462b0cd185829facf51f6fd6b92b71fd7cfe"
+    },
+    "ee1263f7786f835a7fd0dd6bf5f0f3908b5b49b1730e5cfa66a63de7e26140d2.png": {
+      "collection": "Neko Helmet",
+      "model": "Turbo Frog",
+      "url": "https://api.changes.tg/model/Neko%20Helmet/Turbo%20Frog.png?size=256",
+      "sha256": "8505126d0ff94b5a301a2922194847989ab2b725578d04815245edec6be3fa7d"
+    },
+    "f22d1e0cda994cd8b571cf096bb651294b4da086b0f0e6b80ef867d2acd4250c.png": {
+      "collection": "Party Sparkler",
+      "model": "Le Pepe",
+      "url": "https://api.changes.tg/model/Party%20Sparkler/Le%20Pepe.png?size=256",
+      "sha256": "feeecbd5db4343e8392ffd5517d1fbe41dbe12f3942d1ba85d1b866988c5d698"
+    },
+    "e0ef9f985b103c31d27e18ecb7004b7d7c35c5b11c6833f278cc05ef5b6082d9.png": {
+      "collection": "Party Sparkler",
+      "model": "Lord Vader",
+      "url": "https://api.changes.tg/model/Party%20Sparkler/Lord%20Vader.png?size=256",
+      "sha256": "8964519d28ae3a723cfe50642803a2ed1bc82f261dfac6bce6a3ccc718d820ca"
+    },
+    "671dd01f58260c83ea47d6ffaba3a16f8542408e4a8404e05e861eed4816ad2d.png": {
+      "collection": "Party Sparkler",
+      "model": "Pika Pika",
+      "url": "https://api.changes.tg/model/Party%20Sparkler/Pika%20Pika.png?size=256",
+      "sha256": "83fce5c6ff5924c8a54767b4cd0512891f31638039f8d45a3c6f505d50b49caf"
+    },
+    "7f3d8ba33a8492a85137611ab6018998846503af0a43769eacf0b7659c6958cf.png": {
+      "collection": "Party Sparkler",
+      "model": "Sailor Moon",
+      "url": "https://api.changes.tg/model/Party%20Sparkler/Sailor%20Moon.png?size=256",
+      "sha256": "ca664236888aa7aeaa77d112fa3b97784e0f5afea6167b299e9ef7f4204d8c3f"
+    },
+    "ade7bf9a84d591fc36230c79f2e59678379fca6942b38c8a687c52cfc4712cf5.png": {
+      "collection": "Pet Snake",
+      "model": "Dobby",
+      "url": "https://api.changes.tg/model/Pet%20Snake/Dobby.png?size=256",
+      "sha256": "5312e89c8ee641446ae6b4b0ef19c120cfcce84ccbfe79db7e5b104f2a6cd1b1"
+    },
+    "2887f477ca9a5b779ce7dd40e8d0aba6aec767c688db1e5827153774043f60d3.png": {
+      "collection": "Pet Snake",
+      "model": "Pure Gold",
+      "url": "https://api.changes.tg/model/Pet%20Snake/Pure%20Gold.png?size=256",
+      "sha256": "436caa504f33124fc61b37b47c2116ef7feb9b3940c5eddcbbbe3428cb56a68b"
+    },
+    "6163a2d396f778e9aec3e6555c5c15eeb42a1211b5211010a647e47a3e445db5.png": {
+      "collection": "Plush Pepe",
+      "model": "Midas Pepe",
+      "url": "https://api.changes.tg/model/Plush%20Pepe/Midas%20Pepe.png?size=256",
+      "sha256": "64f5338443666f96f0d061e62d6089855562b5565deea5eb6f519015fd0b6630"
+    },
+    "7bb58fe02762d352bc6dbfedc8b50a62e790f25200202519a673f9d5c8837cd5.png": {
+      "collection": "Pool Float",
+      "model": "Pool Pepe",
+      "url": "https://api.changes.tg/model/Pool%20Float/Pool%20Pepe.png?size=256",
+      "sha256": "093bafc2ee31fa6954c4ea2e052814853e4340646314ab55ec5e304d0d4c9821"
+    },
+    "da46b5fb10d0c8612695761217f2831f1f3fcece785740aa9255887246a35f18.png": {
+      "collection": "Precious Peach",
+      "model": "999 Karat",
+      "url": "https://api.changes.tg/model/Precious%20Peach/999%20Karat.png?size=256",
+      "sha256": "9a5f8ce1bfa0e9cefb0f85d7889cbb41d224717b5a7ad76da7fb764a6b9613e8"
+    },
+    "ba9db9b2de603b8911c8626bc2bb067c35cf9de0767cbd59ebfdebcc76dc6d7c.png": {
+      "collection": "Resistance Dog",
+      "model": "Plush Pepe",
+      "url": "https://api.changes.tg/model/Resistance%20Dog/Plush%20Pepe.png?size=256",
+      "sha256": "23119fe375ced093471c577322282d8f3a16d0f3503a68853de7e652edafed7d"
+    },
+    "8a6eddfcdb7f004846f9a9c5d18a36912659f357fb83596f6b9ba7f529f00e62.png": {
+      "collection": "Restless Jar",
+      "model": "Pepe Pod",
+      "url": "https://api.changes.tg/model/Restless%20Jar/Pepe%20Pod.png?size=256",
+      "sha256": "0c3112303bf6846a6b982f70beb6d5156a0b5379c105de91c08c62cff425b5a9"
+    },
+    "60099a134c7c118a7546c9c0826b43e446255bcbf155d24860b298bebb50698d.png": {
+      "collection": "Scared Cat",
+      "model": "Nebula",
+      "url": "https://api.changes.tg/model/Scared%20Cat/Nebula.png?size=256",
+      "sha256": "6ae14074350e2fa414c811abdcc29d11a0885e88833960572486cf48c74ef1e4"
+    },
+    "3477c633f26e0322dba5f2b808d4df7ab4d49c86b833327bb557633b28d0c722.png": {
+      "collection": "Scared Cat",
+      "model": "Pepe Paws",
+      "url": "https://api.changes.tg/model/Scared%20Cat/Pepe%20Paws.png?size=256",
+      "sha256": "65dfe52cf20c2a1974f09c4a7544cd92b1594597b3b89ddecd0c86df27f97a71"
+    },
+    "a8843f7c0247085673b0155d6a49192ba4e682d7d3ecb258cf8e49160e838ba7.png": {
+      "collection": "Sharp Tongue",
+      "model": "Pepelicious",
+      "url": "https://api.changes.tg/model/Sharp%20Tongue/Pepelicious.png?size=256",
+      "sha256": "29ad5240cf6833f0bd871b1d6b2de327104549ca88615c238d55c95a7dfc0665"
+    },
+    "9bd22907df87a9ce9945904d0803fe28998bfca993a0eae0b686b726b0c81020.png": {
+      "collection": "Signet Ring",
+      "model": "Gold",
+      "url": "https://api.changes.tg/model/Signet%20Ring/Gold.png?size=256",
+      "sha256": "362f099947e29c5185040057110115af29b16229e7965412d249897a8a3b20e5"
+    },
+    "ee7e4e12a3f938d35f816a5ea1a3cad527996bc9b534e3f751803cfdb4f76143.png": {
+      "collection": "Signet Ring",
+      "model": "Platinum",
+      "url": "https://api.changes.tg/model/Signet%20Ring/Platinum.png?size=256",
+      "sha256": "74087f652f2724249b25dd9f06625a9f970a98219f7fe7a41ee5a840ccea1dd9"
+    },
+    "fba7ee072411cbb1ae21351519b3cf30bcc331a735aadf129ac4a9797ff81010.png": {
+      "collection": "Signet Ring",
+      "model": "Saturn Ring",
+      "url": "https://api.changes.tg/model/Signet%20Ring/Saturn%20Ring.png?size=256",
+      "sha256": "7f7a6b661df010a86ae00ee651c6857bb108b83dbbfa8aa891ef698af03d1412"
+    },
+    "c1b70af42b9ef0a67377eec54e85001f0b69c4483d1e9c5750959174293520d6.png": {
+      "collection": "Sleigh Bell",
+      "model": "Darth Vader",
+      "url": "https://api.changes.tg/model/Sleigh%20Bell/Darth%20Vader.png?size=256",
+      "sha256": "9f725f000b6c89f08cf6678c32e7f8c809902172eee47087131c7cd84b9ac4e5"
+    },
+    "8640360e26ba124b781003866df603c2bddf59bf1f6adaa6f5b1ec92c65bf191.png": {
+      "collection": "Snow Globe",
+      "model": "Pepe Frost",
+      "url": "https://api.changes.tg/model/Snow%20Globe/Pepe%20Frost.png?size=256",
+      "sha256": "aa182f4e07f1433c7dc1b580af1609c7b3cd6f93de9c068d90c093359da14cd1"
+    },
+    "aed21cd1e1072889ed89c10ab8c1ef5fb83dc092191d89df54967ae36f0f7946.png": {
+      "collection": "Snow Mittens",
+      "model": "Astronaut",
+      "url": "https://api.changes.tg/model/Snow%20Mittens/Astronaut.png?size=256",
+      "sha256": "931ee73d6c0f7dccdfa826eeba253edfa75074ba6e9d7d1300ad02f30b57fcfc"
+    },
+    "518d40cbd336ca28672dbfe57e77e41a92b30625aed01413a85d90c38fda733a.png": {
+      "collection": "Spring Basket",
+      "model": "Cheems",
+      "url": "https://api.changes.tg/model/Spring%20Basket/Cheems.png?size=256",
+      "sha256": "c701171a1d3a977c092412718ff9e5f486a00d7880394107424496e743f80f9d"
+    },
+    "d857f3c7575e0f90f53f86540873c1de4cac1b67b9c5d1b025b39564fe2d7e5d.png": {
+      "collection": "Spring Basket",
+      "model": "Meme God",
+      "url": "https://api.changes.tg/model/Spring%20Basket/Meme%20God.png?size=256",
+      "sha256": "d62abc97cad42a7979eb5e2d6f61e57d10615f3bf9ca2c78e12cfeb9756a3288"
+    },
+    "59668be4a5992f5621407ec3d50ec71407caeda359b8c818829cf3b82178729a.png": {
+      "collection": "Spring Basket",
+      "model": "Strong Doge",
+      "url": "https://api.changes.tg/model/Spring%20Basket/Strong%20Doge.png?size=256",
+      "sha256": "2233901448efff1802970c694f0b7a2be9676bfc1457ee659a66269b1a2b632d"
+    },
+    "9be06f43a0779e9047f28e0bb111eb45b40e7da39cf9179a8aaa96dd64c89a46.png": {
+      "collection": "Spy Agaric",
+      "model": "Pepe Mania",
+      "url": "https://api.changes.tg/model/Spy%20Agaric/Pepe%20Mania.png?size=256",
+      "sha256": "627d44ed6802b72e226970ef817c9ae73129bf0ec5b36a3e2eb3263f090f3b04"
+    },
+    "ebe6595a30d7953b9a63dc4a512fc15cdded4d5892c0822e6bef516e6f73dcf7.png": {
+      "collection": "Star Notepad",
+      "model": "Pepe Diary",
+      "url": "https://api.changes.tg/model/Star%20Notepad/Pepe%20Diary.png?size=256",
+      "sha256": "70540a18c7e662ca921441d7c9ab3b96b23cafe6a902d23a70a3072ca23e6ca4"
+    },
+    "701f9247bce7865cf6b5e881fdfc64447b46bbc759289ca2bf80c9b3d636bbed.png": {
+      "collection": "Surge Board",
+      "model": "Pepe Surfer",
+      "url": "https://api.changes.tg/model/Surge%20Board/Pepe%20Surfer.png?size=256",
+      "sha256": "8f5d6fa0067ef6e52e1079092d02dba56a2b1de0e0910830521afe800baa90cb"
+    },
+    "25bdfd57a538188899c5b740ca7156b75a98aacc2354df564b006d3336823f00.png": {
+      "collection": "Tama Gadget",
+      "model": "Pepe Feels",
+      "url": "https://api.changes.tg/model/Tama%20Gadget/Pepe%20Feels.png?size=256",
+      "sha256": "8264e6777b0cb4769b6c742b6b7c8ac7b5c06e99a7c6f422f6e85000a2f85c71"
+    },
+    "1eb02a9e3e4f6e939ee99b60d770a953374690a769c4175ba6cf4d8eccbfb2ad.png": {
+      "collection": "Timeless Book",
+      "model": "Froges",
+      "url": "https://api.changes.tg/model/Timeless%20Book/Froges.png?size=256",
+      "sha256": "e63e6bd66ab70560939edb8fd375ac1f2f6db4c43ee8351f3b1a6b5c6fc80519"
+    },
+    "be25699ce468261d73cdfc4b809d808bbcd2872dd78c0ea5dee22f982c574dad.png": {
+      "collection": "Top Hat",
+      "model": "Solar System",
+      "url": "https://api.changes.tg/model/Top%20Hat/Solar%20System.png?size=256",
+      "sha256": "039fc3c078257652653527563239511348a8d7bd11e8699211c68c3ab3a2c78e"
+    },
+    "a52e088b1575ca437214eb2a2bb7e4223f0302d5988b937ceccdd5218ee13646.png": {
+      "collection": "Toy Bear",
+      "model": "Golden Cub",
+      "url": "https://api.changes.tg/model/Toy%20Bear/Golden%20Cub.png?size=256",
+      "sha256": "2c67412ca983deebebef27cb097b831801e8e39e7feaa264109244be016474b0"
+    },
+    "afac59f22e7960c423c46627341880d94600ba1e1902b356dcd9db00636c1d8d.png": {
+      "collection": "Toy Bear",
+      "model": "Little Pepe",
+      "url": "https://api.changes.tg/model/Toy%20Bear/Little%20Pepe.png?size=256",
+      "sha256": "ae5036177a60697b99dae3ead131f335412f0493b45d141680d3e9f85ddb4f24"
+    },
+    "328a8f76e287c54c88bf39f5f98bfd0686a2c818fd27f7adc858115278761107.png": {
+      "collection": "Trapped Heart",
+      "model": "Silver",
+      "url": "https://api.changes.tg/model/Trapped%20Heart/Silver.png?size=256",
+      "sha256": "85be04d15a4439a7d80b920c5c4a80fa8141da8ffb2f968ca7607646ea2319d1"
+    },
+    "cebda4661df4cb570ed0abf5f52c4ffc90b8a1669830bb74baa28a6595e86cbb.png": {
+      "collection": "Victory Medal",
+      "model": "Gold",
+      "url": "https://api.changes.tg/model/Victory%20Medal/Gold.png?size=256",
+      "sha256": "4a7311d3f79526ccba1d0c054c703bed7df14eb495de2cf6a47879e682819875"
+    },
+    "c02e75240584fccbf25b591d5cc384f1a07e76dca248aa0125443006419283c8.png": {
+      "collection": "Victory Medal",
+      "model": "Silver",
+      "url": "https://api.changes.tg/model/Victory%20Medal/Silver.png?size=256",
+      "sha256": "d4aa2f63566c6d006d400d31eb34dadefc8dc6eb2917d974a254e8b91e08a96f"
+    },
+    "801d789555ef7bd525e69801b5ca2afe1445d4b8fed88aab60aebac4e19f52b4.png": {
+      "collection": "Voodoo Doll",
+      "model": "Far Galaxy",
+      "url": "https://api.changes.tg/model/Voodoo%20Doll/Far%20Galaxy.png?size=256",
+      "sha256": "5544f67c742223f1ef8f6faedfba372962125b6d0782b89d08bbc9409f286cac"
+    },
+    "94723424f4568b1113212b46d4b77cbbb93065d197599f1ec3c645e8989d479c.png": {
+      "collection": "Winter Wreath",
+      "model": "Festive Pepe",
+      "url": "https://api.changes.tg/model/Winter%20Wreath/Festive%20Pepe.png?size=256",
+      "sha256": "f8c744b3e45b9172fa48ebea94e355c7fd1a0eff6c7d724b8bc70f65fd444aa3"
+    },
+    "a5e169cf526a8d0b3d989a6671990abcad1a94036ac7b80f5ef488cb16c89d3a.png": {
+      "collection": "Witch Hat",
+      "model": "Sorting Cat",
+      "url": "https://api.changes.tg/model/Witch%20Hat/Sorting%20Cat.png?size=256",
+      "sha256": "7752742fe28babb82a33b118542738de418703f2d26f2aefb2386915e68ad219"
+    }
+  }
+}

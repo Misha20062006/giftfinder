@@ -170,5 +170,14 @@
   "native_price": "মূল মুদ্রা · দাম",
   "native_currency": "মূল মুদ্রা",
   "converted_price": "≈ দাম",
-  "converted_currency": "মুদ্রা"
+  "converted_currency": "মুদ্রা",
+  "theme_pepe": "পেপে",
+  "theme_gold": "সোনালি",
+  "theme_silver": "রুপালি",
+  "theme_star_wars": "স্টার ওয়ার্স",
+  "theme_harry_potter": "হ্যারি পটার",
+  "theme_pokemon": "পোকেমন",
+  "theme_sailor_moon": "সেইলর মুন",
+  "theme_doge": "ডোজ ও শিবা ইনু",
+  "theme_space": "মহাকাশ"
 }

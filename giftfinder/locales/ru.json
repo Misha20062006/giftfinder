@@ -170,5 +170,14 @@
   "native_price": "Исходная валюта · Цена",
   "native_currency": "Исходная валюта",
   "converted_price": "≈ Цена",
-  "converted_currency": "Валюта"
+  "converted_currency": "Валюта",
+  "theme_pepe": "Пепе",
+  "theme_gold": "Золотые",
+  "theme_silver": "Серебристые",
+  "theme_star_wars": "Звёздные войны",
+  "theme_harry_potter": "Гарри Поттер",
+  "theme_pokemon": "Покемоны",
+  "theme_sailor_moon": "Сейлор Мун",
+  "theme_doge": "Doge и сиба-ину",
+  "theme_space": "Космос"
 }

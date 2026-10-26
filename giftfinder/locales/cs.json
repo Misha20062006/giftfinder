@@ -170,5 +170,14 @@
   "native_price": "Původní měna · Cena",
   "native_currency": "Původní měna",
   "converted_price": "≈ Cena",
-  "converted_currency": "Měna"
+  "converted_currency": "Měna",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Zlaté",
+  "theme_silver": "Stříbrné",
+  "theme_star_wars": "Star Wars",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge a shiba inu",
+  "theme_space": "Vesmír"
 }

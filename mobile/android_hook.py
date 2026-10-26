@@ -7,6 +7,7 @@ valid name. Python's package files keep their normal extension-module names.
 """
 from pathlib import Path
 import re
+import sys
 import xml.etree.ElementTree as ET
 
 
@@ -85,3 +86,10 @@ def after_apk_build(toolchain):
     changed = fix_binding_library_names(toolchain._dist.dist_dir)
     fix_qt_activity_delegation(toolchain._dist.dist_dir)
     print('GiftFinder: installable Qt binding library names:', ', '.join(changed), flush=True)
+
+
+def before_apk_build(toolchain):
+    # p4a has assembled its distribution, but has not yet archived Python files.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from mobile.android_runtime import prepare_distribution
+    prepare_distribution(toolchain)

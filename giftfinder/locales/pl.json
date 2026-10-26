@@ -170,5 +170,14 @@
   "native_price": "Waluta oryginalna · Cena",
   "native_currency": "Waluta oryginalna",
   "converted_price": "≈ Cena",
-  "converted_currency": "Waluta"
+  "converted_currency": "Waluta",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Złote",
+  "theme_silver": "Srebrzyste",
+  "theme_star_wars": "Gwiezdne wojny",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge i shiba inu",
+  "theme_space": "Kosmos"
 }

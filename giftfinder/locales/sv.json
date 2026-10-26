@@ -170,5 +170,14 @@
   "native_price": "Ursprungsvaluta · Pris",
   "native_currency": "Ursprungsvaluta",
   "converted_price": "≈ Pris",
-  "converted_currency": "Valuta"
+  "converted_currency": "Valuta",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Guldfärgade",
+  "theme_silver": "Silverfärgade",
+  "theme_star_wars": "Star Wars",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge och shiba inu",
+  "theme_space": "Rymden"
 }

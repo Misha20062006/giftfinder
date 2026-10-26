@@ -1,0 +1,28 @@
+theme_pepe|theme_gold|theme_silver|theme_star_wars|theme_harry_potter|theme_pokemon|theme_sailor_moon|theme_doge|theme_space
+ru|Пепе|Золотые|Серебристые|Звёздные войны|Гарри Поттер|Покемоны|Сейлор Мун|Doge и сиба-ину|Космос
+uk|Пепе|Золоті|Сріблясті|Зоряні війни|Гаррі Поттер|Покемони|Сейлор Мун|Doge і сіба-іну|Космос
+de|Pepe|Goldene|Silberne|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge & Shiba Inu|Weltraum
+fr|Pepe|Dorés|Argentés|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge et Shiba Inu|Espace
+es|Pepe|Dorados|Plateados|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge y shiba inu|Espacio
+it|Pepe|Dorati|Argentati|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge e Shiba Inu|Spazio
+pt_PT|Pepe|Dourados|Prateados|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge e Shiba Inu|Espaço
+pt_BR|Pepe|Dourados|Prateados|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge e Shiba Inu|Espaço
+pl|Pepe|Złote|Srebrzyste|Gwiezdne wojny|Harry Potter|Pokémon|Sailor Moon|Doge i shiba inu|Kosmos
+cs|Pepe|Zlaté|Stříbrné|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge a shiba inu|Vesmír
+nl|Pepe|Goudkleurig|Zilverkleurig|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge en shiba inu|Ruimte
+sv|Pepe|Guldfärgade|Silverfärgade|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge och shiba inu|Rymden
+tr|Pepe|Altın renkli|Gümüş renkli|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge ve Shiba Inu|Uzay
+ar|بيبي|ذهبية|فضية|حرب النجوم|هاري بوتر|بوكيمون|سيلور مون|دوج وشيبا إينو|الفضاء
+he|פפה|זהובים|כסופים|מלחמת הכוכבים|הארי פוטר|פוקימון|סיילור מון|דוג׳ ושיבה אינו|חלל
+fa|پپه|طلایی|نقره‌ای|جنگ ستارگان|هری پاتر|پوکمون|سیلور مون|دوج و شیبا اینو|فضا
+hi|पेपे|सुनहरे|चाँदी जैसे|स्टार वॉर्स|हैरी पॉटर|पोकेमॉन|सेलर मून|डोज और शीबा इनु|अंतरिक्ष
+bn|পেপে|সোনালি|রুপালি|স্টার ওয়ার্স|হ্যারি পটার|পোকেমন|সেইলর মুন|ডোজ ও শিবা ইনু|মহাকাশ
+ur|پیپے|سنہری|چاندی جیسے|اسٹار وارز|ہیری پوٹر|پوکیمون|سیلر مون|ڈوج اور شیبا اینو|خلا
+id|Pepe|Keemasan|Keperakan|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge dan Shiba Inu|Luar angkasa
+ms|Pepe|Keemasan|Keperakan|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge dan Shiba Inu|Angkasa
+vi|Pepe|Mạ vàng|Mạ bạc|Star Wars|Harry Potter|Pokémon|Sailor Moon|Doge và Shiba Inu|Vũ trụ
+th|เปเป้|สีทอง|สีเงิน|สตาร์ วอร์ส|แฮร์รี่ พอตเตอร์|โปเกมอน|เซเลอร์มูน|Doge และชิบะอินุ|อวกาศ
+zh_CN|佩佩|金色|银色|星球大战|哈利·波特|宝可梦|美少女战士|Doge 与柴犬|太空
+zh_TW|佩佩|金色|銀色|星際大戰|哈利·波特|寶可夢|美少女戰士|Doge 與柴犬|太空
+ja|ペペ|ゴールド|シルバー|スター・ウォーズ|ハリー・ポッター|ポケモン|美少女戦士セーラームーン|Dogeと柴犬|宇宙
+ko|페페|골드|실버|스타워즈|해리 포터|포켓몬|세일러 문|Doge와 시바견|우주

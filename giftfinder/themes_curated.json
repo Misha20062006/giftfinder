@@ -1,5 +1,5 @@
 {
-  "reviewed_on": "2026-10-24",
+  "reviewed_on": "2026-10-26",
   "themes": [
     {
       "key": "minecraft",
@@ -686,6 +686,531 @@
         ]
       ],
       "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+    },
+    {
+      "key": "pepe",
+      "title": "Пепе в разных подарках",
+      "subtitle": "Узнаваемое лицо или образ Пепе вне базовой коллекции Plush Pepe. Обычные лягушки не включены.",
+      "color": "#80ba78",
+      "members": [
+        [
+          "Kissed Frog",
+          "Happy Pepe"
+        ],
+        [
+          "Sharp Tongue",
+          "Pepelicious"
+        ],
+        [
+          "Scared Cat",
+          "Pepe Paws"
+        ],
+        [
+          "Spy Agaric",
+          "Pepe Mania"
+        ],
+        [
+          "Party Sparkler",
+          "Le Pepe"
+        ],
+        [
+          "Jester Hat",
+          "Pepe Hop"
+        ],
+        [
+          "Desk Calendar",
+          "Pepe Plans"
+        ],
+        [
+          "Ginger Cookie",
+          "Pepe Pryanik"
+        ],
+        [
+          "Star Notepad",
+          "Pepe Diary"
+        ],
+        [
+          "Loot Bag",
+          "Pepe Bag"
+        ],
+        [
+          "Toy Bear",
+          "Little Pepe"
+        ],
+        [
+          "Winter Wreath",
+          "Festive Pepe"
+        ],
+        [
+          "Snow Globe",
+          "Pepe Frost"
+        ],
+        [
+          "Tama Gadget",
+          "Pepe Feels"
+        ],
+        [
+          "Jack-in-the-Box",
+          "Shy Pepe"
+        ],
+        [
+          "Easter Egg",
+          "Boiled Pepe"
+        ],
+        [
+          "Restless Jar",
+          "Pepe Pod"
+        ],
+        [
+          "Nail Bracelet",
+          "Pepe Band"
+        ],
+        [
+          "Cupid Charm",
+          "Pepe Love"
+        ],
+        [
+          "Joyful Bundle",
+          "Pepe Bag"
+        ],
+        [
+          "Fresh Socks",
+          "Pepe Socks"
+        ],
+        [
+          "Ice Cream",
+          "Cryo Pepe"
+        ],
+        [
+          "Pool Float",
+          "Pool Pepe"
+        ],
+        [
+          "Mood Pack",
+          "Pepe Unleashed"
+        ],
+        [
+          "Surge Board",
+          "Pepe Surfer"
+        ],
+        [
+          "Durov's Glasses",
+          "Pepe Dream"
+        ],
+        [
+          "Resistance Dog",
+          "Plush Pepe"
+        ],
+        [
+          "Bunny Muffin",
+          "Froggy"
+        ],
+        [
+          "Neko Helmet",
+          "Turbo Frog"
+        ],
+        [
+          "Bonded Ring",
+          "Froge Ring"
+        ],
+        [
+          "Timeless Book",
+          "Froges"
+        ],
+        [
+          "Spring Basket",
+          "Meme God"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "gold",
+      "title": "Золотые",
+      "subtitle": "Золотой металлический вариант модели; цвет фона не ограничен. Это не обещание полностью одноцветного изображения.",
+      "color": "#dab65f",
+      "members": [
+        [
+          "Plush Pepe",
+          "Midas Pepe"
+        ],
+        [
+          "Astral Shard",
+          "Gold 999"
+        ],
+        [
+          "Easter Egg",
+          "Pure Gold"
+        ],
+        [
+          "Artisan Brick",
+          "Gold Bar"
+        ],
+        [
+          "Artisan Brick",
+          "Gold Block"
+        ],
+        [
+          "Ice Cream",
+          "Gold Ingot"
+        ],
+        [
+          "Precious Peach",
+          "999 Karat"
+        ],
+        [
+          "Signet Ring",
+          "Gold"
+        ],
+        [
+          "Bunny Muffin",
+          "Gold"
+        ],
+        [
+          "Ion Gem",
+          "King Midas"
+        ],
+        [
+          "Toy Bear",
+          "Golden Cub"
+        ],
+        [
+          "Victory Medal",
+          "Gold"
+        ],
+        [
+          "Algorithm Cup",
+          "Gold"
+        ],
+        [
+          "Intelligence Cup",
+          "Gold"
+        ],
+        [
+          "Cookie Heart",
+          "Gold Bar"
+        ],
+        [
+          "Jingle Bells",
+          "Solid Gold"
+        ],
+        [
+          "Love Potion",
+          "Molten Gold"
+        ],
+        [
+          "Happy Brownie",
+          "Gold Nugget"
+        ],
+        [
+          "Pet Snake",
+          "Pure Gold"
+        ],
+        [
+          "Joyful Bundle",
+          "Pure Gold"
+        ],
+        [
+          "Neko Helmet",
+          "Gold Rush"
+        ],
+        [
+          "Heroic Helmet",
+          "King Midas"
+        ],
+        [
+          "Jolly Chimp",
+          "Golden Monkey"
+        ],
+        [
+          "Money Pot",
+          "Gold Miner"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "silver",
+      "title": "Серебристые",
+      "subtitle": "Визуально серебристый металл; радужный хром и спорные медные оттенки исключены.",
+      "color": "#adbcc9",
+      "members": [
+        [
+          "Signet Ring",
+          "Platinum"
+        ],
+        [
+          "Trapped Heart",
+          "Silver"
+        ],
+        [
+          "Kissed Frog",
+          "Silver"
+        ],
+        [
+          "Eternal Rose",
+          "Silver Flower"
+        ],
+        [
+          "Bunny Muffin",
+          "Silver"
+        ],
+        [
+          "Algorithm Cup",
+          "Silver"
+        ],
+        [
+          "Intelligence Cup",
+          "Silver"
+        ],
+        [
+          "Victory Medal",
+          "Silver"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "star_wars",
+      "title": "Star Wars",
+      "subtitle": "Узнаваемые персонажи, предметы и явно названные джедайские отсылки.",
+      "color": "#8da9c4",
+      "members": [
+        [
+          "Hex Pot",
+          "Death Star"
+        ],
+        [
+          "Party Sparkler",
+          "Lord Vader"
+        ],
+        [
+          "Sleigh Bell",
+          "Darth Vader"
+        ],
+        [
+          "Gem Signet",
+          "Death Star"
+        ],
+        [
+          "Light Sword",
+          "Wrath of Vader"
+        ],
+        [
+          "Light Sword",
+          "Jedi Luke"
+        ],
+        [
+          "Light Sword",
+          "Master Yoda"
+        ],
+        [
+          "Light Sword",
+          "The Skywalker"
+        ],
+        [
+          "Light Sword",
+          "Jedi Princess"
+        ],
+        [
+          "Bow Tie",
+          "Baby Yoda"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "harry_potter",
+      "title": "Гарри Поттер",
+      "subtitle": "Факультеты Хогвартса и узнаваемые предметы/персонажи; общая магия сама по себе не считается.",
+      "color": "#b99777",
+      "members": [
+        [
+          "Flying Broom",
+          "Gryffindor"
+        ],
+        [
+          "Flying Broom",
+          "Hufflepuff"
+        ],
+        [
+          "Flying Broom",
+          "Ravenclaw"
+        ],
+        [
+          "Flying Broom",
+          "Slytherin"
+        ],
+        [
+          "Flying Broom",
+          "Nimbus"
+        ],
+        [
+          "Lush Bouquet",
+          "Mandrake"
+        ],
+        [
+          "Witch Hat",
+          "Sorting Cat"
+        ],
+        [
+          "Pet Snake",
+          "Dobby"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "pokemon",
+      "title": "Pokémon",
+      "subtitle": "Пикачу, покебол и узнаваемые атрибуты; Pokerface и Poker Chips исключены ещё до визуального отбора.",
+      "color": "#e3c265",
+      "members": [
+        [
+          "Durov's Cap",
+          "Pokemon"
+        ],
+        [
+          "Hex Pot",
+          "Pikabrew"
+        ],
+        [
+          "Party Sparkler",
+          "Pika Pika"
+        ],
+        [
+          "Ginger Cookie",
+          "Pika Pika"
+        ],
+        [
+          "Big Year",
+          "Pokeball"
+        ],
+        [
+          "Instant Ramen",
+          "Pika-Pika!"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "sailor_moon",
+      "title": "Sailor Moon",
+      "subtitle": "Узнаваемые жезлы, броши, символы и одежда Sailor Moon.",
+      "color": "#cc9dbd",
+      "members": [
+        [
+          "Party Sparkler",
+          "Sailor Moon"
+        ],
+        [
+          "Lol Pop",
+          "Sailor Moon"
+        ],
+        [
+          "Bow Tie",
+          "Sailor Moon"
+        ],
+        [
+          "Cupid Charm",
+          "Moon Prism"
+        ],
+        [
+          "Joyful Bundle",
+          "Sailor Moon"
+        ],
+        [
+          "Fresh Socks",
+          "Moon Prism"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "doge",
+      "title": "Doge и сиба-ину",
+      "subtitle": "Doge/Cheems и узнаваемые сиба-ину; обычные собаки не включены автоматически.",
+      "color": "#c7a16f",
+      "members": [
+        [
+          "Bunny Muffin",
+          "Shiba Inu"
+        ],
+        [
+          "Easter Egg",
+          "Dogel Mogel"
+        ],
+        [
+          "Bow Tie",
+          "Doge Gem"
+        ],
+        [
+          "Spring Basket",
+          "Strong Doge"
+        ],
+        [
+          "Lucky Locket",
+          "DOGE"
+        ],
+        [
+          "Spring Basket",
+          "Cheems"
+        ],
+        [
+          "Nail Bracelet",
+          "Hachikō"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
+    },
+    {
+      "key": "space",
+      "title": "Космос",
+      "subtitle": "Планеты, кольца, чёрные дыры, скафандры и явно космические узоры; одно название не является основанием.",
+      "color": "#9396d1",
+      "members": [
+        [
+          "Diamond Ring",
+          "Black Hole"
+        ],
+        [
+          "Top Hat",
+          "Solar System"
+        ],
+        [
+          "Mini Oscar",
+          "Astronaut"
+        ],
+        [
+          "Snow Mittens",
+          "Astronaut"
+        ],
+        [
+          "Neko Helmet",
+          "Astronaut"
+        ],
+        [
+          "Signet Ring",
+          "Saturn Ring"
+        ],
+        [
+          "Hypno Lollipop",
+          "Saturn"
+        ],
+        [
+          "Voodoo Doll",
+          "Far Galaxy"
+        ],
+        [
+          "Scared Cat",
+          "Nebula"
+        ]
+      ],
+      "reviewed_on": "2026-10-26"
     }
+  ],
+  "research_sources": [
+    "https://t.me/GiftChangesAPI",
+    "https://tongifts.wiki/en/tags"
   ]
 }

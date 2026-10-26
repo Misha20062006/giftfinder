@@ -170,5 +170,14 @@
   "native_price": "สกุลเงินเดิม · ราคา",
   "native_currency": "สกุลเงินเดิม",
   "converted_price": "≈ ราคา",
-  "converted_currency": "สกุลเงิน"
+  "converted_currency": "สกุลเงิน",
+  "theme_pepe": "เปเป้",
+  "theme_gold": "สีทอง",
+  "theme_silver": "สีเงิน",
+  "theme_star_wars": "สตาร์ วอร์ส",
+  "theme_harry_potter": "แฮร์รี่ พอตเตอร์",
+  "theme_pokemon": "โปเกมอน",
+  "theme_sailor_moon": "เซเลอร์มูน",
+  "theme_doge": "Doge และชิบะอินุ",
+  "theme_space": "อวกาศ"
 }

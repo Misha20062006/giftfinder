@@ -170,5 +170,14 @@
   "native_price": "العملة الأصلية · السعر",
   "native_currency": "العملة الأصلية",
   "converted_price": "≈ السعر",
-  "converted_currency": "العملة"
+  "converted_currency": "العملة",
+  "theme_pepe": "بيبي",
+  "theme_gold": "ذهبية",
+  "theme_silver": "فضية",
+  "theme_star_wars": "حرب النجوم",
+  "theme_harry_potter": "هاري بوتر",
+  "theme_pokemon": "بوكيمون",
+  "theme_sailor_moon": "سيلور مون",
+  "theme_doge": "دوج وشيبا إينو",
+  "theme_space": "الفضاء"
 }

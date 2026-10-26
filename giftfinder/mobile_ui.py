@@ -48,6 +48,15 @@ def list_view(view, delegate, height):
     QScroller.grabGesture(view.viewport(), QScroller.ScrollerGestureType.TouchGesture)
 
 
+def touch_scroll_list(view):
+    view.setVerticalScrollMode(QListView.ScrollMode.ScrollPerPixel)
+    QScroller.grabGesture(view.viewport(), QScroller.ScrollerGestureType.TouchGesture)
+
+
+def is_scrolling(view):
+    return QScroller.scroller(view.viewport()).state() in (QScroller.State.Dragging, QScroller.State.Scrolling)
+
+
 class MobileTileDelegate(QStyledItemDelegate):
     def __init__(self, renderer, parent, selected=lambda row: False):
         super().__init__(parent)
@@ -169,6 +178,8 @@ class MobileFilterDialog(FilterDialog):
         content = QWidget(); form = QVBoxLayout(content); form.setContentsMargins(0, 0, 0, 0); form.setSpacing(8)
         self.summary.setWordWrap(True); form.addWidget(self.summary)
         self.category_select = touch(QComboBox())
+        self.category_select.setAccessibleIdentifier('mobileFilterCategory')
+        self.search.setAccessibleIdentifier('mobileFilterListSearch')
         for key, title in (('collections','collection'), ('models','model'), ('backdrops','backdrop'), ('symbols','symbol'), ('themes','themes'), ('colors','color')):
             self.category_select.addItem(tr(title), key)
         self.category_select.currentIndexChanged.connect(lambda _: self.change_tab(self.category_select.currentData()))
@@ -274,6 +285,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         header = QHBoxLayout(); brand = label('GiftFinder', 'brand'); brand.setFixedWidth(100); header.addWidget(brand)
         header.addStretch(1)
         touch(self.language_button); self.language_button.setFixedWidth(124); self.language_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed); header.addWidget(self.language_button)
+        self.language_button.setAccessibleIdentifier('mobileLanguageButton')
         self.mobile_menu_button = touch(button('⋮', self.mobile_menu, 'quiet')); self.mobile_menu_button.setFont(font(24)); self.mobile_menu_button.setFixedWidth(44); self.mobile_menu_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed); self.mobile_menu_button.setAccessibleName(tr('actions'))
         header.addWidget(self.mobile_menu_button); outer.addLayout(header)
         outer.addWidget(touch(self.search_edit))
@@ -397,6 +409,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
     def keep_dialog(self, dialog):
         dialog.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.FramelessWindowHint)
         for grip in dialog.findChildren(QSizeGrip): grip.hide()
+        for view in dialog.findChildren(QListWidget): touch_scroll_list(view)
         for child in dialog.findChildren(MotionButton):
             fixed_width = child.minimumWidth() if child.minimumWidth() == child.maximumWidth() else None
             touch(child)
@@ -432,9 +445,15 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         dialog = QDialog(self); layout = QVBoxLayout(dialog); layout.setContentsMargins(10,8,10,8)
         layout.addWidget(label('language', 'brand'))
         languages = QListWidget(); layout.addWidget(languages, 1)
+        languages.setAccessibleIdentifier('mobileLanguageList')
         for code, title in [('system',tr('system_language'))]+list(LANGUAGES.items()):
             item = QListWidgetItem(flag_icon(code), title); item.setData(Qt.ItemDataRole.UserRole, code); item.setSizeHint(QSize(0,48)); languages.addItem(item)
-        languages.itemClicked.connect(lambda item: (self.change_language(item.data(Qt.ItemDataRole.UserRole)), dialog.accept()))
+        def choose_language(item):
+            # A flick can finish with a synthesized mouse release. It is a
+            # scroll gesture, not a request to select the row under the finger.
+            if is_scrolling(languages): return
+            self.change_language(item.data(Qt.ItemDataRole.UserRole)); dialog.accept()
+        languages.itemClicked.connect(choose_language)
         layout.addWidget(touch(button('cancel', dialog.reject))); self.keep_dialog(dialog)
 
     def mobile_menu(self):
@@ -498,6 +517,9 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         translated = message(str(text)); self.notice.setText(translated); self.notice.setToolTip(translated); self.notice.setVisible(bool(translated))
 
     def handle_back(self):
+        popup = QApplication.activePopupWidget()
+        if popup is not None:
+            popup.close(); return
         for selector in self.findChildren(SearchSelector):
             if selector.popup.isVisible(): selector.hidePopup(); return
         for dialog in reversed(self.dialogs):

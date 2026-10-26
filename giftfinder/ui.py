@@ -208,7 +208,7 @@ class MainWindow(QMainWindow):
         theme_title=QHBoxLayout();self.theme_toggle=button('',self.toggle_themes,'quiet','chevron');theme_title.addWidget(self.theme_toggle);theme_title.addStretch()
         theme_title.addWidget(button('all_themes',lambda:self.open_filters('themes'),'quiet','arrow'));home_layout.addLayout(theme_title)
         self.theme_grid=CardView(self.renderer,cell=QSize(220,100));self.theme_grid.setWrapping(True);self.theme_grid.setFlow(QListView.Flow.LeftToRight)
-        self.theme_grid.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff);self.theme_grid.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.theme_grid.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded);self.theme_grid.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.theme_model=TileModel();self.theme_grid.setModel(self.theme_model);self.theme_grid.setItemDelegate(TileDelegate(self.renderer,parent=self.theme_grid,cell=QSize(220,100),ribbon=True))
         self.theme_grid.clicked.connect(lambda index:self.search_theme(index.data(Qt.ItemDataRole.UserRole)['key']));home_layout.addWidget(self.theme_grid)
         rule=QFrame();rule.setFixedHeight(1);rule.setStyleSheet('background:#2b3741;');home_layout.addWidget(rule)
@@ -232,11 +232,23 @@ class MainWindow(QMainWindow):
     def update_theme_height(self):
         columns=max(1,(self.width()-60)//220)
         rows=(self.theme_model.rowCount()+columns-1)//columns
-        self.theme_grid.setFixedHeight(rows*100+4)
+        layout=self.home_grid.parentWidget().layout()
+        margins=layout.contentsMargins()
+        chrome=margins.top()+margins.bottom()+layout.spacing()*(layout.count()-1)
+        for i in range(layout.count()):
+            item=layout.itemAt(i)
+            if item.widget() not in (self.theme_grid,self.home_grid):chrome+=item.sizeHint().height()
+        # Reserve a complete collection row; additional themes stay reachable by
+        # scrolling instead of forcing the window beyond the screen's height.
+        available=self.stack.height()-chrome-self.home_grid.gridSize().height()
+        visible_rows=max(1,int((available-4)//100))
+        self.theme_grid.setFixedHeight(min(rows,visible_rows)*100+4)
 
     def resizeEvent(self,event):
         super().resizeEvent(event)
-        if hasattr(self,'theme_model'):self.update_theme_height()
+        if hasattr(self,'theme_model'):
+            self.update_theme_height()
+            QTimer.singleShot(0,self.update_theme_height)
 
     def toggle_themes(self):
         self.themes_collapsed=not self.themes_collapsed
@@ -560,8 +572,17 @@ class MainWindow(QMainWindow):
             selected=items.currentRow();items.clear()
             for i,data in enumerate(self.store.data['searches']):
                 q = query_from_dict(data)
-                title = ' · '.join(x for x in (q.collection,theme_name(q.theme) if q.theme else '',tr('theme_monochrome') if q.monochrome else '',', '.join(tr('color_'+color) for color in q.mono_colors),q.text,', '.join(q.models),tr('selected_models',count=len(q.targets)) if q.targets else '',', '.join(q.backdrops)) if x) or tr('search')
-                item = QListWidgetItem(title); item.setData(Qt.ItemDataRole.UserRole,i); items.addItem(item)
+                targets = ', '.join(name if collection == q.collection else f'{collection} / {name}' for collection,name in q.targets)
+                parts = [q.collection,theme_name(q.theme) if q.theme else '',tr('theme_monochrome') if q.monochrome else '',', '.join(tr('color_'+color) for color in q.mono_colors),q.text,', '.join(q.models),tr('model')+': '+targets if targets else '',', '.join(q.backdrops)]
+                if q.number is not None: parts.append(f'{tr("number")}: {q.number}')
+                if q.symbols: parts.append(tr('symbol')+': '+', '.join(q.symbols))
+                if set(q.markets) != set(MARKETS): parts.append(tr('market')+': '+', '.join(MARKETS.get(key,(key,''))[0] for key in q.markets))
+                extra = data.get('extra',{'min':data.get('price_min',data.get('min','')),'max':data.get('price_max',data.get('max','')),'unit':data.get('price_currency',data.get('unit','GRAM'))})
+                if extra.get('min') or extra.get('max'):
+                    unit = extra.get('unit','GRAM'); unit = 'GRAM' if unit == 'TON' else unit
+                    parts.append(f'{tr("price")}: {extra.get("min") or "0"}–{extra.get("max") or "∞"} {unit}')
+                title = ' · '.join(part for part in parts if part) or tr('search')
+                item = QListWidgetItem(title); item.setToolTip(title); item.setData(Qt.ItemDataRole.UserRole,i); items.addItem(item)
             if selected>=0:items.setCurrentRow(selected)
         populate()
         if not items.count(): layout.addWidget(label('no_searches','muted'))

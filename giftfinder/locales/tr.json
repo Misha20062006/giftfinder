@@ -170,5 +170,14 @@
   "native_price": "Orijinal para birimi · Fiyat",
   "native_currency": "Orijinal para birimi",
   "converted_price": "≈ Fiyat",
-  "converted_currency": "Para birimi"
+  "converted_currency": "Para birimi",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Altın renkli",
+  "theme_silver": "Gümüş renkli",
+  "theme_star_wars": "Star Wars",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge ve Shiba Inu",
+  "theme_space": "Uzay"
 }

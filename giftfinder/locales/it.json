@@ -170,5 +170,14 @@
   "native_price": "Valuta originale · Prezzo",
   "native_currency": "Valuta originale",
   "converted_price": "≈ Prezzo",
-  "converted_currency": "Valuta"
+  "converted_currency": "Valuta",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Dorati",
+  "theme_silver": "Argentati",
+  "theme_star_wars": "Star Wars",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge e Shiba Inu",
+  "theme_space": "Spazio"
 }

@@ -226,7 +226,8 @@ def merge_offers(existing: list[Offer], incoming: list[Offer]) -> list[Offer]:
     for item in incoming:
         old = data.get(item.key)
         if old is None or (item.source == 'direct' and old.source != 'direct') or (
-            item.source == old.source and (item.checked_at or 0) >= (old.checked_at or 0)
+            (item.source == old.source or (old.source == 'local-cache' and item.source != 'local-cache'))
+            and (item.checked_at or 0) >= (old.checked_at or 0)
         ):
             data[item.key] = item
     return list(data.values())

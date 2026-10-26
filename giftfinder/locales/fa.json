@@ -170,5 +170,14 @@
   "native_price": "ارز اصلی · قیمت",
   "native_currency": "ارز اصلی",
   "converted_price": "≈ قیمت",
-  "converted_currency": "ارز"
+  "converted_currency": "ارز",
+  "theme_pepe": "پپه",
+  "theme_gold": "طلایی",
+  "theme_silver": "نقره‌ای",
+  "theme_star_wars": "جنگ ستارگان",
+  "theme_harry_potter": "هری پاتر",
+  "theme_pokemon": "پوکمون",
+  "theme_sailor_moon": "سیلور مون",
+  "theme_doge": "دوج و شیبا اینو",
+  "theme_space": "فضا"
 }

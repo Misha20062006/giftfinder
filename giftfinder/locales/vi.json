@@ -170,5 +170,14 @@
   "native_price": "Tiền tệ gốc · Giá",
   "native_currency": "Tiền tệ gốc",
   "converted_price": "≈ Giá",
-  "converted_currency": "Tiền tệ"
+  "converted_currency": "Tiền tệ",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Mạ vàng",
+  "theme_silver": "Mạ bạc",
+  "theme_star_wars": "Star Wars",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge và Shiba Inu",
+  "theme_space": "Vũ trụ"
 }

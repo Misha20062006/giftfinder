@@ -60,14 +60,17 @@ def test_monochrome_combines_collection_theme_model_and_background(tmp_path):
 
 def test_all_themes_visible_expanded_at_normal_and_minimum_window_size(window,app):
     w=window
-    assert w.theme_model.rowCount()==len(w.catalog.themes)==11
+    assert w.theme_model.rowCount()==len(w.catalog.themes)==20
     assert any(r['key']=='monochrome' for r in w.theme_model.rows)
     for size in [(1400,900),(1050,740)]:
         w.resize(*size);app.processEvents();w.theme_grid.doItemsLayout();app.processEvents()
         viewport=w.theme_grid.viewport().rect()
-        assert w.theme_grid.verticalScrollBar().maximum()==0
+        assert w.theme_grid.verticalScrollBar().maximum()>0
         assert w.theme_grid.horizontalScrollBar().maximum()==0
-        for i in range(11):assert viewport.contains(w.theme_grid.visualRect(w.theme_model.index(i)))
+        assert w.home_grid.viewport().height()>=w.home_grid.gridSize().height()
+        for i in range(w.theme_model.rowCount()):
+            index=w.theme_model.index(i);w.theme_grid.scrollTo(index);app.processEvents()
+            assert viewport.contains(w.theme_grid.visualRect(index))
     w.toggle_themes();assert not w.theme_grid.isVisible()
     w.toggle_themes();assert w.theme_grid.isVisible()
 

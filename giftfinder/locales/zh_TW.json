@@ -170,5 +170,14 @@
   "native_price": "原始貨幣 · 價格",
   "native_currency": "原始貨幣",
   "converted_price": "≈ 價格",
-  "converted_currency": "貨幣"
+  "converted_currency": "貨幣",
+  "theme_pepe": "佩佩",
+  "theme_gold": "金色",
+  "theme_silver": "銀色",
+  "theme_star_wars": "星際大戰",
+  "theme_harry_potter": "哈利·波特",
+  "theme_pokemon": "寶可夢",
+  "theme_sailor_moon": "美少女戰士",
+  "theme_doge": "Doge 與柴犬",
+  "theme_space": "太空"
 }

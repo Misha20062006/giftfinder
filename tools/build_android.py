@@ -6,6 +6,7 @@ only from the environment; generated projects, wheels and profiles stay in build
 from __future__ import annotations
 
 import argparse
+import atexit
 import ast
 import configparser
 import hashlib
@@ -21,20 +22,22 @@ import sys
 import tarfile
 import time
 import urllib.request
+import urllib.parse
 import xml.etree.ElementTree as ET
 import zipfile
 
+if __package__ in (None, ''):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.android_elf import audit_apk
+
 
 ROOT = Path(__file__).resolve().parents[1]
-QT_VERSION = '6.12.0'
+INPUTS = json.loads((ROOT / 'mobile/android-build-inputs.json').read_text(encoding='utf-8'))
+QT_VERSION = INPUTS['qt_version']
 PACKAGE_ID = 'org.giftfinder.giftfinder'
-NDK_VERSION = '28.2.13676358'
+NDK_VERSION = INPUTS['ndk_version']
 ARCHITECTURES = {'arm64-v8a': 'aarch64', 'x86_64': 'x86_64'}
-PURE_REQUIREMENTS = (
-    'requests==2.34.2', 'beautifulsoup4==4.15.0', 'urllib3==2.8.0',
-    'certifi==2026.10.23', 'idna==3.20', 'charset-normalizer==3.5.2',
-    'soupsieve==3.0.4', 'typing_extensions==4.16.0',
-)
+PURE_REQUIREMENTS = tuple(item['requirement'] for item in INPUTS['pure_wheels'])
 
 
 def compilation_environment():
@@ -43,7 +46,7 @@ def compilation_environment():
     for key in ('ANDROID_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD',
                 'ANDROID_KEY_PASSWORD', 'ANDROID_KEY_ALIAS', 'GIFT_FINDER_ANDROID_KEYSTORE'):
         environment.pop(key, None)
-    environment['CHARSET_NORMALIZER_USE_MYPYC'] = '0'
+    environment['CHARSET_NORMALIZER_USE_CYTHON'] = '0'
     return environment
 
 
@@ -111,24 +114,79 @@ def stage_project(destination, *, smoke=False):
     return allowed
 
 
-def download_wheel(component, architecture, cache):
-    name = f'{component}-{QT_VERSION}-{QT_VERSION}-cp310-abi3-android_{architecture}.whl'
-    url = f'https://download.qt.io/official_releases/QtForPython/{component}/{name}'
-    with urllib.request.urlopen(url + '.sha256', timeout=60) as response:
-        expected = response.read().decode('ascii').split()[0].lower()
-    if not re.fullmatch('[0-9a-f]{64}', expected):
-        raise RuntimeError(f'Invalid official checksum for {component}')
-    target = cache / name
+def download_verified(url, expected, target):
+    if not re.fullmatch('[0-9a-f]{64}', expected) or not url.startswith('https://'):
+        raise RuntimeError('Invalid pinned build input URL or SHA-256')
+    target = Path(target)
     if target.exists() and hashlib.sha256(target.read_bytes()).hexdigest() == expected:
         return target
+    target.parent.mkdir(parents=True, exist_ok=True)
     temporary = target.with_suffix('.part')
-    print(f'Downloading official {component} {architecture} wheel', flush=True)
+    print('Downloading pinned build input:', target.name, flush=True)
     with urllib.request.urlopen(url, timeout=120) as response, temporary.open('wb') as output:
         shutil.copyfileobj(response, output)
     if hashlib.sha256(temporary.read_bytes()).hexdigest() != expected:
-        raise RuntimeError(f'Official checksum mismatch: {component}')
+        raise RuntimeError(f'Pinned checksum mismatch: {target.name}')
     temporary.replace(target)
     return target
+
+
+def download_wheel(component, architecture, cache):
+    entry = INPUTS['qt_wheels'][architecture][component]
+    return download_verified(entry['url'], entry['sha256'], cache / entry['filename'])
+
+
+def build_fingerprint(inputs=None, templates=None):
+    if templates is None:
+        import PySide6
+        library = Path(PySide6.__file__).parent / 'scripts/deploy_lib'
+        templates = {str(path.relative_to(library)): hashlib.sha256(path.read_bytes()).hexdigest()
+                     for path in library.rglob('*') if path.is_file() and path.suffix in {'.py', '.jinja', '.spec'}}
+    payload = {'inputs': inputs if inputs is not None else INPUTS, 'qt_recipe_templates': templates,
+               'build_hooks': {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+                               for name in ('mobile/android_hook.py', 'mobile/android_runtime.py')}}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode('utf-8')).hexdigest()
+
+
+def smoke_probe_metadata():
+    values = {}
+    tree = ast.parse((ROOT / 'mobile/main.py').read_text(encoding='utf-8-sig'))
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id in {'ANDROID_SMOKE_IMAGE_URL', 'ANDROID_SMOKE_IMAGE_SHA256'}:
+                    values[target.id] = ast.literal_eval(node.value)
+    if set(values) != {'ANDROID_SMOKE_IMAGE_URL', 'ANDROID_SMOKE_IMAGE_SHA256'}:
+        raise RuntimeError('The native HTTPS smoke probe must declare its exact immutable URL and content SHA-256')
+    return {'url': values['ANDROID_SMOKE_IMAGE_URL'], 'sha256': values['ANDROID_SMOKE_IMAGE_SHA256'],
+            'host': urllib.parse.urlparse(values['ANDROID_SMOKE_IMAGE_URL']).hostname,
+            'purpose': 'uncached public HTTPS transport and image decoding; provider integration is separate'}
+
+
+def prepare_runtime_inputs(fingerprint, environment):
+    import importlib.metadata
+    import shiboken6_generator
+    from mobile.android_runtime import verified_wheel
+    if importlib.metadata.version('shiboken6-generator') != QT_VERSION:
+        raise RuntimeError('The exact pinned Qt Shiboken host generator is required')
+    base = ROOT / 'build/android/runtime-inputs' / fingerprint
+    base.mkdir(parents=True, exist_ok=True)
+    (base / 'inputs.json').write_text(json.dumps(INPUTS, indent=2) + '\n', encoding='utf-8')
+    for dependency in INPUTS['pure_wheels']:
+        wheel = download_verified(dependency['url'], dependency['sha256'], base / 'pure-wheels' / dependency['filename'])
+        verified_wheel(wheel, dependency['sha256'])
+    commit = INPUTS['shiboken_source']['commit']
+    for relative, digest in INPUTS['shiboken_source']['files'].items():
+        url = f'https://raw.githubusercontent.com/qtproject/pyside-pyside-setup/{commit}/{relative}'
+        download_verified(url, digest, base / 'source' / relative)
+    source = base / 'source/sources/shiboken6/shibokenmodule'
+    generated = base / 'generated'
+    generator = Path(shiboken6_generator.__file__).parent / ('shiboken6.exe' if os.name == 'nt' else 'shiboken6')
+    run([generator, '--generator-set=shiboken', '--avoid-protected-hack',
+         '--output-directory=' + str(generated), source / 'nothing.h', source / 'typesystem_shiboken.xml'], env=environment)
+    if not (generated / 'Shiboken/shiboken_module_wrapper.cpp').is_file():
+        raise RuntimeError('Official Shiboken generator did not create the target wrapper source')
+    return base
 
 
 def ensure_sdk_compatibility(sdk):
@@ -149,11 +207,12 @@ def ensure_sdk_compatibility(sdk):
     legacy.chmod(0o755)
 
 
-def clear_cached_installer_environment(base, architecture):
+def clear_cached_installer_environment(base, architecture, *, compilation=None):
     """Regenerate p4a's disposable pip venv, preserving every compiled recipe."""
     if architecture not in ARCHITECTURES:
         raise RuntimeError('Unknown Android architecture')
-    installer = base / 'compilation/android/platform' / f'build-{architecture}' / 'build/venv'
+    compilation = compilation or base / 'compilation'
+    installer = compilation / 'android/platform' / f'build-{architecture}' / 'build/venv'
     if not installer.exists():
         return False
     if installer.is_symlink() or not installer.resolve().is_relative_to(base.resolve()):
@@ -250,7 +309,7 @@ def include_native_qt_plugins(apk, config_path, wheel, architecture):
     return added
 
 
-def patch_buildozer(stage, output, app_version, architecture):
+def patch_buildozer(stage, output, app_version, architecture, *, compilation=None):
     target = stage / 'buildozer.spec'
     config = configparser.ConfigParser(interpolation=None, strict=False)
     config.read(target, encoding='utf-8')
@@ -270,7 +329,10 @@ def patch_buildozer(stage, output, app_version, architecture):
         'source.exclude_dirs': '.git,.buildozer,deployment,__pycache__',
         # p4a records recipe names in lowercase and compares them case-sensitively
         # when choosing an existing native distribution.
-        'requirements': 'python3,sqlite3,openssl,shiboken6,pyside6,' + ','.join(PURE_REQUIREMENTS),
+        # Universal application wheels are installed by our before_apk_build hook.
+        # Do not let host pip choose Linux accelerators for the Android target.
+        'requirements': 'python3==' + INPUTS['target_python'] + ',sqlite3,openssl,shiboken6,pyside6',
+        'p4a.commit': INPUTS['p4a_commit'],
         'android.archs': architecture, 'android.api': '35', 'android.minapi': '28', 'android.ndk_api': '28',
         'android.accept_sdk_license': 'True', 'android.permissions': ','.join(sorted(permissions)),
         'android.release_artifact': 'apk', 'android.debug_artifact': 'apk',
@@ -310,7 +372,7 @@ public class GiftFinderDiagnosticsActivity extends org.kivy.android.PythonActivi
         config.set('app', key, value)
     config.set('buildozer', 'bin_dir', str(output))
     # Keep native compilation outside the directory purged by pyside6 --init.
-    config.set('buildozer', 'build_dir', str(stage.parent / 'compilation'))
+    config.set('buildozer', 'build_dir', str(compilation or stage.parent / 'compilation'))
     with target.open('w', encoding='utf-8') as stream:
         config.write(stream)
 
@@ -343,9 +405,10 @@ def inspect_apk(apk, architecture):
             raise RuntimeError('APK is missing installable lib-prefixed Qt binding preload libraries')
         if any(re.fullmatch(rf'lib/{re.escape(architecture)}/Qt\w+\.abi3\.so', name) for name in names):
             raise RuntimeError('APK contains Qt binding preload libraries that Android will not extract')
+    native = audit_apk(apk, architecture)
     return {'resources_and_dependencies_present': True, 'native_architecture': architecture,
             'qt_openssl_tls_plugin_packaged': True,
-            'qt_binding_preloads_use_installable_library_names': True}
+            'qt_binding_preloads_use_installable_library_names': True, **native}
 
 
 def manifest_metadata(badging):
@@ -370,6 +433,114 @@ def input_method_visible(dump):
     if visibility:
         return bool(int(visibility.group(1), 16) & 2)
     raise RuntimeError('Cannot determine the Android input-method visibility for the Back test')
+
+
+def native_hierarchy(adb, output, name):
+    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-regression.xml'], timeout=45)
+    source = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-regression.xml'], capture=True)
+    (output / (name + '.xml')).write_text(source, encoding='utf-8')
+    return ET.fromstring(source)
+
+
+def native_bounds(node):
+    match = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]', node.get('bounds', '') if node is not None else '')
+    if not match:
+        return None
+    x1, y1, x2, y2 = map(int, match.groups())
+    return (x1, y1, x2, y2) if x1 < x2 and y1 < y2 else None
+
+
+def native_find(tree, predicate, purpose):
+    nodes = [node for node in tree.iter('node') if predicate(node) and native_bounds(node)
+             and node.get('enabled') == 'true']
+    if len(nodes) != 1:
+        raise RuntimeError(f'Cannot find one visible Android {purpose}')
+    return nodes[0]
+
+
+def native_label(node, label):
+    return node.get('text') == label or node.get('content-desc') == label
+
+
+def native_id(node, name):
+    value = node.get('resource-id', '')
+    return value == name or value.endswith('.' + name) or value.endswith(':id/' + name)
+
+
+def native_tap(adb, node):
+    x1, y1, x2, y2 = native_bounds(node)
+    run([adb, 'shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2)], timeout=15)
+
+
+def main_popup_and_language_test(adb, output, pid):
+    tree = native_hierarchy(adb, output, 'popup-home')
+    native_tap(adb, native_find(tree, lambda n: native_label(n, 'Actions'), 'Actions button'))
+    tree = native_hierarchy(adb, output, 'popup-actions-open')
+    native_find(tree, lambda n: native_label(n, 'Rates'), 'Rates menu entry')
+    run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
+    tree = native_hierarchy(adb, output, 'popup-actions-after-back')
+    native_find(tree, lambda n: native_label(n, 'Filters'), 'main Filters button after popup Back')
+    if any(native_label(n, 'Rates') and native_bounds(n) for n in tree.iter('node')):
+        raise RuntimeError('One Back did not close the Actions menu')
+    if run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip() != pid:
+        raise RuntimeError('Back from Actions exited the application')
+    native_tap(adb, native_find(tree, lambda n: native_id(n, 'mobileLanguageButton'), 'language button'))
+    swipes = 0
+    for attempt in range(8):
+        tree = native_hierarchy(adb, output, 'language-scroll-' + str(attempt))
+        listing = native_find(tree, lambda n: native_id(n, 'mobileLanguageList'), 'language list after touch swipe')
+        japanese = next((n for n in tree.iter('node') if native_label(n, '日本語') and native_bounds(n)), None)
+        if japanese is not None and swipes:
+            break
+        x1, y1, x2, y2 = native_bounds(listing)
+        run([adb, 'shell', 'input', 'swipe', str((x1 + x2) // 2), str(y1 + (y2 - y1) * 4 // 5),
+             str((x1 + x2) // 2), str(y1 + (y2 - y1) // 5), '350'], timeout=15)
+        swipes += 1
+        time.sleep(1)  # Let the injected kinetic gesture settle before an ordinary tap.
+    else:
+        raise RuntimeError('Finger swipes did not reach the lower Japanese language row')
+    with (output / 'android-language-scrolled.png').open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+    native_tap(adb, japanese)
+    tree = native_hierarchy(adb, output, 'language-japanese-selected')
+    button = native_find(tree, lambda n: native_id(n, 'mobileLanguageButton'), 'selected Japanese language button')
+    if not re.search(r'\bJA\b', button.get('text', '') + ' ' + button.get('content-desc', '')):
+        raise RuntimeError('An ordinary tap after language scrolling did not select Japanese')
+    native_tap(adb, button)
+    tree = native_hierarchy(adb, output, 'language-restore-english')
+    native_tap(adb, native_find(tree, lambda n: native_label(n, 'English'), 'English language row'))
+    tree = native_hierarchy(adb, output, 'language-english-selected')
+    button = native_find(tree, lambda n: native_id(n, 'mobileLanguageButton'), 'restored English language button')
+    if not re.search(r'\bEN\b', button.get('text', '') + ' ' + button.get('content-desc', '')):
+        raise RuntimeError('English was not restored through the native language list')
+    return swipes
+
+
+def category_popup_draft_test(adb, output, pid):
+    tree = native_hierarchy(adb, output, 'category-draft-start')
+    search = native_find(tree, lambda n: native_id(n, 'mobileFilterListSearch'), 'filter draft search')
+    native_tap(adb, search)
+    run([adb, 'shell', 'input', 'text', 'Egg'], timeout=15)
+    native_hierarchy(adb, output, 'category-draft-typed')
+    ime = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
+    if input_method_visible(ime):
+        run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
+        time.sleep(1)
+    tree = native_hierarchy(adb, output, 'category-draft-before-popup')
+    native_tap(adb, native_find(tree, lambda n: native_id(n, 'mobileFilterCategory'), 'filter category selector'))
+    tree = native_hierarchy(adb, output, 'category-popup-open')
+    native_find(tree, lambda n: native_label(n, 'Backdrop'), 'category popup Backdrop option')
+    run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
+    tree = native_hierarchy(adb, output, 'category-popup-after-back')
+    native_find(tree, lambda n: native_id(n, 'mobileFilterCategory'), 'category selector after popup Back')
+    search = native_find(tree, lambda n: native_id(n, 'mobileFilterListSearch'), 'preserved filter draft')
+    if 'Egg' not in (search.get('text', ''), search.get('content-desc', '')):
+        raise RuntimeError('Back from the category popup did not preserve the draft text')
+    logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
+    if 'GIFTFINDER_ANDROID_FILTERS_CLOSED' in logs:
+        raise RuntimeError('Back from category popup closed the entire filter sheet')
+    if run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip() != pid:
+        raise RuntimeError('Back from category popup exited the application')
 
 
 def csv_picker_test(adb, output, pid):
@@ -449,6 +620,10 @@ def build(args):
     if not deploy:
         raise RuntimeError('Install PySide6-Essentials 6.12.0 on this Linux/macOS host')
     environment = compilation_environment()
+    fingerprint = build_fingerprint()
+    compilation = base / 'compilation' / fingerprint
+    runtime_inputs = prepare_runtime_inputs(fingerprint, environment)
+    environment['GIFT_FINDER_ANDROID_RUNTIME_INPUTS'] = str(runtime_inputs)
     initialize = [deploy, '--config-file', config, '--init', '--keep-deployment-files', '--no-install', '--force']
     run(initialize, cwd=stage, env=environment)
     if ensure_declared_qt_plugins(config, wheels[0], args.arch):
@@ -456,8 +631,8 @@ def build(args):
         # the staging deployment directory, so its cache is preserved.
         run(initialize, cwd=stage, env=environment)
     app_version = version()
-    patch_buildozer(stage, binary, app_version, args.arch)
-    clear_cached_installer_environment(base, args.arch)
+    patch_buildozer(stage, binary, app_version, args.arch, compilation=compilation)
+    clear_cached_installer_environment(base, args.arch, compilation=compilation)
     run([sys.executable, '-m', 'buildozer', '-v', 'android', 'release'], cwd=stage, env=environment)
     apks = list(binary.glob('*.apk'))
     if len(apks) != 1:
@@ -507,6 +682,9 @@ def build(args):
                 'signature_verified': True, 'zip_alignment_16kb_verified': True,
                 'certificate_sha256': certificate.group(1),
                 'qt_native_plugins_added_after_cached_recipe': added_plugins,
+                'dependency_recipe_fingerprint': fingerprint,
+                'ci_https_image_probe': smoke_probe_metadata(),
+                'shiboken_rebuild': json.loads((runtime_inputs / ('rebuild-' + args.arch + '.json')).read_text(encoding='utf-8')),
                 **metadata, **checks}
     (base / 'verification.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(evidence, indent=2), flush=True)
@@ -520,6 +698,9 @@ def emulator_test(args):
     adb = shutil.which('adb')
     if not adb:
         raise RuntimeError('adb must be available')
+    page_size = int(run([adb, 'shell', 'getconf', 'PAGESIZE'], capture=True).strip())
+    if page_size != 16384:
+        raise RuntimeError(f'The native release check requires a real 16-KiB environment, got {page_size}')
     # Incremental install can report success while APK blocks are still streaming.
     # Test the normal, fully installed release package before launching Qt.
     run([adb, 'install', '--no-incremental', '-r', apk], timeout=120)
@@ -532,7 +713,7 @@ def emulator_test(args):
     run([adb, 'shell', 'am', 'start', '-W', '-n', activities[0]], timeout=120)
     deadline = time.monotonic() + 90
     logs = ''
-    required_markers = ('GIFTFINDER_ANDROID_READY', 'GIFTFINDER_ANDROID_TLS_READY',
+    required_markers = ('GIFTFINDER_ANDROID_READY', 'GIFTFINDER_ANDROID_CHARSET_READY', 'GIFTFINDER_ANDROID_TLS_READY',
                         'GIFTFINDER_ANDROID_IMAGE_READY')
     while time.monotonic() < deadline:
         process = subprocess.run([adb, 'shell', 'pidof', PACKAGE_ID], text=True, capture_output=True)
@@ -556,10 +737,20 @@ def emulator_test(args):
                                      text=True, capture_output=True, timeout=20)
         (output / 'startup-activities.txt').write_text(diagnostics.stdout, encoding='utf-8')
         raise RuntimeError(f'Android startup/network checks did not complete: {missing_markers}; inspect logcat')
+    if 'RequestsDependencyWarning' in logs:
+        raise RuntimeError('Android requests has no working charset detection dependency')
     time.sleep(5)
     pid = run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip()
     if not pid:
         raise RuntimeError('The Android application exited after startup')
+    live_log_file = (output / 'native-runtime-logcat.txt').open('w', encoding='utf-8')
+    live_log = subprocess.Popen([adb, 'logcat', '--pid', pid, '-v', 'threadtime'], stdout=live_log_file, text=True)
+    def close_live_log():
+        if live_log.poll() is None:
+            live_log.terminate()
+            live_log.wait(timeout=5)
+        live_log_file.close()
+    atexit.register(close_live_log)
     final_logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
     (output / 'application-logcat.txt').write_text(final_logs, encoding='utf-8')
     if any(marker in final_logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
@@ -574,6 +765,7 @@ def emulator_test(args):
     colors = {image.pixelColor(x, y).rgba() for x in range(0, image.width(), 17) for y in range(0, image.height(), 19)}
     if len(colors) < 16:
         raise RuntimeError('Android screenshot is blank or nearly blank')
+    language_swipes = main_popup_and_language_test(adb, output, pid)
     run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-ui.xml'], timeout=45)
     hierarchy = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-ui.xml'], capture=True)
     (output / 'home-accessibility.xml').write_text(hierarchy, encoding='utf-8')
@@ -596,6 +788,7 @@ def emulator_test(args):
         raise RuntimeError('Crash detected while opening the mobile filter sheet')
     with (output / 'android-filters.png').open('wb') as stream:
         subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream)
+    category_popup_draft_test(adb, output, pid)
     ime_before = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
     (output / 'input-method-before-back.txt').write_text(ime_before, encoding='utf-8')
     ime_was_visible = input_method_visible(ime_before)
@@ -664,6 +857,12 @@ def emulator_test(args):
     csv_picker_test(adb, output, pid)
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
+                'actual_android_page_size': page_size, 'charset_detector_runtime_check': True,
+                'ci_https_image_probe': smoke_probe_metadata(),
+                'actions_popup_one_back_kept_main_alive': True,
+                'category_popup_one_back_preserved_filter_and_draft': True,
+                'language_finger_swipes_reached_japanese': True, 'language_swipes_injected': language_swipes,
+                'language_normal_tap_selected_japanese_and_restored_english': True,
                 'python_ssl_and_sqlite_runtime_checks': True, 'qt_ssl_backend_runtime_check': True,
                 'uncached_public_image_loaded_over_https': True,
                 'accessible_filters_button_tapped': True, 'mobile_filters_sheet_opened': True,
@@ -689,11 +888,17 @@ def main():
     package.add_argument('--sdk')
     package.add_argument('--ndk')
     package.add_argument('--smoke', action='store_true')
+    commands.add_parser('cache-key')
+    commands.add_parser('host-requirements')
     emulator = commands.add_parser('emulator-test')
     emulator.add_argument('--apk', required=True)
     emulator.add_argument('--evidence', default='build/android/x86_64/emulator')
     args = parser.parse_args()
-    if args.command == 'build':
+    if args.command == 'cache-key':
+        print(build_fingerprint())
+    elif args.command == 'host-requirements':
+        print('\n'.join(name + '==' + value for name, value in INPUTS['host_tools'].items()))
+    elif args.command == 'build':
         build(args)
     else:
         emulator_test(args)

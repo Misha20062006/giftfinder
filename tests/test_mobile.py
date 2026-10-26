@@ -6,10 +6,10 @@ import os
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 
 import pytest
-from PySide6.QtCore import QPoint, QRect, Qt
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QRect, Qt
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog, QListWidget
+from PySide6.QtWidgets import QApplication, QFileDialog, QListWidget, QMenu
 
 from giftfinder.core import MARKETS, Offer, SearchQuery, Store
 from giftfinder.mobile_ui import MobileFilterDialog, MobileWindow
@@ -24,6 +24,13 @@ def app():
     return QApplication.instance() or application()
 
 
+@pytest.fixture(scope='module')
+def touch_device():
+    # A real touchscreen outlives its events; destroying Qt's synthetic device
+    # while kinetic scrolling is active can synthesize a stray mouse release.
+    return QTest.createTouchDevice()
+
+
 @pytest.fixture
 def window(app, tmp_path, monkeypatch):
     monkeypatch.setenv('GIFT_FINDER_DATA_DIR', str(tmp_path / 'profile'))
@@ -31,7 +38,9 @@ def window(app, tmp_path, monkeypatch):
     window.change_language('en')
     window.show(); settle(window)
     yield window
-    window.close(); app.processEvents()
+    window.close(); window.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+    app.processEvents()
 
 
 def inside(window, widget):
@@ -52,10 +61,12 @@ def test_phone_layout_has_reachable_header_search_and_navigation(window, app, la
         assert widget.isVisible(), name
         assert window.rect().contains(inside(window, widget)), (name, widget.geometry())
         assert widget.height() >= 40
-    assert window.home_model.rowCount() == 123 and window.theme_model.rowCount() == 11
+    assert window.home_model.rowCount() == 123 and window.theme_model.rowCount() == len(window.catalog.themes)
     assert window.home_grid.horizontalScrollBar().maximum() == 0
     assert window.theme_grid.verticalScrollBar().maximum() > 0
     assert window.filter_button.accessibleName() == 'Filters'
+    assert window.language_button.accessibleIdentifier() == 'mobileLanguageButton'
+    assert window.language_button.objectName() == 'select'
     for widget in (window.nav_catalog, window.nav_favorites, window.mobile_saved_button):
         _, height = widget.text_layout(widget.width()-widget.text_space())
         assert height <= widget.height()-4
@@ -66,6 +77,8 @@ def test_filter_sheet_exposes_every_category_and_six_markets(window, app):
     window.open_filters(); settle(window)
     dialog = window.filter_dialog
     assert isinstance(dialog, MobileFilterDialog) and dialog.width() == 360
+    assert dialog.category_select.accessibleIdentifier() == 'mobileFilterCategory'
+    assert dialog.search.accessibleIdentifier() == 'mobileFilterListSearch'
     assert {dialog.category_select.itemData(i) for i in range(dialog.category_select.count())} == {'collections','models','backdrops','symbols','themes','colors'}
     assert set(dialog.market_checks) == set(MARKETS)
     dialog.advanced_toggle.click(); app.processEvents()
@@ -291,3 +304,87 @@ def test_saved_search_list_and_source_dialog_fit_phone(window, app):
     assert window.dialogs[-1].width() == 360
     window.handle_back(); app.processEvents()
     assert window.isVisible()
+
+
+@pytest.mark.parametrize('key', [Qt.Key.Key_Back, Qt.Key.Key_Escape])
+def test_back_closes_menu_before_main_window(window, app, key):
+    menu = QMenu(window)
+    menu.addAction('Rates')
+    menu.popup(window.mobile_menu_button.mapToGlobal(QPoint(0, 0)))
+    app.processEvents()
+    assert app.activePopupWidget() is menu
+    QTest.keyClick(menu, key); app.processEvents()
+    assert not menu.isVisible()
+    assert window.isVisible() and window.mode == 'catalog'
+    menu.deleteLater()
+
+
+def test_back_closes_category_popup_before_cancelling_filter_draft(window, app):
+    original = SearchQuery(collection='Input Key', models=('Creeper',))
+    window.filter_query = original
+    window.open_filters(); dialog = window.filter_dialog
+    dialog.number.setText('42')
+    draft = dialog.state
+    dialog.category_select.showPopup(); app.processEvents()
+    popup = app.activePopupWidget()
+    assert popup is not None
+    QTest.keyClick(popup, Qt.Key.Key_Back); app.processEvents()
+    assert not popup.isVisible() and window.filter_dialog is dialog
+    assert dialog.number.text() == '42' and dialog.state == draft
+    assert window.filter_query == original
+    QTest.keyClick(dialog.search, Qt.Key.Key_Back); app.processEvents()
+    assert window.filter_dialog is None and window.filter_query == original
+
+
+def swipe_up(view, device):
+    viewport = view.viewport()
+    x = viewport.width() // 2
+    start = min(viewport.height()-20, 400)
+    sequence = QTest.touchEvent(viewport, device)
+    sequence.press(0, QPoint(x, start), viewport).commit()
+    for step in range(1, 11):
+        QTest.qWait(15)
+        sequence.move(0, QPoint(x, start-step*22), viewport).commit()
+    sequence.release(0, QPoint(x, start-220), viewport).commit()
+    QTest.qWait(60)
+
+
+def test_language_list_scrolls_by_touch_without_selecting_a_language(window, app, touch_device):
+    window.language_menu(); app.processEvents()
+    dialog = window.dialogs[-1]
+    languages = dialog.findChild(QListWidget)
+    assert languages.accessibleIdentifier() == 'mobileLanguageList'
+    before = window.store.data['settings']['language']
+    assert languages.verticalScrollBar().maximum() > 0
+    swipe_up(languages, touch_device)
+    assert languages.verticalScrollBar().value() > 0
+    assert dialog.isVisible() and window.store.data['settings']['language'] == before
+
+
+def test_language_list_still_accepts_an_ordinary_touch_tap(window, app, touch_device):
+    window.language_menu(); app.processEvents()
+    dialog = window.dialogs[-1]
+    languages = dialog.findChild(QListWidget)
+    row = next(i for i in range(languages.count()) if languages.item(i).data(Qt.ItemDataRole.UserRole) == 'ru')
+    point = languages.visualItemRect(languages.item(row)).center()
+    sequence = QTest.touchEvent(languages.viewport(), touch_device)
+    sequence.press(0, point, languages.viewport()).commit()
+    QTest.qWait(30)
+    sequence.release(0, point, languages.viewport()).commit()
+    app.processEvents()
+    assert window.store.data['settings']['language'] == 'ru'
+    assert dialog not in window.dialogs
+
+
+def test_saved_search_list_scrolls_by_touch_without_loading_a_query(window, app, touch_device):
+    for number in range(1, 31):
+        window.filter_query = SearchQuery(collection='Easter Egg', number=number)
+        window.save_search()
+    original = window.filter_query
+    window.saved_searches(); app.processEvents()
+    dialog = window.dialogs[-1]
+    searches = dialog.findChild(QListWidget)
+    assert searches.verticalScrollBar().maximum() > 0
+    swipe_up(searches, touch_device)
+    assert searches.verticalScrollBar().value() > 0
+    assert dialog.isVisible() and window.filter_query == original

@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +75,41 @@ def write_checksums(paths, destination):
     destination.write_text(''.join(lines), encoding='utf-8')
 
 
+def package_artifacts(dist, executable, output, build, version, target):
+    """Use a fresh staging directory; an earlier package cannot add stale files."""
+    prefix = f'GiftFinder-{version}-{target}'
+    build.mkdir(parents=True, exist_ok=True)
+    artifacts = []
+    with tempfile.TemporaryDirectory(prefix='package-', dir=build) as temporary:
+        stage = Path(temporary)
+        if stage.resolve().parent != build.resolve():
+            raise RuntimeError('Package staging escaped its managed build directory')
+        add_documentation(stage)
+        if target.startswith('Windows-'):
+            shutil.copy2(executable, stage / 'GiftFinder.exe')
+            standalone = output / f'{prefix}.exe'
+            shutil.copy2(executable, standalone)
+            artifacts.append(standalone)
+            archive = output / f'{prefix}.zip'
+            write_zip(stage, archive)
+        elif target.startswith('macOS-'):
+            shutil.copytree(dist / 'GiftFinder.app', stage / 'GiftFinder.app', symlinks=True)
+            (stage / 'Applications').symlink_to('/Applications', target_is_directory=True)
+            archive = output / f'{prefix}.dmg'
+            run('hdiutil', 'create', '-volname', 'GiftFinder', '-srcfolder', stage,
+                '-ov', '-format', 'UDZO', archive)
+        else:
+            shutil.copytree(dist / 'GiftFinder', stage / 'GiftFinder', symlinks=True)
+            (stage / 'start-giftfinder.sh').write_text(
+                '#!/bin/sh\ncd -- "$(dirname -- "$0")" || exit 1\nexec ./GiftFinder/GiftFinder "$@"\n', encoding='utf-8')
+            (stage / 'start-giftfinder.sh').chmod(0o755)
+            archive = output / f'{prefix}.tar.gz'
+            with tarfile.open(archive, 'w:gz') as package:
+                package.add(stage, arcname='GiftFinder')
+        artifacts.append(archive)
+    return artifacts
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / 'release-dist')
@@ -82,11 +118,8 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     version = runpy.run_path(str(ROOT / 'giftfinder' / '__init__.py'))['__version__']
     target = target_name()
-    prefix = f'GiftFinder-{version}-{target}'
     build = ROOT / 'build' / target
     dist = build / 'dist'
-    stage = build / 'package'
-    stage.mkdir(parents=True, exist_ok=True)
     if sys.platform == 'darwin':
         make_macos_icon()
     run(sys.executable, '-m', 'PyInstaller', ROOT / 'GiftFinder.spec',
@@ -102,33 +135,7 @@ def main():
            'GIFT_FINDER_DATA_DIR': str(profile / 'profile')}
     run(executable, '--smoke-test', profile, env=env)
     assert (profile / 'result.txt').read_text(encoding='utf-8').startswith('PASS:')
-    add_documentation(stage)
-    artifacts = []
-    if sys.platform == 'win32':
-        shutil.copy2(executable, stage / 'GiftFinder.exe')
-        standalone = output / f'{prefix}.exe'
-        shutil.copy2(executable, standalone)
-        artifacts.append(standalone)
-        archive = output / f'{prefix}.zip'
-        write_zip(stage, archive)
-    elif sys.platform == 'darwin':
-        shutil.copytree(dist / 'GiftFinder.app', stage / 'GiftFinder.app', symlinks=True, dirs_exist_ok=True)
-        applications = stage / 'Applications'
-        if not applications.is_symlink():
-            applications.symlink_to('/Applications', target_is_directory=True)
-        archive = output / f'{prefix}.dmg'
-        run('hdiutil', 'create', '-volname', 'GiftFinder', '-srcfolder', stage,
-            '-ov', '-format', 'UDZO', archive)
-    else:
-        bundle = stage / 'GiftFinder'
-        shutil.copytree(dist / 'GiftFinder', bundle, symlinks=True, dirs_exist_ok=True)
-        (stage / 'start-giftfinder.sh').write_text(
-            '#!/bin/sh\ncd -- "$(dirname -- "$0")" || exit 1\nexec ./GiftFinder/GiftFinder "$@"\n', encoding='utf-8')
-        (stage / 'start-giftfinder.sh').chmod(0o755)
-        archive = output / f'{prefix}.tar.gz'
-        with tarfile.open(archive, 'w:gz') as package:
-            package.add(stage, arcname='GiftFinder')
-    artifacts.append(archive)
+    artifacts = package_artifacts(dist, executable, output, build, version, target)
     write_checksums(artifacts, output / f'SHA256-{target}.txt')
     (build / 'verification.json').write_text(json.dumps({
         'version': version, 'target': target, 'system': platform.platform(),

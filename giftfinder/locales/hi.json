@@ -170,5 +170,14 @@
   "native_price": "मूल मुद्रा · कीमत",
   "native_currency": "मूल मुद्रा",
   "converted_price": "≈ कीमत",
-  "converted_currency": "मुद्रा"
+  "converted_currency": "मुद्रा",
+  "theme_pepe": "पेपे",
+  "theme_gold": "सुनहरे",
+  "theme_silver": "चाँदी जैसे",
+  "theme_star_wars": "स्टार वॉर्स",
+  "theme_harry_potter": "हैरी पॉटर",
+  "theme_pokemon": "पोकेमॉन",
+  "theme_sailor_moon": "सेलर मून",
+  "theme_doge": "डोज और शीबा इनु",
+  "theme_space": "अंतरिक्ष"
 }

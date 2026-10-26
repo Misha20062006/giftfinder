@@ -30,7 +30,7 @@ def main():
         assert len(window.catalog.backdrop_lookup) == 80
         assert len(window.ratebook.currencies()) >= 160
         assert len(window.catalog.themes['minecraft']['members']) == 20
-        assert window.theme_model.rowCount()==len(window.catalog.themes)==11
+        assert window.theme_model.rowCount()==len(window.catalog.themes)==20
         from giftfinder.monochrome import data,allowed
         assert data()['coverage']['models_analyzed']==7806
         assert allowed('Input Key','Creeper','Malachite') and not allowed('Input Key','Creeper','Sapphire')
@@ -56,6 +56,17 @@ def main():
         colors.choose(colors.rows.index(row));assert colors.state.mono_colors==('black',)
         colors.grab().save(str(target/'monochrome-colors.png'));colors.apply();app.processEvents()
         assert window.filter_query.mono_colors==('black',) and not window.filter_query.collection
+        from giftfinder.previews import asset_url
+        from PySide6.QtGui import QImage
+        for key,count in (('pepe',32),('gold',24),('silver',8),('star_wars',10),('harry_potter',8),('pokemon',6),('sailor_moon',6),('doge',7),('space',9)):
+            members=window.catalog.themes[key]['members'];assert len(members)==count
+            collection,model=members[0]
+            preview=window.assets.seed/window.assets.key(asset_url('model',collection,model,256))
+            assert not QImage(str(preview)).isNull(),(key,'missing bundled preview')
+        for key in ('pepe','gold'):
+            window.search_theme(key);app.processEvents()
+            assert window.current_query().theme==key and window.mode=='search'
+            assert window.catalog.resolve(window.current_query())[0]
         window.currency.showPopup();window.currency.search.setText('RUB');app.processEvents()
         matches={window.currency.itemData(window.currency.items.item(i).data(Qt.ItemDataRole.UserRole))
                  for i in range(window.currency.items.count())}
@@ -66,7 +77,7 @@ def main():
         window.change_language('system')
         assert language_code()==resolve_language('system')
         window.close()
-        (target / 'result.txt').write_text(f'PASS: GiftFinder {__version__}, Qt Widgets without WebEngine, full catalog, 7806 models, 80 backdrops, 11 themes, monochrome exact triples, color-first picker, 13 colors, global color query, 166 currencies, 28 language variants, system default, flags, native currency icons, searchable dropdown, RTL, native resizable filters, background image pipeline, animated theme hover, full labels, isolated offscreen render\n', encoding='utf-8')
+        (target / 'result.txt').write_text(f'PASS: GiftFinder {__version__}, Qt Widgets without WebEngine, full catalog, 7806 models, 80 backdrops, 20 themes, monochrome exact triples, color-first picker, 13 colors, global color query, 166 currencies, 28 language variants, system default, flags, native currency icons, searchable dropdown, RTL, native resizable filters, background image pipeline, animated theme hover, full labels, isolated offscreen render\n', encoding='utf-8')
         return 0
     window.show()
     return app.exec()

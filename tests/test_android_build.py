@@ -1,14 +1,20 @@
 import ast
 import configparser
 import io
+import copy
+import hashlib
 from pathlib import Path
+import struct
 import tarfile
+from types import SimpleNamespace
 import zipfile
 
 import pytest
 
 from tools import build_android
 from mobile import android_hook
+from mobile import android_runtime
+from tools import android_elf
 
 
 def test_modern_sdk_compatibility_adds_only_a_missing_legacy_command(tmp_path):
@@ -64,9 +70,10 @@ def test_buildozer_patch_preserves_official_qt_recipe_and_includes_runtime(tmp_p
     config.read(tmp_path / 'buildozer.spec', encoding='utf-8')
     app = config['app']
     assert app['p4a.local_recipes'] == '/official/recipes'
-    assert app['p4a.commit'] == 'pinned'
-    assert app['requirements'].startswith('python3,sqlite3,openssl,shiboken6,pyside6,')
-    assert 'requests==' in app['requirements'] and 'beautifulsoup4==' in app['requirements']
+    assert app['p4a.commit'] == build_android.INPUTS['p4a_commit']
+    assert app['requirements'] == 'python3==3.14.2,sqlite3,openssl,shiboken6,pyside6'
+    assert 'requests==' not in app['requirements']  # Installed from verified universal wheels, not host pip.
+    assert 'requests==2.34.2' in build_android.PURE_REQUIREMENTS
     assert all(ext in app['source.include_exts'].split(',') for ext in ('json', 'png', 'svg', 'pem'))
     assert set(app['android.permissions'].split(',')) == {'INTERNET', 'ACCESS_NETWORK_STATE'}
     assert app['package.domain'] + '.' + app['package.name'] == build_android.PACKAGE_ID
@@ -157,7 +164,7 @@ def fake_apk(path, *, omit=None):
             archive.addfile(info, io.BytesIO(b'{}'))
     with zipfile.ZipFile(path, 'w') as archive:
         archive.writestr('assets/private.tar', buffer.getvalue())
-        archive.writestr('lib/arm64-v8a/libQt6Core_arm64-v8a.so', b'placeholder')
+        archive.writestr('lib/arm64-v8a/libQt6Core_arm64-v8a.so', synthetic_elf())
         archive.writestr('lib/arm64-v8a/libplugins_tls_qopensslbackend_arm64-v8a.so', b'placeholder')
         for module in ('Core', 'Gui', 'Widgets', 'Network', 'Svg'):
             if omit != 'Qt' + module:
@@ -203,6 +210,117 @@ def test_qt_binding_preload_hook_keeps_library_bytes_and_loading_order(tmp_path,
     xml.write_text(initial, encoding='utf-8')
     with pytest.raises(RuntimeError, match='missing'):
         android_hook.fix_binding_library_names(tmp_path)
+
+
+def synthetic_elf(machine=183, *, alignment=16384, needed='libc.so', shared_relro_tail=False):
+    """A minimal ELF fixture with a real dynamic table and separate RELRO LOAD."""
+    data = bytearray(4096)
+    data[:16] = b'\x7fELF\x02\x01\x01' + b'\0' * 9
+    struct.pack_into('<HHIQQQIHHHHHH', data, 16, 3, machine, 1, 0, 64, 0, 0, 64, 56, 4, 0, 0, 0)
+    struct.pack_into('<IIQQQQQQ', data, 64, 1, 5, 0, 0, 0, 2048, 2048, alignment)
+    struct.pack_into('<IIQQQQQQ', data, 120, 1, 6, 2048, 0x4800, 0x4800, 2048,
+                     4096 if shared_relro_tail else 2048, alignment)
+    struct.pack_into('<IIQQQQQQ', data, 176, 0x6474e552, 4, 2048, 0x4800, 0x4800, 2048, 2048, 1)
+    strings = b'\0' + needed.encode() + b'\0'
+    data[0x300:0x300 + len(strings)] = strings
+    entries = [(5, 0x300), (10, len(strings)), (1, 1), (0, 0)]
+    struct.pack_into('<IIQQQQQQ', data, 232, 2, 6, 0x200, 0x200, 0x200, 64, 64, 8)
+    for index, entry in enumerate(entries):
+        struct.pack_into('<qQ', data, 0x200 + index * 16, *entry)
+    return bytes(data)
+
+
+def test_elf_checks_real_architecture_load_alignment_and_relro_overlap():
+    good = android_elf.elf_info(synthetic_elf(), 'real-module.so')
+    assert android_elf.validate_elf(good, 'arm64-v8a')['relro_segments_checked'] == 1
+    # An unaligned end is valid when RELRO owns the entire containing LOAD.
+    assert (good['relro'][0][3] + good['relro'][0][6]) % 16384 != 0
+    for contents, message in ((synthetic_elf(62), 'foreign ELF'),
+                              (synthetic_elf(alignment=4096), 'LOAD segment'),
+                              (synthetic_elf(shared_relro_tail=True), 'RELRO protection')):
+        with pytest.raises(RuntimeError, match=message):
+            android_elf.validate_elf(android_elf.elf_info(contents, 'bad.so'), 'arm64-v8a')
+
+
+def test_elf_audit_checks_nested_archives_and_android_dependency_closure(tmp_path):
+    nested = io.BytesIO()
+    with zipfile.ZipFile(nested, 'w') as archive:
+        archive.writestr('hidden/module.so', synthetic_elf(62))
+    bundle = io.BytesIO()
+    with tarfile.open(fileobj=bundle, mode='w:gz') as archive:
+        info = tarfile.TarInfo('_python_bundle/site-packages/payload.zip')
+        info.size = len(nested.getvalue())
+        archive.addfile(info, io.BytesIO(nested.getvalue()))
+    apk = tmp_path / 'nested.apk'
+    with zipfile.ZipFile(apk, 'w') as archive:
+        archive.writestr('lib/arm64-v8a/libpybundle.so', bundle.getvalue())
+    with pytest.raises(RuntimeError, match='foreign ELF machine 62'):
+        android_elf.audit_apk(apk, 'arm64-v8a')
+    with zipfile.ZipFile(apk, 'w') as archive:
+        archive.writestr('lib/arm64-v8a/host.so', synthetic_elf(needed='libc.so.6'))
+    with pytest.raises(RuntimeError, match='unavailable Android dependencies'):
+        android_elf.audit_apk(apk, 'arm64-v8a')
+
+
+def test_universal_wheel_install_discards_host_accelerators_and_preserves_other_packages(tmp_path):
+    target = tmp_path / 'site-packages'
+    (target / 'charset_normalizer').mkdir(parents=True)
+    (target / 'charset_normalizer/md.so').write_bytes(synthetic_elf(62))
+    (target / 'unrelated.py').write_text('keep', encoding='utf-8')
+    wheels = tmp_path / 'wheels'; wheels.mkdir()
+    wheel = wheels / 'charset_normalizer-3.5.2-py3-none-any.whl'
+    with zipfile.ZipFile(wheel, 'w') as archive:
+        archive.writestr('charset_normalizer/__init__.py', 'pure = True\n')
+        archive.writestr('charset_normalizer/md.py', 'pure = True\n')
+    dependency = {'filename': wheel.name, 'requirement': 'charset-normalizer==3.5.2',
+                  'sha256': hashlib.sha256(wheel.read_bytes()).hexdigest()}
+    android_runtime.install_pure_dependencies(target, wheels, [dependency])
+    assert not (target / 'charset_normalizer/md.so').exists()
+    assert (target / 'charset_normalizer/md.py').is_file()
+    assert (target / 'unrelated.py').read_text(encoding='utf-8') == 'keep'
+    with zipfile.ZipFile(wheel, 'a') as archive:
+        archive.writestr('charset_normalizer/hidden.dat', synthetic_elf(62))
+    with pytest.raises(RuntimeError, match='contains native code'):
+        android_runtime.verified_wheel(wheel, hashlib.sha256(wheel.read_bytes()).hexdigest())
+
+
+def test_cache_fingerprint_changes_for_dependency_source_recipe_and_compiler_flags():
+    original = build_android.build_fingerprint(templates={'recipe.py': 'original'})
+    changed = copy.deepcopy(build_android.INPUTS)
+    changed['pure_wheels'][0]['sha256'] = '0' * 64
+    assert build_android.build_fingerprint(changed, {'recipe.py': 'original'}) != original
+    changed = copy.deepcopy(build_android.INPUTS)
+    changed['shiboken_flags'].append('-DCHANGED_BUILD_FLAG')
+    assert build_android.build_fingerprint(changed, {'recipe.py': 'original'}) != original
+    assert build_android.build_fingerprint(templates={'recipe.py': 'changed'}) != original
+
+
+def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(tmp_path, monkeypatch):
+    installed = tmp_path / 'installed'; bundled = tmp_path / 'dist/_python_bundle__arm64-v8a/_python_bundle/site-packages'
+    for directory in (installed, bundled):
+        (directory / 'shiboken6').mkdir(parents=True)
+        (directory / 'shiboken6/Shiboken.abi3.so').write_bytes(b'old 4KiB binary')
+    headers = tmp_path / 'python-headers'; headers.mkdir(); (headers / 'Python.h').touch()
+    libraries = tmp_path / 'libraries'; libraries.mkdir()
+    for name in ('libshiboken6.abi3.so', 'libpython3.14.so'): (libraries / name).touch()
+    arch = SimpleNamespace(arch='arm64-v8a', command_prefix='aarch64-linux-android',
+                           get_clang_exe=lambda **k: '/ndk/aarch64-linux-android28-clang++')
+    ctx = SimpleNamespace(archs=[arch], get_python_install_dir=lambda _: installed,
+                          get_libs_dir=lambda _: libraries, ndk=SimpleNamespace(sysroot_lib_dir=tmp_path / 'sysroot'),
+                          python_recipe=SimpleNamespace(include_root=lambda _: headers, major_minor_version_string='3.14'))
+    toolchain = SimpleNamespace(ctx=ctx, _dist=SimpleNamespace(dist_dir=tmp_path / 'dist'))
+    commands = []
+    def compile_fixture(command, **kwargs):
+        commands.append(command)
+        Path(command[-1]).write_bytes(synthetic_elf())
+    monkeypatch.setattr(android_runtime.subprocess, 'run', compile_fixture)
+    result = android_runtime.rebuild_shiboken(toolchain, tmp_path, build_android.INPUTS)
+    assert result['source_commit'] == build_android.INPUTS['shiboken_source']['commit']
+    assert commands[0][0].endswith('android28-clang++')
+    assert '-Wl,-z,max-page-size=16384' in commands[0] and '-Wl,-z,common-page-size=16384' in commands[0]
+    assert '-Wl,-z,relro' in commands[0] and '-Wl,--no-undefined' in commands[0]
+    assert all((directory / 'shiboken6/Shiboken.abi3.so').read_bytes() == synthetic_elf()
+               for directory in (installed, bundled))
 
 
 def test_qt_activity_hook_preserves_listeners_and_lifecycle_and_is_idempotent(tmp_path):
@@ -269,3 +387,10 @@ def test_only_cached_installer_venv_is_removed_and_compiled_recipes_are_preserve
                                          ('mImeWindowVis=0x3', True), ('mImeWindowVis=0x1', False)])
 def test_android_back_check_distinguishes_keyboard_visibility(dump, visible):
     assert build_android.input_method_visible(dump) is visible
+
+
+@pytest.mark.parametrize('identifier', ['mobileLanguageButton', 'QApplication.MobileWindow.mobileLanguageButton',
+                                       'org.giftfinder.giftfinder:id/mobileLanguageButton'])
+def test_native_accessibility_accepts_explicit_and_hierarchical_identifiers(identifier):
+    from xml.etree.ElementTree import Element
+    assert build_android.native_id(Element('node', {'resource-id': identifier}), 'mobileLanguageButton')

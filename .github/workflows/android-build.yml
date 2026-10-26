@@ -8,6 +8,13 @@ on:
       - 'giftfinder/**'
       - 'mobile/**'
       - 'tools/build_android.py'
+      - 'tools/android_*.py'
+      - 'tests/test_android_build.py'
+      - 'tests/test_mobile*.py'
+      - 'requirements*.txt'
+      - 'third-party/**'
+      - 'THIRD_PARTY_NOTICES.txt'
+      - 'UNLICENSE'
       - '.github/workflows/android-build.yml'
 
 permissions:
@@ -48,7 +55,8 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y autoconf automake libtool libltdl-dev pkg-config cmake ninja-build ccache zlib1g-dev libffi-dev libssl-dev libncurses-dev libtinfo6 libegl1 libopengl0 fonts-dejavu-core fonts-noto-core
           test -f /usr/share/aclocal/ltdl.m4
-          python -m pip install -r requirements.txt 'pytest==9.1.1' 'PySide6-Essentials==6.12.0' 'buildozer==1.6.0' 'Cython==0.29.37' 'Jinja2==3.1.6' 'pkginfo==1.12.1.2' 'packaging==24.1' 'tqdm==4.67.1'
+          python tools/build_android.py host-requirements > "$RUNNER_TEMP/android-host-requirements.txt"
+          python -m pip install -r requirements.txt -r "$RUNNER_TEMP/android-host-requirements.txt" 'pytest==9.1.1'
           python -m pip check
           sdkmanager --licenses < <(yes) > /dev/null
           sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0' 'ndk;28.2.13676358'
@@ -57,6 +65,12 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           GIFT_FINDER_DATA_DIR: ${{ github.workspace }}/.qa-android-host/profile
         run: python -m pytest tests/test_android_build.py tests/test_mobile.py tests/test_mobile_smoke.py -q --basetemp .test-android-host
+      - name: Fingerprint pinned dependencies, Qt recipes and build flags
+        id: android-inputs
+        run: |
+          fingerprint=$(python tools/build_android.py cache-key)
+          test "${#fingerprint}" -eq 64
+          echo "fingerprint=$fingerprint" >> "$GITHUB_OUTPUT"
       - name: Restore Android compilation cache
         id: android-cache
         uses: actions/cache/restore@v5
@@ -65,9 +79,9 @@ jobs:
             ~/.buildozer/cache
             ~/.buildozer/android/packages
             build/android/wheels
-            build/android/${{ matrix.arch }}/compilation
-          key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-
+            build/android/${{ matrix.arch }}/compilation/${{ steps.android-inputs.outputs.fingerprint }}
+          key: android-v3-${{ runner.os }}-${{ matrix.arch }}-${{ steps.android-inputs.outputs.fingerprint }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: android-v3-${{ runner.os }}-${{ matrix.arch }}-${{ steps.android-inputs.outputs.fingerprint }}-
       - name: Build and sign APK with the stable application key
         id: android-build
         env:
@@ -99,8 +113,8 @@ jobs:
           mkdir -p "$ANDROID_USER_HOME" "$ANDROID_AVD_HOME"
           echo "ANDROID_USER_HOME=$ANDROID_USER_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_AVD_HOME=$ANDROID_AVD_HOME" >> "$GITHUB_ENV"
-          sdkmanager 'emulator' 'system-images;android-35;google_apis;x86_64'
-          echo no | avdmanager create avd --force --name giftfinder --path "$ANDROID_AVD_HOME/giftfinder.avd" --package 'system-images;android-35;google_apis;x86_64' --device pixel_5
+          sdkmanager 'emulator' 'system-images;android-35;google_apis_ps16k;x86_64'
+          echo no | avdmanager create avd --force --name giftfinder --path "$ANDROID_AVD_HOME/giftfinder.avd" --package 'system-images;android-35;google_apis_ps16k;x86_64' --device pixel_5
           "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fx giftfinder
       - name: Boot emulator and verify the installed mobile application
         if: matrix.arch == 'x86_64'
@@ -156,15 +170,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Keep public compilation outputs even after a failed build
-        if: always() && steps.android-cache.outputs.cache-hit != 'true'
+        if: always() && steps.android-inputs.outcome == 'success' && steps.android-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
         with:
           path: |
             ~/.buildozer/cache
             ~/.buildozer/android/packages
             build/android/wheels
-            build/android/${{ matrix.arch }}/compilation
-          key: android-qt6.12-ndk28c-p4a58d21141-${{ runner.os }}-${{ matrix.arch }}-v2-${{ github.run_id }}-${{ github.run_attempt }}
+            build/android/${{ matrix.arch }}/compilation/${{ steps.android-inputs.outputs.fingerprint }}
+          key: android-v3-${{ runner.os }}-${{ matrix.arch }}-${{ steps.android-inputs.outputs.fingerprint }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Remove the temporary signing keystore
         if: always()
         run: rm -f -- "$RUNNER_TEMP/giftfinder-android-signing.jks"

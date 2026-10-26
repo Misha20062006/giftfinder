@@ -170,5 +170,14 @@
   "native_price": "Mata wang asal · Harga",
   "native_currency": "Mata wang asal",
   "converted_price": "≈ Harga",
-  "converted_currency": "Mata wang"
+  "converted_currency": "Mata wang",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Keemasan",
+  "theme_silver": "Keperakan",
+  "theme_star_wars": "Star Wars",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge dan Shiba Inu",
+  "theme_space": "Angkasa"
 }

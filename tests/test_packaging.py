@@ -42,3 +42,32 @@ def test_zip_contains_only_staged_distribution_files_and_checksums_match(tmp_pat
     builder.write_checksums([archive], checksums)
     import hashlib
     assert checksums.read_text().strip() == hashlib.sha256(archive.read_bytes()).hexdigest() + '  GiftFinder.zip'
+
+
+def test_repeated_package_omits_removed_files_and_does_not_clean_existing_directories(tmp_path, monkeypatch):
+    build = tmp_path / 'build'
+    dist = build / 'dist'
+    bundle = dist / 'GiftFinder'
+    bundle.mkdir(parents=True)
+    executable = bundle / 'GiftFinder'
+    executable.write_bytes(b'current executable')
+    removed = bundle / 'removed.so'
+    removed.write_bytes(b'old dependency')
+    legacy = build / 'package'
+    legacy.mkdir()
+    (legacy / 'keep-existing-artifact.txt').write_text('untouched', encoding='utf-8')
+    output = tmp_path / 'releases'
+    output.mkdir()
+    monkeypatch.setattr(builder, 'add_documentation', lambda stage: (stage / 'README.md').write_text('current docs', encoding='utf-8'))
+
+    archive, = builder.package_artifacts(dist, executable, output, build, '0.7.1', 'Linux-x64')
+    with tarfile.open(archive) as package:
+        assert 'GiftFinder/GiftFinder/removed.so' in package.getnames()
+    removed.unlink()
+    builder.package_artifacts(dist, executable, output, build, '0.7.1', 'Linux-x64')
+    with tarfile.open(archive) as package:
+        assert 'GiftFinder/GiftFinder/removed.so' not in package.getnames()
+        assert package.extractfile('GiftFinder/GiftFinder/GiftFinder').read() == b'current executable'
+        assert 'GiftFinder/README.md' in package.getnames()
+    assert (legacy / 'keep-existing-artifact.txt').read_text(encoding='utf-8') == 'untouched'
+    assert not list(build.glob('package-*'))

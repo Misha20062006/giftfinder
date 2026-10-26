@@ -170,5 +170,14 @@
   "native_price": "מטבע מקורי · מחיר",
   "native_currency": "מטבע מקורי",
   "converted_price": "≈ מחיר",
-  "converted_currency": "מטבע"
+  "converted_currency": "מטבע",
+  "theme_pepe": "פפה",
+  "theme_gold": "זהובים",
+  "theme_silver": "כסופים",
+  "theme_star_wars": "מלחמת הכוכבים",
+  "theme_harry_potter": "הארי פוטר",
+  "theme_pokemon": "פוקימון",
+  "theme_sailor_moon": "סיילור מון",
+  "theme_doge": "דוג׳ ושיבה אינו",
+  "theme_space": "חלל"
 }

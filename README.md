@@ -18,7 +18,7 @@
   Выберите пакет для своей системы в релизе<br>
   <a href="https://github.com/Misha20062006/giftfinder/releases/latest">Версии для компьютера</a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Misha20062006/giftfinder/releases/tag/v0.7.0-android.1">Android APK</a>
+  <a href="https://github.com/Misha20062006/giftfinder/releases/tag/v0.7.1-android.1">Android APK</a>
   &nbsp;·&nbsp;
   <a href="docs/USER_GUIDE.md">Руководство</a>
   &nbsp;·&nbsp;
@@ -35,13 +35,13 @@
 |---|---|
 | Точный поиск | Коллекция, модель, фон, узор, номер, площадка и диапазон цены; несколько вариантов одного свойства одновременно |
 | Сравнение предложений | Сортировка по цене, номеру, свежести данных или редкости модели; переход к объявлению на площадке |
-| Готовые подборки | Minecraft, сырные, арбузные, сакура и другие темы |
+| Готовые подборки | 20 разделов: Пепе, золотые, серебристые, Star Wars, Гарри Поттер, Pokémon, Sailor Moon, Doge, космос, Minecraft и другие |
 | Монохромки | Модели и фоны близкого цвета; выбор одного или нескольких из 13 цветов |
 | Удобные цены | GRAM, Stars и приблизительный пересчёт в рубли, доллары, евро и другие валюты с источником и датой курса |
 | Быстрый повторный поиск | Избранное, сохранённые фильтры и локальный кеш предложений |
 | Выгрузка и обновление | Экспорт результатов в CSV, обновление по F5 и автоматическая догрузка страниц Fragment и Portals |
 
-В каталоге версии 0.6 на **24 октября 2026 года**: 123 коллекции, 7 806 моделей и 80 фонов. Каталог обновляется в фоне. Монохромки — наша приблизительная группировка, а не официальный атрибут Telegram.
+В комплектном каталоге на **24 октября 2026 года**: 123 коллекции, 7 806 моделей и 80 фонов. В версии 0.7.1 добавлены девять визуально проверенных подборок — 110 моделей; подборка Пепе включает 32 модели за пределами отдельно доступной коллекции Plush Pepe. Каталог обновляется в фоне. Тематические подборки и монохромки — наша группировка, а не официальный атрибут Telegram.
 
 ## Какие площадки и откуда данные
 
@@ -53,7 +53,7 @@ GiftFinder сам разбирает страницы Fragment и получае
 | [Portals](https://portal-market.com/) | Напрямую: публичный API |
 | Telegram, Getgems, MRKT, Tonnel | Через индекс browse.tg; отдельных прямых подключений нет |
 
-Каталог и изображения — [Gift Changes / changes.tg](https://t.me/GiftChangesAPI). Курсы — ExchangeRate-API и CoinGecko; ориентир стоимости Stars — Fragment. Отдельного прямого подключения к Gift Satellite в версии 0.6 нет.
+Каталог и изображения — [Gift Changes / changes.tg](https://t.me/GiftChangesAPI). Курсы — ExchangeRate-API и CoinGecko; ориентир стоимости Stars — Fragment. Отдельного прямого подключения к Gift Satellite нет.
 
 ## Насколько актуальны цены
 
@@ -72,12 +72,12 @@ GiftFinder сам разбирает страницы Fragment и получае
 
 | Система | Пакет и запуск |
 |---|---|
-| Windows 10/11 x64 | [Скачать ZIP](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-Windows-x64.zip) → `GiftFinder.exe`; также есть отдельный EXE |
-| macOS 14+, Apple Silicon | [Скачать DMG](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-macOS-arm64.dmg) → перенести приложение в Applications |
-| macOS 14+, Intel | [Скачать DMG](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-macOS-x64.dmg) → перенести приложение в Applications |
-| Linux x64 | [Скачать tar.gz](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-Linux-x64.tar.gz) → `start-giftfinder.sh`; glibc 2.35+ |
-| Linux ARM64 | [Скачать tar.gz](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0/GiftFinder-0.7.0-Linux-arm64.tar.gz) → `start-giftfinder.sh`; glibc 2.39+ |
-| Android 9+, ARM64 · preview | [Скачать APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.0-android.1/GiftFinder-0.7.0-Android-arm64-v8a.apk) → открыть файл и разрешить установку из выбранного источника |
+| Windows 10/11 x64 | [Скачать ZIP](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-Windows-x64.zip) → `GiftFinder.exe`; также есть отдельный EXE |
+| macOS 14+, Apple Silicon | [Скачать DMG](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-macOS-arm64.dmg) → перенести приложение в Applications |
+| macOS 14+, Intel | [Скачать DMG](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-macOS-x64.dmg) → перенести приложение в Applications |
+| Linux x64 | [Скачать tar.gz](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-Linux-x64.tar.gz) → `start-giftfinder.sh`; glibc 2.35+ |
+| Linux ARM64 | [Скачать tar.gz](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-Linux-arm64.tar.gz) → `start-giftfinder.sh`; glibc 2.39+ |
+| Android 9+, ARM64 · preview | [Скачать APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1-android.1/GiftFinder-0.7.1-Android-arm64-v8a.apk) → открыть файл и разрешить установку из выбранного источника |
 
 Python для готовых сборок не нужен. Настольные пакеты без коммерческой подписи; Android APK подписан постоянным ключом проекта. При обновлении настройки, избранное и сохранённые поиски остаются в пользовательском профиле. Android получил отдельный сенсорный интерфейс; это предварительная версия, проверенная в эмуляторе, пока без проверки на физическом ARM64-телефоне и живого поиска по всем площадкам. [Подробности запуска, системные требования и статус iOS](docs/PLATFORMS.md).
 
@@ -116,6 +116,6 @@ $env:GIFT_FINDER_DATA_DIR = Join-Path $PWD '.qa\profile'
 .\.venv\Scripts\python.exe tools/build_release.py
 ```
 
-Подробнее: [как устроен поиск](SEARCH_TECHNICAL.txt), [руководство](docs/USER_GUIDE.md). Скриншот получен вне экрана из версии 0.6. Условия использования компонентов: [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) и [third-party/](third-party/).
+Подробнее: [как устроен поиск](SEARCH_TECHNICAL.txt), [руководство](docs/USER_GUIDE.md). Скриншот получен вне экрана из версии 0.7.1. Условия использования компонентов: [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) и [third-party/](third-party/).
 
 </details>

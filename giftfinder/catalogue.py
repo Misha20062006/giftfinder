@@ -7,6 +7,7 @@ import threading
 import time
 from collections import defaultdict
 from dataclasses import replace
+from functools import wraps
 from pathlib import Path
 from urllib.parse import quote
 
@@ -22,8 +23,25 @@ _aliases = {'minecraft':('minecraft','майнкрафт'), 'cheese':('сыр','
             'watermelon':('арбуз','арбузные','watermelon'), 'strawberry':('клубника','клубничные','strawberry'),
             'pumpkin':('тыквы','pumpkin'), 'bee':('пчёлы','пчелы','мёд','мед','honey'),
             'sakura':('сакура','sakura'), 'snowman':('снеговики','snowman'),
-            'skeleton':('кости','скелеты','skeleton'), 'rainbow':('радужные','радуга','rainbow')}
+            'skeleton':('кости','скелеты','skeleton'), 'rainbow':('радужные','радуга','rainbow'),
+            'pepe':('pepe','пепе','pp','пп'),
+            'gold':('gold','golden','золото','золотые','золотой'),
+            'silver':('silver','серебро','серебряные','серебряный'),
+            'star_wars':('star wars','starwars','звёздные войны','звездные войны'),
+            'harry_potter':('harry potter','гарри поттер','хогвартс','hogwarts'),
+            'pokemon':('pokemon','pokémon','покемон','покемоны'),
+            'sailor_moon':('sailor moon','sailormoon','сейлор мун','сейлормун'),
+            'doge':('doge','доге','догэ'),
+            'space':('space','cosmos','космос','космические')}
 THEMES = {row['key']:{**row,'aliases':_aliases.get(row['key'],())} for row in _curated['themes']}
+
+
+def _catalog_locked(method):
+    @wraps(method)
+    def locked(self, *args, **kwargs):
+        with self.lock:
+            return method(self, *args, **kwargs)
+    return locked
 
 
 def query_from_dict(data):
@@ -63,25 +81,30 @@ class Catalog:
                 continue
         self.reindex()
 
+    @_catalog_locked
     def reindex(self):
-        self.model_rows = []
-        self.symbol_rows = []
-        self.themes = {key: {**value, 'members': []} for key,value in THEMES.items()}
+        # GUI readers may hold these public collections without taking the lock.
+        # Build replacements privately so they always see a complete old or new list.
+        model_rows = []
+        symbol_rows = []
+        themes = {key: {**value, 'members': []} for key,value in THEMES.items()}
         reviewed = {key:{(compact(c),norm(m)) for c,m in row['members']} for key,row in THEMES.items()}
         for collection in sorted(self.data.get('traits', {}), key=norm):
             traits = self.data['traits'][collection]
             for row in traits.get('models', []):
                 record = {**row, 'collection': collection, 'key': (collection, row['name'])}
-                self.model_rows.append(record)
-                for key, theme in self.themes.items():
+                model_rows.append(record)
+                for key, theme in themes.items():
                     accepted = (compact(collection), norm(row['name'])) in reviewed[key]
                     if accepted:
                         theme['members'].append((collection, row['name']))
-            self.symbol_rows.extend({**row, 'collection': collection} for row in traits.get('symbols', []))
-        self.model_lookup = {(compact(x['collection']), norm(x['name'])):x for x in self.model_rows}
-        self.backdrop_lookup = {norm(x['name']):x for x in self.data.get('backdrops', [])}
-        self.themes['monochrome']={'title':theme_name('monochrome'),'color':'#8296a9',
-            'members':[(r['collection'],r['model']) for r in monochrome.data()['models'] if (compact(r['collection']),norm(r['model'])) in self.model_lookup]}
+            symbol_rows.extend({**row, 'collection': collection} for row in traits.get('symbols', []))
+        model_lookup = {(compact(x['collection']), norm(x['name'])):x for x in model_rows}
+        backdrop_lookup = {norm(x['name']):x for x in self.data.get('backdrops', [])}
+        themes['monochrome']={'title':theme_name('monochrome'),'color':'#8296a9',
+            'members':[(r['collection'],r['model']) for r in monochrome.data()['models'] if (compact(r['collection']),norm(r['model'])) in model_lookup]}
+        self.model_rows, self.symbol_rows = model_rows, symbol_rows
+        self.model_lookup, self.backdrop_lookup, self.themes = model_lookup, backdrop_lookup, themes
 
     def refresh(self, progress=lambda _: None):
         try:
@@ -117,11 +140,13 @@ class Catalog:
             self.note = tr('local_catalog')+' · ' + error_note(error)
         return self.data
 
+    @_catalog_locked
     def facets(self, collection):
         traits = self.data.get('traits', {}).get(collection, {})
         return {'gift':collection, 'models':traits.get('models', []), 'symbols':traits.get('symbols', []),
                 'backdrops':self.data.get('backdrops', [])}
 
+    @_catalog_locked
     def selected_models(self, query):
         allowed = None
         if query.theme:
@@ -140,6 +165,7 @@ class Catalog:
                 and (allowed is None or (compact(r['collection']), norm(r['name'])) in allowed)
                 and (not (query.monochrome or query.mono_colors) or monochrome.has_model(r['collection'],r['name'],query.backdrops,query.mono_colors))]
 
+    @_catalog_locked
     def resolve(self, query):
         from dataclasses import replace
         if query.mono_colors:
@@ -203,6 +229,7 @@ class Catalog:
         scope = title + (' · '+tr('scope_models',collections=len(variants),models=model_count) if filtered else '')
         return variants, scope
 
+    @_catalog_locked
     def enrich(self, offer):
         row = self.model_lookup.get((compact(offer.collection), norm(offer.model)))
         if row and offer.rarity is None:

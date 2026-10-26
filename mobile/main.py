@@ -3,6 +3,9 @@ import os
 from pathlib import Path
 import sys
 
+ANDROID_SMOKE_IMAGE_URL = 'https://raw.githubusercontent.com/Misha20062006/giftfinder/f0a83fda1c99b46a273d9c01e86d71623d68792e/giftfinder/preview_seed/0052637187ec81a79ccb6849de38cba218de5c928185942594f45d95a6f47dd1.png'
+ANDROID_SMOKE_IMAGE_SHA256 = '28eda0ef2eca93fe30f0cc829d12d168d3d72056761467d4db4c6dbc7b1dd385'
+
 source_root = Path(__file__).resolve().parent.parent
 if (source_root / 'giftfinder').is_dir():
     sys.path.insert(0, str(source_root))
@@ -13,11 +16,9 @@ def smoke_image_check(window):
     from PySide6.QtCore import QEventLoop, QTimer, QUrl
     from PySide6.QtGui import QImage
     from PySide6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
-    from giftfinder.previews import asset_url
+    import hashlib
 
-    rows = window.catalog.model_rows
-    row = next((value for value in rows if value['collection'] == 'Easter Egg' and value['name'] == 'Creeper'), rows[0])
-    request = QNetworkRequest(QUrl(asset_url('model', row['collection'], row['name'], 128)))
+    request = QNetworkRequest(QUrl(ANDROID_SMOKE_IMAGE_URL))
     request.setTransferTimeout(20000)
     request.setAttribute(QNetworkRequest.Attribute.CacheLoadControlAttribute, QNetworkRequest.CacheLoadControl.AlwaysNetwork)
     request.setAttribute(QNetworkRequest.Attribute.RedirectPolicyAttribute, QNetworkRequest.RedirectPolicy.ManualRedirectPolicy)
@@ -33,7 +34,10 @@ def smoke_image_check(window):
             raise RuntimeError('Android smoke HTTPS image failed: '+reply.errorString())
         if reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute) != 200:
             raise RuntimeError('Android smoke image did not return HTTP 200')
-        image = QImage.fromData(bytes(reply.readAll()))
+        payload = bytes(reply.readAll())
+        if hashlib.sha256(payload).hexdigest() != ANDROID_SMOKE_IMAGE_SHA256:
+            raise RuntimeError('Android smoke HTTPS image checksum mismatch')
+        image = QImage.fromData(payload)
         if image.isNull():
             raise RuntimeError('Android smoke HTTPS response is not a decodable image')
         return image.width(), image.height()
@@ -47,11 +51,20 @@ def smoke_runtime_checks(window):
     import ssl
     import sqlite3
     import certifi
+    import charset_normalizer
+    from requests.models import chardet
     from PySide6.QtNetwork import QSslSocket
 
     context = ssl.create_default_context(cafile=certifi.where())
     if context.verify_mode != ssl.CERT_REQUIRED or not context.check_hostname:
         raise RuntimeError('Android smoke Python SSL context must verify certificates and hostnames')
+    sample = 'GiftFinder — проверка кодировки UTF-8. Привет, мир!'
+    if chardet is not charset_normalizer:
+        raise RuntimeError('Android smoke requests must use the packaged charset_normalizer')
+    encoding = chardet.detect(sample.encode('utf-8')).get('encoding')
+    if not encoding or sample.encode('utf-8').decode(encoding) != sample:
+        raise RuntimeError('Android smoke charset detection failed')
+    print('GIFTFINDER_ANDROID_CHARSET_READY', flush=True)
     with closing(sqlite3.connect(':memory:')) as connection:
         if connection.execute('SELECT 1').fetchone() != (1,):
             raise RuntimeError('Android smoke SQLite query failed')

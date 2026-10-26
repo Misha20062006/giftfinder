@@ -170,5 +170,14 @@
   "native_price": "اصل کرنسی · قیمت",
   "native_currency": "اصل کرنسی",
   "converted_price": "≈ قیمت",
-  "converted_currency": "کرنسی"
+  "converted_currency": "کرنسی",
+  "theme_pepe": "پیپے",
+  "theme_gold": "سنہری",
+  "theme_silver": "چاندی جیسے",
+  "theme_star_wars": "اسٹار وارز",
+  "theme_harry_potter": "ہیری پوٹر",
+  "theme_pokemon": "پوکیمون",
+  "theme_sailor_moon": "سیلر مون",
+  "theme_doge": "ڈوج اور شیبا اینو",
+  "theme_space": "خلا"
 }

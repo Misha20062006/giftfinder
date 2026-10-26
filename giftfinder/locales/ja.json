@@ -170,5 +170,14 @@
   "native_price": "元の通貨 · 価格",
   "native_currency": "元の通貨",
   "converted_price": "≈ 価格",
-  "converted_currency": "通貨"
+  "converted_currency": "通貨",
+  "theme_pepe": "ペペ",
+  "theme_gold": "ゴールド",
+  "theme_silver": "シルバー",
+  "theme_star_wars": "スター・ウォーズ",
+  "theme_harry_potter": "ハリー・ポッター",
+  "theme_pokemon": "ポケモン",
+  "theme_sailor_moon": "美少女戦士セーラームーン",
+  "theme_doge": "Dogeと柴犬",
+  "theme_space": "宇宙"
 }

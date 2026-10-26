@@ -170,5 +170,14 @@
   "native_price": "Початкова валюта · Ціна",
   "native_currency": "Початкова валюта",
   "converted_price": "≈ Ціна",
-  "converted_currency": "Валюта"
+  "converted_currency": "Валюта",
+  "theme_pepe": "Пепе",
+  "theme_gold": "Золоті",
+  "theme_silver": "Сріблясті",
+  "theme_star_wars": "Зоряні війни",
+  "theme_harry_potter": "Гаррі Поттер",
+  "theme_pokemon": "Покемони",
+  "theme_sailor_moon": "Сейлор Мун",
+  "theme_doge": "Doge і сіба-іну",
+  "theme_space": "Космос"
 }

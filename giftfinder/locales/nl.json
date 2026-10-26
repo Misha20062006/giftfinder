@@ -170,5 +170,14 @@
   "native_price": "Oorspronkelijke valuta · Prijs",
   "native_currency": "Oorspronkelijke valuta",
   "converted_price": "≈ Prijs",
-  "converted_currency": "Valuta"
+  "converted_currency": "Valuta",
+  "theme_pepe": "Pepe",
+  "theme_gold": "Goudkleurig",
+  "theme_silver": "Zilverkleurig",
+  "theme_star_wars": "Star Wars",
+  "theme_harry_potter": "Harry Potter",
+  "theme_pokemon": "Pokémon",
+  "theme_sailor_moon": "Sailor Moon",
+  "theme_doge": "Doge en shiba inu",
+  "theme_space": "Ruimte"
 }

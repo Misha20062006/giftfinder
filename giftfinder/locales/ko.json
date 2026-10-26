@@ -170,5 +170,14 @@
   "native_price": "원래 통화 · 가격",
   "native_currency": "원래 통화",
   "converted_price": "≈ 가격",
-  "converted_currency": "통화"
+  "converted_currency": "통화",
+  "theme_pepe": "페페",
+  "theme_gold": "골드",
+  "theme_silver": "실버",
+  "theme_star_wars": "스타워즈",
+  "theme_harry_potter": "해리 포터",
+  "theme_pokemon": "포켓몬",
+  "theme_sailor_moon": "세일러 문",
+  "theme_doge": "Doge와 시바견",
+  "theme_space": "우주"
 }

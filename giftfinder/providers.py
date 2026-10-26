@@ -127,7 +127,8 @@ def portals_search(query: SearchQuery, offset: int = 0, cancelled=None) -> Searc
         data = portals_catalog()
         collection = next((x for x in data.get('collections', []) if compact(x.get('name', '')) == compact(query.collection)), None)
         if not collection:
-            return SearchResult(statuses=[SourceStatus('portals', 'no_match', source='direct', complete=True,
+            # A cached metadata map cannot establish that every live offer is absent.
+            return SearchResult(statuses=[SourceStatus('portals', 'unavailable', source='direct', complete=False,
                                                        checked_at=time.time(), note=tr('no_collection_source'))])
         params['collection_ids'] = collection['id']
     if cancelled and cancelled.is_set():
