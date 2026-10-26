@@ -774,6 +774,12 @@ def emulator_test(args):
     launch_config = output / 'emulator-launch-config.txt'
     if launch_config.is_file():
         environment['requested_emulator_graphics'] = launch_config.read_text(encoding='utf-8').strip()
+        requested_ram = re.search(r'\bguest_ram_mb=(\d+)\b', environment['requested_emulator_graphics'])
+        if requested_ram:
+            environment['requested_guest_ram_mb'] = int(requested_ram.group(1))
+    initial_memory = run([adb, 'shell', 'cat', '/proc/meminfo'], capture=True, timeout=30)
+    actual_ram = re.search(r'^MemTotal:\s*(\d+)\s+kB\s*$', initial_memory, re.MULTILINE)
+    environment['actual_guest_memtotal_kib'] = int(actual_ram.group(1)) if actual_ram else None
     emulator_log = output / 'emulator.log'
     if emulator_log.is_file():
         environment['observed_emulator_graphics'] = [line.strip() for line in emulator_log.read_text(encoding='utf-8').splitlines()
@@ -807,6 +813,11 @@ def emulator_test(args):
         log_command = [adb, 'logcat', '-d', '-v', 'threadtime']
         if len(current_pid) == 1 and current_pid[0].isdigit():
             log_command += ['--pid', current_pid[0]]
+            memory = subprocess.run([adb, 'shell', 'cat', '/proc/meminfo', '/proc/' + current_pid[0] + '/status'],
+                                    text=True, capture_output=True, timeout=15)
+            with (output / 'startup-memory-samples.txt').open('a', encoding='utf-8') as stream:
+                stream.write(time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()) + '\n')
+                stream.write(memory.stdout + memory.stderr + '\n')
         result = subprocess.run(log_command, text=True, capture_output=True, check=True)
         logs = result.stdout
         if all(marker in logs for marker in required_markers):

@@ -129,8 +129,8 @@ jobs:
             ps -eo pid,comm,rss --sort=-rss | head -n 16 || true
           }
           host_state > "$evidence/host-before-emulator.txt"
-          echo 'gpu=swangle; guest_vulkan=false; image=android-35/google_apis_ps16k/x86_64' > "$evidence/emulator-launch-config.txt"
-          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -show-kernel -gpu swangle -feature -Vulkan -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
+          echo 'gpu=swangle; guest_vulkan=false; guest_ram_mb=4096; image=android-35/google_apis_ps16k/x86_64' > "$evidence/emulator-launch-config.txt"
+          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -memory 4096 -show-kernel -gpu swangle -feature -Vulkan -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
           emulator_pid=$!
           cleanup() {
             workflow_status=$?
@@ -172,7 +172,7 @@ jobs:
           adb shell input keyevent 82
           adb shell cat /proc/meminfo > "$evidence/guest-memory-before-app.txt"
           adb shell df -h /data > "$evidence/guest-storage-before-app.txt"
-          adb logcat -b crash -b system -v threadtime 'ActivityManager:I' 'AndroidRuntime:V' 'Watchdog:V' 'lmkd:V' 'lowmemorykiller:V' 'adbd:V' '*:S' > "$evidence/guest-system-live.log" 2>&1 &
+          adb logcat -b crash -b system -b main -v threadtime 'ActivityManager:I' 'AndroidRuntime:V' 'Watchdog:V' 'lmkd:V' 'lowmemorykiller:V' 'adbd:V' 'DEBUG:V' 'libc:F' 'tombstoned:V' 'crash_dump64:V' '*:S' > "$evidence/guest-system-live.log" 2>&1 &
           python tools/build_android.py emulator-test --apk "$(find release-dist -name '*x86_64-smoke.apk' -print -quit)"
       - name: Upload signed Android package
         if: always() && steps.android-build.outcome == 'success'
