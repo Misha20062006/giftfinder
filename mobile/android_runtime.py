@@ -89,15 +89,19 @@ def rebuild_shiboken(toolchain, inputs_directory, inputs):
         from pythonforandroid.recipe import Recipe
         python_recipe = Recipe.get_recipe('python3', ctx)
     python_headers = Path(python_recipe.include_root(arch.arch))
-    libraries = Path(ctx.get_libs_dir(arch.arch))
+    # PythonRecipe only puts libpythonbin.so in libs_collections. Its shared
+    # libpython is copied into the assembled distribution by create_python_bundle.
+    libraries = distribution / 'libs' / arch.arch
     source = inputs_directory / 'source'
     generated = inputs_directory / 'generated/Shiboken'
     target = inputs_directory / ('compiled-' + arch.arch) / 'Shiboken.abi3.so'
     target.parent.mkdir(exist_ok=True)
     python_library = libraries / f'libpython{python_recipe.major_minor_version_string}.so'
     shiboken_library = libraries / 'libshiboken6.abi3.so'
-    if not (python_headers / 'Python.h').is_file() or not python_library.is_file() or not shiboken_library.is_file():
-        raise RuntimeError('Target Python/Shiboken headers and libraries must exist before rebuilding the module')
+    missing = [str(path) for path in (python_headers / 'Python.h', python_library, shiboken_library)
+               if not path.is_file()]
+    if missing:
+        raise RuntimeError('Target rebuild inputs are missing: ' + ', '.join(missing))
     command = [arch.get_clang_exe(with_target=True, plus_plus=True), *inputs['shiboken_flags'],
                '-nostdlib++', '-I' + str(python_headers),
                '-I' + str(installed / 'shiboken6/include/shiboken6'),

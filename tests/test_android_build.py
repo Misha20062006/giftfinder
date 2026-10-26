@@ -304,8 +304,10 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
         (directory / 'shiboken6').mkdir(parents=True)
         (directory / 'shiboken6/Shiboken.abi3.so').write_bytes(b'old 4KiB binary')
     headers = tmp_path / 'python-headers'; headers.mkdir(); (headers / 'Python.h').touch()
-    libraries = tmp_path / 'libraries'; libraries.mkdir()
+    libraries = tmp_path / 'dist/libs/arm64-v8a'; libraries.mkdir(parents=True)
     for name in ('libshiboken6.abi3.so', 'libpython3.14.so'): (libraries / name).touch()
+    collections = tmp_path / 'libs_collections'; collections.mkdir()
+    (collections / 'libpythonbin.so').touch()
     arch = SimpleNamespace(arch='arm64-v8a', command_prefix='aarch64-linux-android',
                            get_clang_exe=lambda **k: '/ndk/aarch64-linux-android28-clang++')
     built_recipes = ['hostpython3', 'libffi', 'openssl', 'sqlite3', 'libbz2', 'python3', 'shiboken6', 'pyside6']
@@ -316,7 +318,7 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
         assert 'liblzma' not in ctx.recipe_build_order
         return headers
     ctx = SimpleNamespace(archs=[arch], get_python_install_dir=lambda _: installed,
-                          get_libs_dir=lambda _: libraries, ndk=SimpleNamespace(sysroot_lib_dir=tmp_path / 'sysroot'),
+                          get_libs_dir=lambda _: collections, ndk=SimpleNamespace(sysroot_lib_dir=tmp_path / 'sysroot'),
                           python_recipe=SimpleNamespace(include_root=include_root, major_minor_version_string='3.14'),
                           recipe_build_order=None if cached_context else built_recipes,
                           bootstrap=SimpleNamespace(distribution=None))
@@ -339,6 +341,7 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
     assert commands[0][0].endswith('android28-clang++')
     assert '-Wl,-z,max-page-size=16384' in commands[0] and '-Wl,-z,common-page-size=16384' in commands[0]
     assert '-Wl,-z,relro' in commands[0] and '-Wl,--no-undefined' in commands[0]
+    assert '-L' + str(libraries) in commands[0] and '-L' + str(collections) not in commands[0]
     assert all((directory / 'shiboken6/Shiboken.abi3.so').read_bytes() == synthetic_elf()
                for directory in (installed, bundled))
 
