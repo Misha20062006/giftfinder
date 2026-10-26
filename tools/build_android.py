@@ -760,6 +760,18 @@ def start_android_log(adb, target, selector):
     atexit.register(close)
 
 
+def emulator_cpu_metadata(adb):
+    """Record measured host capacity and the guest's actual online CPU set."""
+    metadata = {'actual_guest_cpu_online': run(
+        [adb, 'shell', 'cat', '/sys/devices/system/cpu/online'], capture=True, timeout=30).strip()}
+    for field, variable in (('actual_host_logical_cpu_count', 'GIFT_FINDER_TEST_HOST_CORES'),
+                            ('requested_guest_cpu_count', 'GIFT_FINDER_TEST_EMULATOR_CORES')):
+        value = os.environ.get(variable)
+        if value is not None:
+            metadata[field] = int(value)
+    return metadata
+
+
 def emulator_test(args):
     """Exercise the installed APK on an already booted, headless Android emulator."""
     apk = Path(args.apk).resolve()
@@ -771,6 +783,7 @@ def emulator_test(args):
     page_size = int(run([adb, 'shell', 'getconf', 'PAGESIZE'], capture=True).strip())
     environment = {'actual_android_page_size': page_size, 'required_android_page_size': 16384,
                    'actual_device_abi': run([adb, 'shell', 'getprop', 'ro.product.cpu.abi'], capture=True).strip()}
+    environment.update(emulator_cpu_metadata(adb))
     for name, property_name in (('actual_android_sdk', 'ro.build.version.sdk'),
                                 ('actual_android_release', 'ro.build.version.release'),
                                 ('actual_android_codename', 'ro.build.version.codename'),

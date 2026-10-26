@@ -127,15 +127,20 @@ jobs:
         run: |
           evidence=build/android/x86_64/emulator
           mkdir -p "$evidence"
+          host_cores=$(nproc)
+          emulator_cores=$((host_cores < 4 ? host_cores : 4))
+          export GIFT_FINDER_TEST_HOST_CORES="$host_cores"
+          export GIFT_FINDER_TEST_EMULATOR_CORES="$emulator_cores"
           host_state() {
             date -u
+            echo "host_nproc=$(nproc)"
             free -m
             df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"
             ps -eo pid,comm,rss --sort=-rss | head -n 16 || true
           }
           host_state > "$evidence/host-before-emulator.txt"
-          echo 'gpu=swangle; guest_vulkan=false; guest_ram_mb=4096; image=android-36/google_apis_ps16k/x86_64' > "$evidence/emulator-launch-config.txt"
-          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -memory 4096 -show-kernel -gpu swangle -feature -Vulkan -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
+          echo "gpu=swangle; guest_vulkan=false; guest_ram_mb=4096; guest_cpu_cores=$emulator_cores; image=android-36/google_apis_ps16k/x86_64" > "$evidence/emulator-launch-config.txt"
+          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -memory 4096 -cores "$emulator_cores" -show-kernel -gpu swangle -feature -Vulkan -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
           emulator_pid=$!
           cleanup() {
             workflow_status=$?

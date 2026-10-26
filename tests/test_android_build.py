@@ -531,3 +531,24 @@ def test_android_back_check_distinguishes_keyboard_visibility(dump, visible):
 def test_native_accessibility_accepts_explicit_and_hierarchical_identifiers(identifier):
     from xml.etree.ElementTree import Element
     assert build_android.native_id(Element('node', {'resource-id': identifier}), 'mobileLanguageButton')
+
+
+@pytest.mark.parametrize('host,requested,online', [('8', '4', '0-3'), ('2', '2', '0-1')])
+def test_emulator_cpu_evidence_preserves_measured_host_and_actual_guest(monkeypatch, host, requested, online):
+    monkeypatch.setenv('GIFT_FINDER_TEST_HOST_CORES', host)
+    monkeypatch.setenv('GIFT_FINDER_TEST_EMULATOR_CORES', requested)
+    def measured_guest(command, **kwargs):
+        assert command == ['/android/adb', 'shell', 'cat', '/sys/devices/system/cpu/online']
+        assert kwargs == {'capture': True, 'timeout': 30}
+        return online + '\r\n'
+    monkeypatch.setattr(build_android, 'run', measured_guest)
+    evidence = build_android.emulator_cpu_metadata('/android/adb')
+    assert evidence == {'actual_host_logical_cpu_count': int(host),
+                        'requested_guest_cpu_count': int(requested), 'actual_guest_cpu_online': online}
+
+
+def test_emulator_cpu_evidence_does_not_invent_unmeasured_host_or_requested_counts(monkeypatch):
+    monkeypatch.delenv('GIFT_FINDER_TEST_HOST_CORES', raising=False)
+    monkeypatch.delenv('GIFT_FINDER_TEST_EMULATOR_CORES', raising=False)
+    monkeypatch.setattr(build_android, 'run', lambda *args, **kwargs: '0-1\n')
+    assert build_android.emulator_cpu_metadata('/android/adb') == {'actual_guest_cpu_online': '0-1'}
