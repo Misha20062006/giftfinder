@@ -741,6 +741,25 @@ def build(args):
     print(json.dumps(evidence, indent=2), flush=True)
 
 
+def start_android_log(adb, target, selector):
+    """Keep app logs that would otherwise be lost if ADB disconnects mid-startup."""
+    stream = Path(target).open('w', encoding='utf-8')
+    process = subprocess.Popen([adb, 'logcat', *selector, '-v', 'threadtime'],
+                               stdout=stream, stderr=subprocess.STDOUT, text=True)
+    def close():
+        try:
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=5)
+        finally:
+            stream.close()
+    atexit.register(close)
+
+
 def emulator_test(args):
     """Exercise the installed APK on an already booted, headless Android emulator."""
     apk = Path(args.apk).resolve()
@@ -769,6 +788,10 @@ def emulator_test(args):
     run([adb, 'install', '--no-incremental', '-r', apk], timeout=120)
     run([adb, 'logcat', '-c'])
     run([adb, 'shell', 'am', 'force-stop', PACKAGE_ID])
+    packages = run([adb, 'shell', 'cmd', 'package', 'list', 'packages', '-U', PACKAGE_ID], capture=True)
+    app_uid = re.search(r'^package:' + re.escape(PACKAGE_ID) + r'\s+uid:(\d+)\s*$', packages, re.MULTILINE)
+    if app_uid:
+        start_android_log(adb, output / 'startup-live-logcat.txt', ['--uid=' + app_uid.group(1)])
     resolved = run([adb, 'shell', 'cmd', 'package', 'resolve-activity', '--brief', PACKAGE_ID], capture=True)
     activities = [line.strip() for line in resolved.splitlines() if line.strip().startswith(PACKAGE_ID + '/')]
     if len(activities) != 1:
@@ -806,14 +829,7 @@ def emulator_test(args):
     pid = run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip()
     if not pid:
         raise RuntimeError('The Android application exited after startup')
-    live_log_file = (output / 'native-runtime-logcat.txt').open('w', encoding='utf-8')
-    live_log = subprocess.Popen([adb, 'logcat', '--pid', pid, '-v', 'threadtime'], stdout=live_log_file, text=True)
-    def close_live_log():
-        if live_log.poll() is None:
-            live_log.terminate()
-            live_log.wait(timeout=5)
-        live_log_file.close()
-    atexit.register(close_live_log)
+    start_android_log(adb, output / 'native-runtime-logcat.txt', ['--pid', pid])
     final_logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
     (output / 'application-logcat.txt').write_text(final_logs, encoding='utf-8')
     if any(marker in final_logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
