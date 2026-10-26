@@ -114,8 +114,10 @@ jobs:
           mkdir -p "$ANDROID_USER_HOME" "$ANDROID_AVD_HOME"
           echo "ANDROID_USER_HOME=$ANDROID_USER_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_AVD_HOME=$ANDROID_AVD_HOME" >> "$GITHUB_ENV"
-          sdkmanager 'emulator' 'system-images;android-35;google_apis_ps16k;x86_64'
-          echo no | avdmanager create avd --force --name giftfinder --path "$ANDROID_AVD_HOME/giftfinder.avd" --package 'system-images;android-35;google_apis_ps16k;x86_64' --device pixel_5
+          sdkmanager --channel=0 'emulator' 'platforms;android-36' 'system-images;android-36;google_apis_ps16k;x86_64'
+          echo no | avdmanager create avd --force --name giftfinder --path "$ANDROID_AVD_HOME/giftfinder.avd" --package 'system-images;android-36;google_apis_ps16k;x86_64' --device pixel_5
+          mkdir -p build/android/x86_64/emulator
+          cp "$ANDROID_HOME/system-images/android-36/google_apis_ps16k/x86_64/source.properties" build/android/x86_64/emulator/emulator-image-source-properties.txt
           "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fx giftfinder
       - name: Boot emulator and verify the installed mobile application
         if: matrix.arch == 'x86_64'
@@ -129,7 +131,7 @@ jobs:
             ps -eo pid,comm,rss --sort=-rss | head -n 16 || true
           }
           host_state > "$evidence/host-before-emulator.txt"
-          echo 'gpu=swangle; guest_vulkan=false; guest_ram_mb=4096; image=android-35/google_apis_ps16k/x86_64' > "$evidence/emulator-launch-config.txt"
+          echo 'gpu=swangle; guest_vulkan=false; guest_ram_mb=4096; image=android-36/google_apis_ps16k/x86_64' > "$evidence/emulator-launch-config.txt"
           "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -memory 4096 -show-kernel -gpu swangle -feature -Vulkan -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
           emulator_pid=$!
           cleanup() {

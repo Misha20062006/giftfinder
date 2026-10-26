@@ -771,6 +771,16 @@ def emulator_test(args):
     page_size = int(run([adb, 'shell', 'getconf', 'PAGESIZE'], capture=True).strip())
     environment = {'actual_android_page_size': page_size, 'required_android_page_size': 16384,
                    'actual_device_abi': run([adb, 'shell', 'getprop', 'ro.product.cpu.abi'], capture=True).strip()}
+    for name, property_name in (('actual_android_sdk', 'ro.build.version.sdk'),
+                                ('actual_android_release', 'ro.build.version.release'),
+                                ('actual_android_codename', 'ro.build.version.codename'),
+                                ('actual_android_build_fingerprint', 'ro.build.fingerprint')):
+        environment[name] = run([adb, 'shell', 'getprop', property_name], capture=True).strip()
+    environment['actual_android_sdk'] = int(environment['actual_android_sdk'])
+    source_properties = output / 'emulator-image-source-properties.txt'
+    if source_properties.is_file():
+        environment['installed_system_image_properties'] = dict(line.split('=', 1) for line in
+            source_properties.read_text(encoding='utf-8').splitlines() if '=' in line and not line.startswith('#'))
     launch_config = output / 'emulator-launch-config.txt'
     if launch_config.is_file():
         environment['requested_emulator_graphics'] = launch_config.read_text(encoding='utf-8').strip()
@@ -789,6 +799,8 @@ def emulator_test(args):
     (output / 'emulator-environment.json').write_text(json.dumps(environment, indent=2) + '\n', encoding='utf-8')
     if page_size != 16384:
         raise RuntimeError(f'The native release check requires a real 16-KiB environment, got {page_size}')
+    if environment['actual_android_sdk'] != 36 or environment['actual_android_codename'] != 'REL':
+        raise RuntimeError('The native release check requires the stable Android16/API36 guest fixture')
     # Incremental install can report success while APK blocks are still streaming.
     # Test the normal, fully installed release package before launching Qt.
     run([adb, 'install', '--no-incremental', '-r', apk], timeout=120)
@@ -948,6 +960,8 @@ def emulator_test(args):
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
                 'actual_android_page_size': page_size, 'charset_detector_runtime_check': True,
+                'actual_android_sdk': environment['actual_android_sdk'],
+                'actual_android_release': environment['actual_android_release'],
                 'graphics_environment': environment,
                 'ci_https_image_probe': smoke_probe_metadata(),
                 'actions_popup_one_back_kept_main_alive': True,

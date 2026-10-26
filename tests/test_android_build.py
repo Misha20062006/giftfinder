@@ -82,6 +82,7 @@ def test_buildozer_patch_preserves_official_qt_recipe_and_includes_runtime(tmp_p
     assert app['package.domain'] + '.' + app['package.name'] == build_android.PACKAGE_ID
     assert app['android.release_artifact'] == 'apk'
     assert app['android.numeric_version'] == '70000'
+    assert app['android.api'] == '35' and app['android.minapi'] == '28'
     assert app['p4a.hook'].endswith('android_hook.py')
 
 
