@@ -5,6 +5,7 @@ import copy
 import hashlib
 from pathlib import Path
 import struct
+import sys
 import tarfile
 from types import SimpleNamespace
 import zipfile
@@ -295,7 +296,8 @@ def test_cache_fingerprint_changes_for_dependency_source_recipe_and_compiler_fla
     assert build_android.build_fingerprint(templates={'recipe.py': 'changed'}) != original
 
 
-def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(tmp_path, monkeypatch):
+@pytest.mark.parametrize('cached_context', [False, True])
+def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(tmp_path, monkeypatch, cached_context):
     installed = tmp_path / 'installed'; bundled = tmp_path / 'dist/_python_bundle__arm64-v8a/_python_bundle/site-packages'
     for directory in (installed, bundled):
         (directory / 'shiboken6').mkdir(parents=True)
@@ -308,6 +310,11 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
     ctx = SimpleNamespace(archs=[arch], get_python_install_dir=lambda _: installed,
                           get_libs_dir=lambda _: libraries, ndk=SimpleNamespace(sysroot_lib_dir=tmp_path / 'sysroot'),
                           python_recipe=SimpleNamespace(include_root=lambda _: headers, major_minor_version_string='3.14'))
+    if cached_context:
+        recipe = ctx.python_recipe
+        ctx.python_recipe = None
+        monkeypatch.setitem(sys.modules, 'pythonforandroid.recipe',
+                            SimpleNamespace(Recipe=SimpleNamespace(get_recipe=lambda name, context: recipe)))
     toolchain = SimpleNamespace(ctx=ctx, _dist=SimpleNamespace(dist_dir=tmp_path / 'dist'))
     commands = []
     def compile_fixture(command, **kwargs):

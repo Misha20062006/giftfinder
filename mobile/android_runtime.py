@@ -69,13 +69,19 @@ def rebuild_shiboken(toolchain, inputs_directory, inputs):
     installed = Path(ctx.get_python_install_dir(arch.arch))
     distribution = Path(toolchain._dist.dist_dir)
     bundled = distribution / f'_python_bundle__{arch.arch}/_python_bundle/site-packages'
-    python_headers = Path(ctx.python_recipe.include_root(arch.arch))
+    python_recipe = ctx.python_recipe
+    if python_recipe is None:
+        # p4a create/apk are separate processes; cached packaging has not run
+        # TargetPythonRecipe.prebuild_arch, which normally sets this field.
+        from pythonforandroid.recipe import Recipe
+        python_recipe = Recipe.get_recipe('python3', ctx)
+    python_headers = Path(python_recipe.include_root(arch.arch))
     libraries = Path(ctx.get_libs_dir(arch.arch))
     source = inputs_directory / 'source'
     generated = inputs_directory / 'generated/Shiboken'
     target = inputs_directory / ('compiled-' + arch.arch) / 'Shiboken.abi3.so'
     target.parent.mkdir(exist_ok=True)
-    python_library = libraries / f'libpython{ctx.python_recipe.major_minor_version_string}.so'
+    python_library = libraries / f'libpython{python_recipe.major_minor_version_string}.so'
     shiboken_library = libraries / 'libshiboken6.abi3.so'
     if not (python_headers / 'Python.h').is_file() or not python_library.is_file() or not shiboken_library.is_file():
         raise RuntimeError('Target Python/Shiboken headers and libraries must exist before rebuilding the module')
