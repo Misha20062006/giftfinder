@@ -40,6 +40,14 @@ def _remove_owned(path, root):
         path.unlink()
 
 
+def active_distribution(toolchain):
+    distribution = toolchain._dist
+    # _build_package creates a new bootstrap, but p4a only attaches its selected
+    # distribution in build_dist_from_args. Cached APK packaging skips that path.
+    toolchain.ctx.bootstrap.distribution = distribution
+    return distribution
+
+
 def install_pure_dependencies(directory, wheel_directory, dependencies):
     """Replace only declared module roots; discard stale host accelerators entirely."""
     directory, wheel_directory = Path(directory), Path(wheel_directory)
@@ -66,8 +74,9 @@ def rebuild_shiboken(toolchain, inputs_directory, inputs):
     """Compile the real generated module against this exact target Python/NDK ABI."""
     ctx = toolchain.ctx
     arch = ctx.archs[0]
+    selected = active_distribution(toolchain)
     installed = Path(ctx.get_python_install_dir(arch.arch))
-    distribution = Path(toolchain._dist.dist_dir)
+    distribution = Path(selected.dist_dir)
     bundled = distribution / f'_python_bundle__{arch.arch}/_python_bundle/site-packages'
     python_recipe = ctx.python_recipe
     if python_recipe is None:
@@ -108,8 +117,9 @@ def prepare_distribution(toolchain):
     inputs_directory = Path(os.environ['GIFT_FINDER_ANDROID_RUNTIME_INPUTS'])
     inputs = json.loads((inputs_directory / 'inputs.json').read_text(encoding='utf-8'))
     arch = toolchain.ctx.archs[0].arch
+    selected = active_distribution(toolchain)
     installed = Path(toolchain.ctx.get_python_install_dir(arch))
-    bundled = Path(toolchain._dist.dist_dir) / f'_python_bundle__{arch}/_python_bundle/site-packages'
+    bundled = Path(selected.dist_dir) / f'_python_bundle__{arch}/_python_bundle/site-packages'
     for directory in (installed, bundled):
         if not directory.is_dir():
             raise RuntimeError('Android distribution has no Python site-packages directory')

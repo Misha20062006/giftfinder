@@ -3,6 +3,7 @@ import configparser
 import io
 import copy
 import hashlib
+import json
 from pathlib import Path
 import struct
 import sys
@@ -309,13 +310,14 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
                            get_clang_exe=lambda **k: '/ndk/aarch64-linux-android28-clang++')
     ctx = SimpleNamespace(archs=[arch], get_python_install_dir=lambda _: installed,
                           get_libs_dir=lambda _: libraries, ndk=SimpleNamespace(sysroot_lib_dir=tmp_path / 'sysroot'),
-                          python_recipe=SimpleNamespace(include_root=lambda _: headers, major_minor_version_string='3.14'))
+                          python_recipe=SimpleNamespace(include_root=lambda _: headers, major_minor_version_string='3.14'),
+                          bootstrap=SimpleNamespace(distribution=None))
     if cached_context:
         recipe = ctx.python_recipe
         ctx.python_recipe = None
         monkeypatch.setitem(sys.modules, 'pythonforandroid.recipe',
                             SimpleNamespace(Recipe=SimpleNamespace(get_recipe=lambda name, context: recipe)))
-    toolchain = SimpleNamespace(ctx=ctx, _dist=SimpleNamespace(dist_dir=tmp_path / 'dist'))
+    toolchain = SimpleNamespace(ctx=ctx, _dist=SimpleNamespace(dist_dir=tmp_path / 'dist', name='giftfinder'))
     commands = []
     def compile_fixture(command, **kwargs):
         commands.append(command)
@@ -328,6 +330,28 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
     assert '-Wl,-z,relro' in commands[0] and '-Wl,--no-undefined' in commands[0]
     assert all((directory / 'shiboken6/Shiboken.abi3.so').read_bytes() == synthetic_elf()
                for directory in (installed, bundled))
+
+
+def test_cached_apk_hook_binds_distribution_before_p4a_runtime_path_apis(tmp_path, monkeypatch):
+    installed = tmp_path / 'installed'; installed.mkdir()
+    bundle = tmp_path / 'dist/_python_bundle__arm64-v8a/_python_bundle/site-packages'
+    bundle.mkdir(parents=True)
+    selected = SimpleNamespace(name='giftfinder', dist_dir=tmp_path / 'dist')
+    ctx = SimpleNamespace(archs=[SimpleNamespace(arch='arm64-v8a')], bootstrap=SimpleNamespace(distribution=None))
+    def python_install(arch):
+        assert ctx.bootstrap.distribution is selected
+        return installed
+    ctx.get_python_install_dir = python_install
+    toolchain = SimpleNamespace(ctx=ctx, _dist=selected)
+    inputs = tmp_path / 'inputs'; inputs.mkdir()
+    (inputs / 'inputs.json').write_text(json.dumps({'pure_wheels': []}), encoding='utf-8')
+    monkeypatch.setenv('GIFT_FINDER_ANDROID_RUNTIME_INPUTS', str(inputs))
+    calls = []
+    monkeypatch.setattr(android_runtime, 'install_pure_dependencies', lambda directory, *a: calls.append(directory))
+    monkeypatch.setattr(android_runtime, 'rebuild_shiboken', lambda *a: {'architecture': 'arm64-v8a'})
+    android_runtime.prepare_distribution(toolchain)
+    assert calls == [installed, bundle]
+    assert (inputs / 'rebuild-arm64-v8a.json').is_file()
 
 
 def test_qt_activity_hook_preserves_listeners_and_lifecycle_and_is_idempotent(tmp_path):
