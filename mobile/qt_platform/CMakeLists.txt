@@ -6,7 +6,7 @@ project(GiftFinderQtAndroidPlatform LANGUAGES C CXX)
 # change is applied and hash-verified before configuration.
 find_package(Qt6 6.12.0 EXACT REQUIRED COMPONENTS Core Gui CorePrivate GuiPrivate)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(platform "${GIFTFINDER_QTBASE_SOURCE}/src/plugins/platforms/android")
 set(sources
