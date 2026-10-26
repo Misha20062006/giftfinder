@@ -308,16 +308,24 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
     for name in ('libshiboken6.abi3.so', 'libpython3.14.so'): (libraries / name).touch()
     arch = SimpleNamespace(arch='arm64-v8a', command_prefix='aarch64-linux-android',
                            get_clang_exe=lambda **k: '/ndk/aarch64-linux-android28-clang++')
+    built_recipes = ['hostpython3', 'libffi', 'openssl', 'sqlite3', 'libbz2', 'python3', 'shiboken6', 'pyside6']
+    def include_root(_):
+        # Pinned PythonRecipe.get_build_dir selects its build directory by
+        # testing optional dependencies against ctx.recipe_build_order.
+        assert 'libbz2' in ctx.recipe_build_order
+        assert 'liblzma' not in ctx.recipe_build_order
+        return headers
     ctx = SimpleNamespace(archs=[arch], get_python_install_dir=lambda _: installed,
                           get_libs_dir=lambda _: libraries, ndk=SimpleNamespace(sysroot_lib_dir=tmp_path / 'sysroot'),
-                          python_recipe=SimpleNamespace(include_root=lambda _: headers, major_minor_version_string='3.14'),
+                          python_recipe=SimpleNamespace(include_root=include_root, major_minor_version_string='3.14'),
+                          recipe_build_order=None if cached_context else built_recipes,
                           bootstrap=SimpleNamespace(distribution=None))
     if cached_context:
         recipe = ctx.python_recipe
         ctx.python_recipe = None
         monkeypatch.setitem(sys.modules, 'pythonforandroid.recipe',
                             SimpleNamespace(Recipe=SimpleNamespace(get_recipe=lambda name, context: recipe)))
-    toolchain = SimpleNamespace(ctx=ctx, _dist=SimpleNamespace(dist_dir=tmp_path / 'dist', name='giftfinder'))
+    toolchain = SimpleNamespace(ctx=ctx, _dist=SimpleNamespace(dist_dir=tmp_path / 'dist', name='giftfinder', recipes=built_recipes))
     commands = []
     def compile_fixture(command, **kwargs):
         commands.append(command)
@@ -325,6 +333,9 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
     monkeypatch.setattr(android_runtime.subprocess, 'run', compile_fixture)
     result = android_runtime.rebuild_shiboken(toolchain, tmp_path, build_android.INPUTS)
     assert result['source_commit'] == build_android.INPUTS['shiboken_source']['commit']
+    assert ctx.recipe_build_order == built_recipes
+    if not cached_context:
+        assert ctx.recipe_build_order is built_recipes
     assert commands[0][0].endswith('android28-clang++')
     assert '-Wl,-z,max-page-size=16384' in commands[0] and '-Wl,-z,common-page-size=16384' in commands[0]
     assert '-Wl,-z,relro' in commands[0] and '-Wl,--no-undefined' in commands[0]
@@ -336,8 +347,9 @@ def test_cached_apk_hook_binds_distribution_before_p4a_runtime_path_apis(tmp_pat
     installed = tmp_path / 'installed'; installed.mkdir()
     bundle = tmp_path / 'dist/_python_bundle__arm64-v8a/_python_bundle/site-packages'
     bundle.mkdir(parents=True)
-    selected = SimpleNamespace(name='giftfinder', dist_dir=tmp_path / 'dist')
-    ctx = SimpleNamespace(archs=[SimpleNamespace(arch='arm64-v8a')], bootstrap=SimpleNamespace(distribution=None))
+    selected = SimpleNamespace(name='giftfinder', dist_dir=tmp_path / 'dist', recipes=['python3', 'shiboken6', 'pyside6'])
+    ctx = SimpleNamespace(archs=[SimpleNamespace(arch='arm64-v8a')], bootstrap=SimpleNamespace(distribution=None),
+                          recipe_build_order=None)
     def python_install(arch):
         assert ctx.bootstrap.distribution is selected
         return installed
@@ -351,6 +363,7 @@ def test_cached_apk_hook_binds_distribution_before_p4a_runtime_path_apis(tmp_pat
     monkeypatch.setattr(android_runtime, 'rebuild_shiboken', lambda *a: {'architecture': 'arm64-v8a'})
     android_runtime.prepare_distribution(toolchain)
     assert calls == [installed, bundle]
+    assert ctx.recipe_build_order == selected.recipes and ctx.recipe_build_order is not selected.recipes
     assert (inputs / 'rebuild-arm64-v8a.json').is_file()
 
 

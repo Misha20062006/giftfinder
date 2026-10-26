@@ -45,6 +45,10 @@ def active_distribution(toolchain):
     # _build_package creates a new bootstrap, but p4a only attaches its selected
     # distribution in build_dist_from_args. Cached APK packaging skips that path.
     toolchain.ctx.bootstrap.distribution = distribution
+    if toolchain.ctx.recipe_build_order is None:
+        # dist_info.json saves the recipes used by the original build. Recipe
+        # path APIs need these choices to locate its existing Python headers.
+        toolchain.ctx.recipe_build_order = list(distribution.recipes)
     return distribution
 
 
