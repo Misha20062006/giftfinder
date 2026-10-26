@@ -7,7 +7,7 @@ os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 
 import pytest
 from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QRect, Qt
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtGui import QDesktopServices, QKeyEvent
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QFileDialog, QListWidget, QMenu
 
@@ -334,6 +334,55 @@ def test_back_closes_category_popup_before_cancelling_filter_draft(window, app):
     assert window.filter_query == original
     QTest.keyClick(dialog.search, Qt.Key.Key_Back); app.processEvents()
     assert window.filter_dialog is None and window.filter_query == original
+
+
+def send_unaccepted_system_key(app, widget, event_type, key):
+    event = QKeyEvent(event_type, key, Qt.KeyboardModifier.NoModifier)
+    event.ignore()
+    app.sendEvent(widget.windowHandle(), event)
+    app.processEvents()
+    return event.isAccepted()
+
+
+@pytest.mark.parametrize('key', [Qt.Key.Key_Back, Qt.Key.Key_Escape])
+def test_popup_back_acknowledges_matching_release_on_main_window(window, app, key):
+    menu = QMenu(window); menu.addAction('Rates')
+    menu.popup(window.mobile_menu_button.mapToGlobal(QPoint(0, 0))); app.processEvents()
+    try:
+        assert send_unaccepted_system_key(app, menu, QEvent.Type.KeyPress, key)
+        assert not menu.isVisible() and window.isVisible()
+        assert send_unaccepted_system_key(app, window, QEvent.Type.KeyRelease, key)
+        assert window.isVisible() and window.mode == 'catalog'
+        assert not window.eventFilter(window, QKeyEvent(QEvent.Type.KeyRelease, key, Qt.KeyboardModifier.NoModifier))
+    finally:
+        menu.deleteLater()
+
+
+def test_category_popup_back_release_keeps_filter_draft_and_next_back_cancels(window, app):
+    original = SearchQuery(collection='Input Key', models=('Creeper',))
+    window.filter_query = original
+    window.open_filters(); dialog = window.filter_dialog
+    dialog.number.setText('42'); draft = dialog.state
+    dialog.category_select.showPopup(); app.processEvents(); popup = app.activePopupWidget()
+    assert send_unaccepted_system_key(app, popup, QEvent.Type.KeyPress, Qt.Key.Key_Back)
+    assert send_unaccepted_system_key(app, dialog, QEvent.Type.KeyRelease, Qt.Key.Key_Back)
+    assert window.filter_dialog is dialog and dialog.number.text() == '42'
+    assert dialog.state == draft and window.filter_query == original
+    assert send_unaccepted_system_key(app, dialog, QEvent.Type.KeyPress, Qt.Key.Key_Back)
+    assert send_unaccepted_system_key(app, window, QEvent.Type.KeyRelease, Qt.Key.Key_Back)
+    assert window.filter_dialog is None and window.isVisible() and window.filter_query == original
+
+
+def test_back_release_does_not_navigate_again_or_consume_unpaired_events(window, app):
+    window.show_favorites(); app.processEvents()
+    assert not window.eventFilter(window, QKeyEvent(QEvent.Type.KeyRelease, Qt.Key.Key_Back, Qt.KeyboardModifier.NoModifier))
+    assert send_unaccepted_system_key(app, window, QEvent.Type.KeyPress, Qt.Key.Key_Back)
+    assert window.mode == 'catalog' and window.isVisible()
+    assert not window.eventFilter(window, QKeyEvent(QEvent.Type.KeyRelease, Qt.Key.Key_Escape, Qt.KeyboardModifier.NoModifier))
+    assert send_unaccepted_system_key(app, window, QEvent.Type.KeyRelease, Qt.Key.Key_Back)
+    assert window.mode == 'catalog' and window.isVisible()
+    assert send_unaccepted_system_key(app, window, QEvent.Type.KeyPress, Qt.Key.Key_Back)
+    assert not window.isVisible()
 
 
 def swipe_up(view, device):

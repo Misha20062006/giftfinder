@@ -266,6 +266,7 @@ class MobileDetailsDialog(DetailsDialog):
 class MobileWindow(MainWindow):
     def __init__(self, offline=False):
         super().__init__(offline=offline)
+        self._mobile_back_key = None
         self.setMinimumSize(320, 240); self.resize(360, 800)
         self.setStyleSheet(self.styleSheet()+'''
 QLineEdit, QComboBox { min-height: 28px; }
@@ -528,8 +529,17 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         self.close()
 
     def eventFilter(self, obj, event):
-        if self.isVisible() and event.type() == QEvent.Type.KeyPress and event.key() in (Qt.Key.Key_Back, Qt.Key.Key_Escape):
-            self.handle_back(); return True
+        if (self.isVisible() and event.type() in (QEvent.Type.KeyPress, QEvent.Type.KeyRelease)
+                and event.key() in (Qt.Key.Key_Back, Qt.Key.Key_Escape)):
+            if event.type() == QEvent.Type.KeyPress:
+                self._mobile_back_key = event.key()
+                event.accept()
+                self.handle_back(); return True
+            if self._mobile_back_key == event.key():
+                self._mobile_back_key = None
+                # Android also checks release acceptance before its default
+                # task-background action. A closed popup no longer receives it.
+                event.accept(); return True
         if event.type() == QEvent.Type.FocusIn and isinstance(obj, QWidget) and self.filter_dialog and isinstance(self.filter_dialog, MobileFilterDialog):
             dialog = self.filter_dialog
             scroll = dialog.form_scroll
