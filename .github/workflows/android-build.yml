@@ -52,6 +52,9 @@ jobs:
           echo "$android_sdk/platform-tools" >> "$GITHUB_PATH"
       - name: Install Android build dependencies
         run: |
+          # Use the official Ubuntu archive before apt starts downloading packages.
+          sudo sed -i '/azure\.archive\.ubuntu\.com\/ubuntu\//d' /etc/apt/apt-mirrors.txt
+          grep -Fq 'https://archive.ubuntu.com/ubuntu/' /etc/apt/apt-mirrors.txt
           sudo apt-get update -q
           sudo apt-get install -y autoconf automake libtool libltdl-dev pkg-config cmake ninja-build p7zip-full ccache zlib1g-dev libffi-dev libssl-dev libncurses-dev libtinfo6 libegl1 libopengl0 fonts-dejavu-core fonts-noto-core
           test -f /usr/share/aclocal/ltdl.m4

@@ -336,7 +336,8 @@ def test_back_closes_category_popup_before_cancelling_filter_draft(window, app):
     assert window.filter_dialog is None and window.filter_query == original
 
 
-def test_filter_category_opens_from_one_touch_tap_and_back_keeps_draft(window, app, touch_device):
+@pytest.mark.parametrize('queued', [False, True])
+def test_filter_category_opens_from_one_touch_tap_and_back_keeps_draft(window, app, touch_device, queued):
     original = SearchQuery(collection='Input Key', models=('Creeper',))
     window.filter_query = original
     window.open_filters(); dialog = window.filter_dialog
@@ -344,9 +345,10 @@ def test_filter_category_opens_from_one_touch_tap_and_back_keeps_draft(window, a
     category = dialog.category_select
     point = category.rect().center()
     sequence = QTest.touchEvent(category, touch_device)
-    sequence.press(0, point, category).commit()
-    QTest.qWait(30)
-    sequence.release(0, point, category).commit()
+    sequence.press(0, point, category).commit(processEvents=not queued)
+    if not queued:
+        assert app.activePopupWidget() is None
+    sequence.release(0, point, category).commit(processEvents=not queued)
     app.processEvents()
     popup = app.activePopupWidget()
     assert popup is not None and category.view().isVisible()
@@ -355,6 +357,43 @@ def test_filter_category_opens_from_one_touch_tap_and_back_keeps_draft(window, a
     assert send_unaccepted_system_key(app, dialog, QEvent.Type.KeyRelease, Qt.Key.Key_Back)
     assert window.filter_dialog is dialog and dialog.search.text() == 'egg'
     assert dialog.category == 'collections' and window.filter_query == original
+
+
+def test_filter_category_waits_for_release_then_accepts_a_new_row_tap(window, app):
+    window.open_filters(); dialog = window.filter_dialog
+    dialog.search.setText('egg'); category = dialog.category_select
+    selected = []; category.activated.connect(selected.append)
+    QTest.mousePress(category, Qt.MouseButton.LeftButton)
+    app.processEvents()
+    assert app.activePopupWidget() is None and selected == []
+    QTest.mouseRelease(category, Qt.MouseButton.LeftButton)
+    app.processEvents()
+    assert category.view().isVisible() and selected == []
+    index = category.model().index(category.findData('backdrops'), 0)
+    QTest.mouseClick(category.view().viewport(), Qt.MouseButton.LeftButton,
+                     pos=category.view().visualRect(index).center())
+    app.processEvents()
+    assert selected == [index.row()] and dialog.category == 'backdrops'
+    assert app.activePopupWidget() is None
+
+
+def test_filter_category_cancels_outside_or_interrupted_press_and_keeps_keyboard(window, app):
+    window.open_filters(); dialog = window.filter_dialog; category = dialog.category_select
+    QTest.mouseRelease(category, Qt.MouseButton.LeftButton)
+    assert app.activePopupWidget() is None
+    QTest.mousePress(category, Qt.MouseButton.LeftButton)
+    QTest.mouseRelease(category, Qt.MouseButton.LeftButton, pos=QPoint(-100, -100))
+    assert app.activePopupWidget() is None
+    QTest.mousePress(category, Qt.MouseButton.LeftButton)
+    app.sendEvent(category, QEvent(QEvent.Type.UngrabMouse))
+    QTest.mouseRelease(category, Qt.MouseButton.LeftButton)
+    assert app.activePopupWidget() is None
+    QTest.keyClick(category, Qt.Key.Key_Down, Qt.KeyboardModifier.AltModifier)
+    app.processEvents()
+    assert category.view().isVisible()
+    assert send_unaccepted_system_key(app, app.activePopupWidget(), QEvent.Type.KeyPress, Qt.Key.Key_Back)
+    assert send_unaccepted_system_key(app, dialog, QEvent.Type.KeyRelease, Qt.Key.Key_Back)
+    assert window.filter_dialog is dialog and dialog.category == 'collections'
 
 
 def send_unaccepted_system_key(app, widget, event_type, key):

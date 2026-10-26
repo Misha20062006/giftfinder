@@ -163,6 +163,35 @@ class MobileSearchSelector(SearchSelector):
         self.popup.setGeometry(bounds.x(), bounds.y(), max(200, bounds.width()), min(430, max(160, bounds.height())))
 
 
+class MobileCategoryCombo(SortCombo):
+    """Open after a complete tap, before a new gesture can choose a row."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._category_press = False
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._category_press = self.rect().contains(event.position().toPoint())
+            event.accept()
+        else:
+            super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            open_popup = self._category_press and self.rect().contains(event.position().toPoint())
+            self._category_press = False
+            event.accept()
+            if open_popup: self.showPopup()
+        else:
+            super().mouseReleaseEvent(event)
+
+    def event(self, event):
+        if event.type() in (QEvent.Type.Hide, QEvent.Type.WindowDeactivate,
+                            QEvent.Type.UngrabMouse, QEvent.Type.TouchCancel):
+            self._category_press = False
+        return super().event(event)
+
+
 class MobileFilterDialog(FilterDialog):
     def __init__(self, window, query=None, extra=None):
         super().__init__(window, query, extra)
@@ -177,7 +206,7 @@ class MobileFilterDialog(FilterDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         content = QWidget(); form = QVBoxLayout(content); form.setContentsMargins(0, 0, 0, 0); form.setSpacing(8)
         self.summary.setWordWrap(True); form.addWidget(self.summary)
-        self.category_select = touch(SortCombo())
+        self.category_select = touch(MobileCategoryCombo())
         self.category_select.setAccessibleIdentifier('mobileFilterCategory')
         self.search.setAccessibleIdentifier('mobileFilterListSearch')
         for key, title in (('collections','collection'), ('models','model'), ('backdrops','backdrop'), ('symbols','symbol'), ('themes','themes'), ('colors','color')):
