@@ -374,6 +374,34 @@ def test_cached_apk_hook_binds_distribution_before_p4a_runtime_path_apis(tmp_pat
     assert (inputs / 'rebuild-arm64-v8a.json').is_file()
 
 
+def test_native_failure_capture_keeps_frame_process_and_window_state(tmp_path, monkeypatch):
+    monkeypatch.setattr(build_android.shutil, 'which', lambda _: '/android/adb')
+    commands = []
+    def capture(command, **kwargs):
+        commands.append(command)
+        kwargs['stdout'].write(b'captured state')
+        if 'activity' in command:
+            raise build_android.subprocess.TimeoutExpired(command, 20)
+    monkeypatch.setattr(build_android.subprocess, 'run', capture)
+    build_android.capture_emulator_failure(SimpleNamespace(evidence=str(tmp_path)))
+    assert len(commands) == 4
+    assert (tmp_path / 'android-runtime-failure.png').read_bytes() == b'captured state'
+    assert (tmp_path / 'runtime-failure-windows.txt').read_bytes() == b'captured state'
+    assert (tmp_path / 'runtime-failure-pid.txt').read_bytes() == b'captured state'
+
+
+def test_native_diagnostic_failure_does_not_hide_original_runtime_failure(monkeypatch):
+    monkeypatch.setattr(sys, 'argv', ['build_android.py', 'emulator-test', '--apk', 'smoke.apk'])
+    def fail_runtime(_):
+        raise RuntimeError('Original native regression failed')
+    def fail_capture(_):
+        raise OSError('Evidence destination unavailable')
+    monkeypatch.setattr(build_android, 'emulator_test', fail_runtime)
+    monkeypatch.setattr(build_android, 'capture_emulator_failure', fail_capture)
+    with pytest.raises(RuntimeError, match='Original native regression failed'):
+        build_android.main()
+
+
 def test_qt_activity_hook_preserves_listeners_and_lifecycle_and_is_idempotent(tmp_path):
     activity = tmp_path / 'src/main/java/org/kivy/android/PythonActivity.java'
     activity.parent.mkdir(parents=True)

@@ -699,6 +699,9 @@ def emulator_test(args):
     if not adb:
         raise RuntimeError('adb must be available')
     page_size = int(run([adb, 'shell', 'getconf', 'PAGESIZE'], capture=True).strip())
+    environment = {'actual_android_page_size': page_size, 'required_android_page_size': 16384,
+                   'actual_device_abi': run([adb, 'shell', 'getprop', 'ro.product.cpu.abi'], capture=True).strip()}
+    (output / 'emulator-environment.json').write_text(json.dumps(environment, indent=2) + '\n', encoding='utf-8')
     if page_size != 16384:
         raise RuntimeError(f'The native release check requires a real 16-KiB environment, got {page_size}')
     # Incremental install can report success while APK blocks are still streaming.
@@ -880,6 +883,27 @@ def emulator_test(args):
     print(json.dumps(evidence, indent=2), flush=True)
 
 
+def capture_emulator_failure(args):
+    """Keep the actual failed frame and Android state without masking the failure."""
+    adb = shutil.which('adb')
+    if not adb:
+        return
+    output = Path(args.evidence).resolve()
+    output.mkdir(parents=True, exist_ok=True)
+    captures = {
+        'android-runtime-failure.png': ['exec-out', 'screencap', '-p'],
+        'runtime-failure-activities.txt': ['shell', 'dumpsys', 'activity', 'activities'],
+        'runtime-failure-windows.txt': ['shell', 'dumpsys', 'window', 'windows'],
+        'runtime-failure-pid.txt': ['shell', 'pidof', PACKAGE_ID],
+    }
+    for filename, command in captures.items():
+        try:
+            with (output / filename).open('wb') as stream:
+                subprocess.run([adb, *command], stdout=stream, stderr=subprocess.STDOUT, timeout=20, check=False)
+        except (OSError, subprocess.SubprocessError) as error:
+            print('Could not capture Android failure evidence:', filename, type(error).__name__, flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
@@ -901,7 +925,14 @@ def main():
     elif args.command == 'build':
         build(args)
     else:
-        emulator_test(args)
+        try:
+            emulator_test(args)
+        except Exception:
+            try:
+                capture_emulator_failure(args)
+            except Exception as error:
+                print('Could not save Android failure evidence:', type(error).__name__, flush=True)
+            raise
 
 
 if __name__ == '__main__':
