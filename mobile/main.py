@@ -79,15 +79,29 @@ def smoke_runtime_checks(window):
 
 
 def install_smoke_key_trace(window):
-    """Observe CI Back dispatch before the ordinary window filter consumes it."""
+    """Observe CI key/category dispatch without changing application events."""
     if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') != '1':
         return None
-    from PySide6.QtCore import QEvent, QObject, Qt
+    from PySide6.QtCore import QEvent, QObject, Qt, QTimer
     from PySide6.QtGui import QGuiApplication
-    from PySide6.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication, QStyle, QStyleOptionComboBox
     import json
 
     class KeyTrace(QObject):
+        @staticmethod
+        def widget_identity(widget):
+            return None if widget is None else {'class': widget.metaObject().className(),
+                                               'name': widget.objectName()}
+
+        def category_snapshot(self, dialog, category, event_type, timestamp):
+            if getattr(window, 'filter_dialog', None) is not dialog:
+                return
+            record = {'after_type': event_type, 'timestamp': timestamp,
+                      'category_has_focus': category.hasFocus(),
+                      'focus_widget': self.widget_identity(QApplication.focusWidget()),
+                      'popup': self.widget_identity(QApplication.activePopupWidget())}
+            print('GIFTFINDER_ANDROID_CATEGORY_AFTER ' + json.dumps(record, sort_keys=True), flush=True)
+
         def eventFilter(self, target, event):
             if (event.type() in (QEvent.Type.KeyPress, QEvent.Type.KeyRelease)
                     and event.key() in (Qt.Key.Key_Back, Qt.Key.Key_Escape)):
@@ -98,6 +112,40 @@ def install_smoke_key_trace(window):
                           'timestamp': event.timestamp(),
                           'input_method_visible': QGuiApplication.inputMethod().isVisible()}
                 print('GIFTFINDER_ANDROID_KEY_EVENT ' + json.dumps(record, sort_keys=True), flush=True)
+            elif event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
+                                  QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate, QEvent.Type.TouchEnd):
+                dialog = getattr(window, 'filter_dialog', None)
+                category = getattr(dialog, 'category_select', None)
+                if category is not None and category.isVisible():
+                    if event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease):
+                        local, global_position = event.position(), event.globalPosition()
+                    elif event.points():
+                        local, global_position = event.points()[0].position(), event.points()[0].globalPosition()
+                    else:
+                        return False
+                    if category.rect().contains(category.mapFromGlobal(global_position.toPoint())):
+                        event_type, timestamp = event.type().name, event.timestamp()
+                        option = QStyleOptionComboBox(); category.initStyleOption(option)
+                        hit = category.style().hitTestComplexControl(QStyle.ComplexControl.CC_ComboBox,
+                            option, category.mapFromGlobal(global_position.toPoint()), category)
+                        record = {'type': event_type, 'timestamp': timestamp,
+                                  'target': self.widget_identity(target),
+                                  'local': [local.x(), local.y()],
+                                  'global': [global_position.x(), global_position.y()],
+                                  'category_has_focus': category.hasFocus(),
+                                  'category_editable': category.isEditable(),
+                                  'hit_none': hit == QStyle.SubControl.SC_None,
+                                  'hit_arrow': hit == QStyle.SubControl.SC_ComboBoxArrow,
+                                  'hit_edit_field': hit == QStyle.SubControl.SC_ComboBoxEditField,
+                                  'focus_on_touch_release': QGuiApplication.styleHints().setFocusOnTouchRelease(),
+                                  'focus_widget': self.widget_identity(QApplication.focusWidget()),
+                                  'popup': self.widget_identity(QApplication.activePopupWidget())}
+                        if event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease):
+                            record.update(button=event.button().name, source=event.source().name,
+                                          spontaneous=event.spontaneous(), accepted=event.isAccepted())
+                        print('GIFTFINDER_ANDROID_CATEGORY_EVENT ' + json.dumps(record, sort_keys=True), flush=True)
+                        QTimer.singleShot(0, lambda d=dialog, c=category, t=event_type, ts=timestamp:
+                                          self.category_snapshot(d, c, t, ts))
             return False
 
     observer = KeyTrace(window)

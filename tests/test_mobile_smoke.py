@@ -9,9 +9,9 @@ import pytest
 from PySide6.QtWidgets import QApplication
 from PySide6 import QtNetwork
 from PySide6.QtGui import QImage
-from PySide6.QtCore import QEvent, QObject, Qt
-from PySide6.QtGui import QKeyEvent
-from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import QEvent, QObject, QPoint, QPointF, Qt
+from PySide6.QtGui import QKeyEvent, QMouseEvent
+from PySide6.QtWidgets import QComboBox, QDialog, QWidget
 from giftfinder.ui_common import application
 from mobile import main as entry
 
@@ -126,3 +126,49 @@ def test_key_trace_observes_before_normal_filter_without_consuming_or_changing_e
         app.removeEventFilter(observer)
         app.removeEventFilter(normal)
         window.deleteLater()
+
+
+def test_category_trace_observes_pointer_and_post_dispatch_focus_without_changing_events(app, monkeypatch, capsys):
+    monkeypatch.setenv('GIFT_FINDER_ANDROID_SMOKE', '1')
+    window = QWidget(); dialog = QDialog(window)
+    received = []
+
+    class Category(QComboBox):
+        def event(self, event):
+            if event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease):
+                received.append(event.isAccepted())
+                return True
+            return super().event(event)
+
+    category = Category(dialog); category.setGeometry(10, 10, 200, 48)
+    category.addItem('Collection', 'collections')
+    dialog.category_select = category; window.filter_dialog = dialog
+    window.show(); dialog.show(); app.processEvents()
+    observer = entry.install_smoke_key_trace(window)
+    try:
+        point = QPointF(20, 20); global_point = QPointF(category.mapToGlobal(QPoint(20, 20)))
+        for event_type, buttons in ((QEvent.Type.MouseButtonPress, Qt.MouseButton.LeftButton),
+                                    (QEvent.Type.MouseButtonRelease, Qt.MouseButton.NoButton)):
+            event = QMouseEvent(event_type, point, global_point, Qt.MouseButton.LeftButton,
+                                buttons, Qt.KeyboardModifier.NoModifier)
+            event.setTimestamp(12345); event.ignore()
+            app.sendEvent(category, event)
+        app.processEvents()
+        assert received == [False, False]
+        output = capsys.readouterr().out.splitlines()
+        records = [json.loads(line.removeprefix('GIFTFINDER_ANDROID_CATEGORY_EVENT '))
+                   for line in output if line.startswith('GIFTFINDER_ANDROID_CATEGORY_EVENT ')]
+        snapshots = [json.loads(line.removeprefix('GIFTFINDER_ANDROID_CATEGORY_AFTER '))
+                     for line in output if line.startswith('GIFTFINDER_ANDROID_CATEGORY_AFTER ')]
+        category_records = [r for r in records if r['target']['class'] == category.metaObject().className()]
+        assert [r['type'] for r in category_records] == ['MouseButtonPress', 'MouseButtonRelease']
+        assert all(r['local'] == [20, 20] and r['global'] == [global_point.x(), global_point.y()]
+                   and r['timestamp'] == 12345 and r['target']['class'] == category.metaObject().className()
+                   and r['focus_on_touch_release'] == app.styleHints().setFocusOnTouchRelease()
+                   for r in category_records)
+        assert [r['after_type'] for r in snapshots] == [r['type'] for r in records]
+        assert all(r['category_has_focus'] == category.hasFocus() and r['popup'] is None for r in snapshots)
+    finally:
+        app.removeEventFilter(observer)
+        window.filter_dialog = None
+        dialog.close(); window.close(); window.deleteLater()

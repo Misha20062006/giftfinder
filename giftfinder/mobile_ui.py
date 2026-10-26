@@ -9,11 +9,11 @@ import os
 
 from PySide6.QtCore import QEvent, QFile, QIODevice, QPoint, QRect, QRectF, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QPainter, QPen
-from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QFileDialog, QGridLayout,
+from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout,
     QHBoxLayout, QLabel, QLayout, QListView, QListWidget, QListWidgetItem, QMenu,
     QScrollArea, QScroller, QSizeGrip, QSizePolicy, QStyledItemDelegate, QVBoxLayout, QWidget)
 
-from .controls import SearchSelector
+from .controls import SearchSelector, SortCombo
 from .core import MARKETS, Offer, safe_url
 from .design import MotionButton, font
 from .i18n import LANGUAGES, age_text, bind, language_code, message, refresh_tree, tr
@@ -177,7 +177,7 @@ class MobileFilterDialog(FilterDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         content = QWidget(); form = QVBoxLayout(content); form.setContentsMargins(0, 0, 0, 0); form.setSpacing(8)
         self.summary.setWordWrap(True); form.addWidget(self.summary)
-        self.category_select = touch(QComboBox())
+        self.category_select = touch(SortCombo())
         self.category_select.setAccessibleIdentifier('mobileFilterCategory')
         self.search.setAccessibleIdentifier('mobileFilterListSearch')
         for key, title in (('collections','collection'), ('models','model'), ('backdrops','backdrop'), ('symbols','symbol'), ('themes','themes'), ('colors','color')):

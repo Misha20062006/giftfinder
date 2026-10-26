@@ -336,6 +336,27 @@ def test_back_closes_category_popup_before_cancelling_filter_draft(window, app):
     assert window.filter_dialog is None and window.filter_query == original
 
 
+def test_filter_category_opens_from_one_touch_tap_and_back_keeps_draft(window, app, touch_device):
+    original = SearchQuery(collection='Input Key', models=('Creeper',))
+    window.filter_query = original
+    window.open_filters(); dialog = window.filter_dialog
+    dialog.search.setText('egg'); dialog.search.setFocus(); app.processEvents()
+    category = dialog.category_select
+    point = category.rect().center()
+    sequence = QTest.touchEvent(category, touch_device)
+    sequence.press(0, point, category).commit()
+    QTest.qWait(30)
+    sequence.release(0, point, category).commit()
+    app.processEvents()
+    popup = app.activePopupWidget()
+    assert popup is not None and category.view().isVisible()
+    assert tr('backdrop') in [category.itemText(i) for i in range(category.count())]
+    assert send_unaccepted_system_key(app, popup, QEvent.Type.KeyPress, Qt.Key.Key_Back)
+    assert send_unaccepted_system_key(app, dialog, QEvent.Type.KeyRelease, Qt.Key.Key_Back)
+    assert window.filter_dialog is dialog and dialog.search.text() == 'egg'
+    assert dialog.category == 'collections' and window.filter_query == original
+
+
 def send_unaccepted_system_key(app, widget, event_type, key):
     event = QKeyEvent(event_type, key, Qt.KeyboardModifier.NoModifier)
     event.ignore()
