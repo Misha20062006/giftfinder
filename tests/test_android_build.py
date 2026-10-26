@@ -17,6 +17,7 @@ from tools import build_android
 from mobile import android_hook
 from mobile import android_runtime
 from tools import android_elf
+from tools import android_qt_platform
 
 
 def test_modern_sdk_compatibility_adds_only_a_missing_legacy_command(tmp_path):
@@ -368,6 +369,7 @@ def test_cached_apk_hook_binds_distribution_before_p4a_runtime_path_apis(tmp_pat
     calls = []
     monkeypatch.setattr(android_runtime, 'install_pure_dependencies', lambda directory, *a: calls.append(directory))
     monkeypatch.setattr(android_runtime, 'rebuild_shiboken', lambda *a: {'architecture': 'arm64-v8a'})
+    monkeypatch.setattr(android_qt_platform, 'install_platform', lambda *a: None)
     android_runtime.prepare_distribution(toolchain)
     assert calls == [installed, bundle]
     assert ctx.recipe_build_order == selected.recipes and ctx.recipe_build_order is not selected.recipes
@@ -400,6 +402,59 @@ def test_native_diagnostic_failure_does_not_hide_original_runtime_failure(monkey
     monkeypatch.setattr(build_android, 'capture_emulator_failure', fail_capture)
     with pytest.raises(RuntimeError, match='Original native regression failed'):
         build_android.main()
+
+
+def test_qt_accessibility_backport_accepts_only_exact_original_or_patched_source(tmp_path):
+    original = b'if (QAndroidPlatformWindow::surfacesCount() == 0) {\n"no valid surface."\n}\n'
+    patched = b'if (QGuiApplication::topLevelWindows().isEmpty()) {\n"no top-level windows."\n}\n'
+    pins = {'original_file_sha256': hashlib.sha256(original).hexdigest(),
+            'patched_file_sha256': hashlib.sha256(patched).hexdigest()}
+    source = tmp_path / 'androidjniaccessibility.cpp'; source.write_bytes(original)
+    android_qt_platform.patch_accessibility(source, pins)
+    assert source.read_bytes() == patched
+    android_qt_platform.patch_accessibility(source, pins)
+    assert source.read_bytes() == patched
+    source.write_bytes(original + b'unexpected upstream change')
+    with pytest.raises(RuntimeError, match='differs from the pinned release'):
+        android_qt_platform.patch_accessibility(source, pins)
+
+
+def test_qt_platform_backport_replaces_all_four_build_copies(tmp_path):
+    native = 'libplugins_platforms_qtforandroid_arm64-v8a.so'
+    installed, dist, libraries = tmp_path / 'installed', tmp_path / 'dist', tmp_path / 'libraries'
+    bundle = dist / '_python_bundle__arm64-v8a/_python_bundle/site-packages'
+    targets = [directory / 'PySide6/Qt/plugins/platforms' / native for directory in (installed, bundle)]
+    targets += [dist / 'libs/arm64-v8a' / native, libraries / native]
+    for path in targets:
+        path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(b'old plugin')
+    source = tmp_path / 'rebuilt.so'; source.write_bytes(b'new source-built plugin')
+    metadata = {'plugin': source.name, 'sha256': hashlib.sha256(source.read_bytes()).hexdigest()}
+    (tmp_path / 'qt-platform-arm64-v8a.json').write_text(json.dumps(metadata), encoding='utf8')
+    ctx = SimpleNamespace(archs=[SimpleNamespace(arch='arm64-v8a')],
+                          get_python_install_dir=lambda _: installed, get_libs_dir=lambda _: libraries)
+    android_qt_platform.install_platform(SimpleNamespace(ctx=ctx, _dist=SimpleNamespace(dist_dir=dist)), tmp_path)
+    assert all(p.read_bytes() == source.read_bytes() for p in targets)
+
+
+def test_qt_platform_verification_rejects_a_stale_nested_plugin(tmp_path):
+    native = 'libplugins_platforms_qtforandroid_arm64-v8a.so'
+    payload = b'verified plugin'
+    metadata = {'sha256': hashlib.sha256(payload).hexdigest()}
+    apk = tmp_path / 'app.apk'
+    def package(nested_payload):
+        buffer = io.BytesIO()
+        with tarfile.open(fileobj=buffer, mode='w:gz') as bundle:
+            entry = tarfile.TarInfo('_python_bundle/site-packages/PySide6/Qt/plugins/platforms/' + native)
+            entry.size = len(nested_payload); bundle.addfile(entry, io.BytesIO(nested_payload))
+        with zipfile.ZipFile(apk, 'w') as archive:
+            archive.writestr('lib/arm64-v8a/' + native, payload)
+            archive.writestr('lib/arm64-v8a/libpybundle.so', buffer.getvalue())
+    package(payload)
+    result = android_qt_platform.verify_packaged_platform(apk, 'arm64-v8a', metadata)
+    assert result['all_packaged_copies_match_rebuilt_plugin'] and len(result['packaged_plugin_copies']) == 2
+    package(b'stale Qt wheel plugin')
+    with pytest.raises(RuntimeError, match='stale or different'):
+        android_qt_platform.verify_packaged_platform(apk, 'arm64-v8a', metadata)
 
 
 def test_qt_activity_hook_preserves_listeners_and_lifecycle_and_is_idempotent(tmp_path):

@@ -112,5 +112,39 @@
     "-Wl,-z,now",
     "-Wl,--no-undefined",
     "-Wl,-soname,Shiboken.abi3.so"
-  ]
+  ],
+  "qt_android_platform": {
+    "upstream_fix_commit": "59e4671814e9e25e316ed7ec1fe3e5d276141914",
+    "source_file": "src/plugins/platforms/android/androidjniaccessibility.cpp",
+    "original_file_sha256": "2a59593d04a37d7a594ac6bc84c56ef9d9d41dcc3ba72a24f90c60e5d1a1ed44",
+    "patched_file_sha256": "65a87d3418859b4e052de66d2cf8826e07b7aa6994306cf1e9a34c8c12f737b7",
+    "source_archive": {
+      "filename": "qtbase-everywhere-src-6.12.0.tar.xz",
+      "root": "qtbase-everywhere-src-6.12.0",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtbase-everywhere-src-6.12.0.tar.xz",
+      "sha256": "a951bd163c7b80fc6b8c88d7668fb56abf91c152373e13c10666763238131307"
+    },
+    "host_sdk": {
+      "url": "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6120/qt6_6120/qt.qt6.6120.linux_gcc_64/6.12.0-0-202609280346qtbase-Linux-RHEL_9_6-GCC-Linux-RHEL_9_6-X86_64.7z",
+      "sha256": "943023b929d0c08eafe7341700b5ed7601284410b7afd6093f950be291d1d7cd",
+      "filename": "6.12.0-0-202609280346qtbase-Linux-RHEL_9_6-GCC-Linux-RHEL_9_6-X86_64.7z"
+    },
+    "host_icu": {
+      "url": "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_6120/qt6_6120/qt.qt6.6120.linux_gcc_64/6.12.0-0-202609280346icu-linux-Rhel8.6-x86_64.7z",
+      "sha256": "1fdbcd67b1760f3a3f031c64637a9f19992aed2f35aa615e12a468f8c655d4da",
+      "filename": "6.12.0-0-202609280346icu-linux-Rhel8.6-x86_64.7z"
+    },
+    "target_sdks": {
+      "arm64-v8a": {
+        "url": "https://download.qt.io/online/qtsdkrepository/all_os/android/qt6_6120/qt6_6120_arm64_v8a/qt.qt6.6120.android_arm64_v8a/6.12.0-0-202609280346qtbase-MacOS-MacOS_15-Clang-Android-Android_ANY-ARM64.7z",
+        "sha256": "6c55d891f1685bdafb22425cc209b304eacb04b6bc774fd3965ac1326ffa1cc2",
+        "filename": "6.12.0-0-202609280346qtbase-MacOS-MacOS_15-Clang-Android-Android_ANY-ARM64.7z"
+      },
+      "x86_64": {
+        "url": "https://download.qt.io/online/qtsdkrepository/all_os/android/qt6_6120/qt6_6120_x86_64/qt.qt6.6120.android_x86_64/6.12.0-0-202609280346qtbase-Linux-RHEL_9_6-Clang-Android-Android_ANY-X86_64.7z",
+        "sha256": "347dd1c17a499362b1eade91e5239c676cf2612cd94f4d9cc20fb4f9aa299cc8",
+        "filename": "6.12.0-0-202609280346qtbase-Linux-RHEL_9_6-Clang-Android-Android_ANY-X86_64.7z"
+      }
+    }
+  }
 }

@@ -1,6 +1,6 @@
 """Build a signed Android APK with the official Qt for Python Android recipes.
 
-Run on Linux/macOS with JDK 17, Android SDK 35 and NDK 28c. Credentials are read
+Run on Linux x86_64 with JDK 17, Android SDK 35 and NDK 28c. Credentials are read
 only from the environment; generated projects, wheels and profiles stay in build/.
 """
 from __future__ import annotations
@@ -14,6 +14,7 @@ import io
 import json
 import os
 from pathlib import Path
+import platform
 import re
 import shlex
 import shutil
@@ -29,6 +30,7 @@ import zipfile
 if __package__ in (None, ''):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.android_elf import audit_apk
+from tools.android_qt_platform import prepare_platform, verify_packaged_platform
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,7 +146,8 @@ def build_fingerprint(inputs=None, templates=None):
                      for path in library.rglob('*') if path.is_file() and path.suffix in {'.py', '.jinja', '.spec'}}
     payload = {'inputs': inputs if inputs is not None else INPUTS, 'qt_recipe_templates': templates,
                'build_hooks': {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
-                               for name in ('mobile/android_hook.py', 'mobile/android_runtime.py')}}
+                               for name in ('mobile/android_hook.py', 'mobile/android_runtime.py',
+                                            'tools/android_qt_platform.py', 'mobile/qt_platform/CMakeLists.txt')}}
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode('utf-8')).hexdigest()
 
 
@@ -596,8 +599,8 @@ def csv_picker_test(adb, output, pid):
 
 
 def build(args):
-    if sys.platform not in ('linux', 'darwin'):
-        raise RuntimeError('Official PySide6 Android builds require a Linux or macOS host')
+    if sys.platform != 'linux' or platform.machine().lower() not in ('x86_64', 'amd64'):
+        raise RuntimeError('The pinned Qt Android backport currently requires a Linux x86_64 build host')
     if args.smoke and args.arch != 'x86_64':
         raise RuntimeError('Offline smoke mode is reserved for the x86_64 emulator package')
     sdk = Path(args.sdk or os.environ.get('ANDROID_HOME') or os.environ.get('ANDROID_SDK_ROOT', '')).resolve()
@@ -623,6 +626,8 @@ def build(args):
     fingerprint = build_fingerprint()
     compilation = base / 'compilation' / fingerprint
     runtime_inputs = prepare_runtime_inputs(fingerprint, environment)
+    platform_rebuild = prepare_platform(runtime_inputs, INPUTS, args.arch, ndk, sdk, wheels[0],
+                                        download_verified, environment, ROOT)
     environment['GIFT_FINDER_ANDROID_RUNTIME_INPUTS'] = str(runtime_inputs)
     initialize = [deploy, '--config-file', config, '--init', '--keep-deployment-files', '--no-install', '--force']
     run(initialize, cwd=stage, env=environment)
@@ -639,6 +644,7 @@ def build(args):
         raise RuntimeError(f'Expected one built APK, found {len(apks)}')
     added_plugins = include_native_qt_plugins(apks[0], config, wheels[0], args.arch)
     checks = inspect_apk(apks[0], args.arch)
+    platform_checks = verify_packaged_platform(apks[0], args.arch, platform_rebuild)
     destination = ROOT / 'release-dist'
     destination.mkdir(exist_ok=True)
     label = '-smoke' if args.smoke else ''
@@ -685,6 +691,7 @@ def build(args):
                 'dependency_recipe_fingerprint': fingerprint,
                 'ci_https_image_probe': smoke_probe_metadata(),
                 'shiboken_rebuild': json.loads((runtime_inputs / ('rebuild-' + args.arch + '.json')).read_text(encoding='utf-8')),
+                'qt_android_platform_rebuild': platform_checks,
                 **metadata, **checks}
     (base / 'verification.json').write_text(json.dumps(evidence, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(evidence, indent=2), flush=True)

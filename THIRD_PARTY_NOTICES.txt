@@ -112,6 +112,21 @@ Its original LGPL/GPL terms remain applicable; this does not relicense Qt code.
 Pinned source checksums and linker flags: mobile/android-build-inputs.json.
 Rebuild implementation: mobile/android_runtime.py.
 
+Android 0.7.1 also rebuilds QtBase 6.12.0's Android platform plugin with the
+functional two-line accessibility guard/message hunk of upstream QTBUG-146706:
+https://github.com/qt/qtbase/commit/59e4671814e9e25e316ed7ec1fe3e5d276141914
+The guard checks QGuiApplication::topLevelWindows() instead of the broken global
+surface counter; the remaining counter implementation is retained. No unrelated
+Qt branch changes are included. Apart from this plugin and the thin Shiboken
+extension described above, Qt/PySide libraries remain unmodified.
+Original source: https://github.com/qt/qtbase/tree/v6.12.0
+License: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only (Qt's original terms).
+Pinned source/SDK hashes and backport inputs: mobile/android-build-inputs.json.
+Rebuild implementation: tools/android_qt_platform.py and
+mobile/qt_platform/CMakeLists.txt. The Android verification evidence records
+original and modified source hashes and the resulting plugin hash. These
+modifications do not relicense Qt code under GiftFinder's Unlicense.
+
 Additional bundled model previews for the reviewed themes are Telegram gift
 artwork retrieved through Gift Changes. URLs and file hashes are recorded in
 giftfinder/preview_seed/SOURCES-new-themes.json; artwork is not under Unlicense.

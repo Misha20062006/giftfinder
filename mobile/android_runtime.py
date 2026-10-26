@@ -136,4 +136,6 @@ def prepare_distribution(toolchain):
             raise RuntimeError('Android distribution has no Python site-packages directory')
         install_pure_dependencies(directory, inputs_directory / 'pure-wheels', inputs['pure_wheels'])
     rebuilt = rebuild_shiboken(toolchain, inputs_directory, inputs)
+    from tools.android_qt_platform import install_platform
+    install_platform(toolchain, inputs_directory)
     (inputs_directory / ('rebuild-' + arch + '.json')).write_text(json.dumps(rebuilt, indent=2) + '\n', encoding='utf-8')

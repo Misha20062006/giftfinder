@@ -53,7 +53,7 @@ jobs:
       - name: Install Android build dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y autoconf automake libtool libltdl-dev pkg-config cmake ninja-build ccache zlib1g-dev libffi-dev libssl-dev libncurses-dev libtinfo6 libegl1 libopengl0 fonts-dejavu-core fonts-noto-core
+          sudo apt-get install -y autoconf automake libtool libltdl-dev pkg-config cmake ninja-build p7zip-full ccache zlib1g-dev libffi-dev libssl-dev libncurses-dev libtinfo6 libegl1 libopengl0 fonts-dejavu-core fonts-noto-core
           test -f /usr/share/aclocal/ltdl.m4
           python tools/build_android.py host-requirements > "$RUNNER_TEMP/android-host-requirements.txt"
           python -m pip install -r requirements.txt -r "$RUNNER_TEMP/android-host-requirements.txt" 'pytest==9.1.1'
@@ -79,6 +79,7 @@ jobs:
             ~/.buildozer/cache
             ~/.buildozer/android/packages
             build/android/wheels
+            build/android/runtime-inputs/${{ steps.android-inputs.outputs.fingerprint }}
             build/android/${{ matrix.arch }}/compilation/${{ steps.android-inputs.outputs.fingerprint }}
           key: android-v3-${{ runner.os }}-${{ matrix.arch }}-${{ steps.android-inputs.outputs.fingerprint }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: android-v3-${{ runner.os }}-${{ matrix.arch }}-${{ steps.android-inputs.outputs.fingerprint }}-
@@ -121,9 +122,33 @@ jobs:
         run: |
           evidence=build/android/x86_64/emulator
           mkdir -p "$evidence"
+          host_state() {
+            date -u
+            free -m
+            df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"
+            ps -eo pid,comm,rss --sort=-rss | head -n 16 || true
+          }
+          host_state > "$evidence/host-before-emulator.txt"
           "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
           emulator_pid=$!
-          trap 'timeout 10s adb emu kill >/dev/null 2>&1 || true' EXIT
+          cleanup() {
+            workflow_status=$?
+            host_state > "$evidence/host-after-emulator.txt" 2>&1 || true
+            sudo dmesg --ctime | grep -Ei 'out of memory|oom-kill|killed process' > "$evidence/host-oom.txt" || true
+            {
+              echo "workflow_exit_status=$workflow_status"
+              if kill -0 "$emulator_pid" 2>/dev/null; then
+                echo 'emulator_process_alive_before_cleanup=true'
+              else
+                echo 'emulator_process_alive_before_cleanup=false'
+                wait "$emulator_pid" && emulator_status=0 || emulator_status=$?
+                echo "emulator_exit_status=$emulator_status"
+              fi
+            } > "$evidence/emulator-process-state.txt"
+            timeout 10s adb emu kill >/dev/null 2>&1 || true
+            return "$workflow_status"
+          }
+          trap cleanup EXIT
           deadline=$((SECONDS + 180))
           booted=0
           while [ "$SECONDS" -lt "$deadline" ]; do
@@ -177,6 +202,7 @@ jobs:
             ~/.buildozer/cache
             ~/.buildozer/android/packages
             build/android/wheels
+            build/android/runtime-inputs/${{ steps.android-inputs.outputs.fingerprint }}
             build/android/${{ matrix.arch }}/compilation/${{ steps.android-inputs.outputs.fingerprint }}
           key: android-v3-${{ runner.os }}-${{ matrix.arch }}-${{ steps.android-inputs.outputs.fingerprint }}-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Remove the temporary signing keystore
