@@ -129,7 +129,8 @@ jobs:
             ps -eo pid,comm,rss --sort=-rss | head -n 16 || true
           }
           host_state > "$evidence/host-before-emulator.txt"
-          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
+          echo 'gpu=swangle; guest_vulkan=false; image=android-35/google_apis_ps16k/x86_64' > "$evidence/emulator-launch-config.txt"
+          "$ANDROID_HOME/emulator/emulator" -avd giftfinder -no-window -no-audio -no-boot-anim -no-snapshot -gpu swangle -feature -Vulkan -camera-back none -camera-front none > "$evidence/emulator.log" 2>&1 &
           emulator_pid=$!
           cleanup() {
             workflow_status=$?

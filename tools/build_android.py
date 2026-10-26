@@ -752,6 +752,15 @@ def emulator_test(args):
     page_size = int(run([adb, 'shell', 'getconf', 'PAGESIZE'], capture=True).strip())
     environment = {'actual_android_page_size': page_size, 'required_android_page_size': 16384,
                    'actual_device_abi': run([adb, 'shell', 'getprop', 'ro.product.cpu.abi'], capture=True).strip()}
+    launch_config = output / 'emulator-launch-config.txt'
+    if launch_config.is_file():
+        environment['requested_emulator_graphics'] = launch_config.read_text(encoding='utf-8').strip()
+    emulator_log = output / 'emulator.log'
+    if emulator_log.is_file():
+        environment['observed_emulator_graphics'] = [line.strip() for line in emulator_log.read_text(encoding='utf-8').splitlines()
+            if any(marker in line for marker in ('emuglConfig_init:', 'Graphics Adapter ', 'Graphics API Version '))]
+    graphics = run([adb, 'shell', 'dumpsys', 'SurfaceFlinger'], capture=True, timeout=30)
+    environment['observed_guest_gles'] = [line.strip() for line in graphics.splitlines() if 'GLES:' in line]
     (output / 'emulator-environment.json').write_text(json.dumps(environment, indent=2) + '\n', encoding='utf-8')
     if page_size != 16384:
         raise RuntimeError(f'The native release check requires a real 16-KiB environment, got {page_size}')
@@ -912,6 +921,7 @@ def emulator_test(args):
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
                 'actual_android_page_size': page_size, 'charset_detector_runtime_check': True,
+                'graphics_environment': environment,
                 'ci_https_image_probe': smoke_probe_metadata(),
                 'actions_popup_one_back_kept_main_alive': True,
                 'category_popup_one_back_preserved_filter_and_draft': True,
