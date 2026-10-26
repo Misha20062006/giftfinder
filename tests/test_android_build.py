@@ -308,6 +308,8 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
     for name in ('libshiboken6.abi3.so', 'libpython3.14.so'): (libraries / name).touch()
     collections = tmp_path / 'libs_collections'; collections.mkdir()
     (collections / 'libpythonbin.so').touch()
+    cxx_library = tmp_path / 'sysroot/aarch64-linux-android/libc++_shared.so'
+    cxx_library.parent.mkdir(parents=True); cxx_library.touch()
     arch = SimpleNamespace(arch='arm64-v8a', command_prefix='aarch64-linux-android',
                            get_clang_exe=lambda **k: '/ndk/aarch64-linux-android28-clang++')
     built_recipes = ['hostpython3', 'libffi', 'openssl', 'sqlite3', 'libbz2', 'python3', 'shiboken6', 'pyside6']
@@ -342,6 +344,8 @@ def test_shiboken_rebuild_uses_target_compiler_and_replaces_both_runtime_copies(
     assert '-Wl,-z,max-page-size=16384' in commands[0] and '-Wl,-z,common-page-size=16384' in commands[0]
     assert '-Wl,-z,relro' in commands[0] and '-Wl,--no-undefined' in commands[0]
     assert '-L' + str(libraries) in commands[0] and '-L' + str(collections) not in commands[0]
+    assert str(cxx_library) in commands[0] and '-L' + str(cxx_library.parent) not in commands[0]
+    assert '-lc++_shared' not in commands[0]
     assert all((directory / 'shiboken6/Shiboken.abi3.so').read_bytes() == synthetic_elf()
                for directory in (installed, bundled))
 

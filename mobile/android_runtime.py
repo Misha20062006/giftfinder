@@ -98,7 +98,8 @@ def rebuild_shiboken(toolchain, inputs_directory, inputs):
     target.parent.mkdir(exist_ok=True)
     python_library = libraries / f'libpython{python_recipe.major_minor_version_string}.so'
     shiboken_library = libraries / 'libshiboken6.abi3.so'
-    missing = [str(path) for path in (python_headers / 'Python.h', python_library, shiboken_library)
+    cxx_library = Path(ctx.ndk.sysroot_lib_dir) / arch.command_prefix / 'libc++_shared.so'
+    missing = [str(path) for path in (python_headers / 'Python.h', python_library, shiboken_library, cxx_library)
                if not path.is_file()]
     if missing:
         raise RuntimeError('Target rebuild inputs are missing: ' + ', '.join(missing))
@@ -108,7 +109,9 @@ def rebuild_shiboken(toolchain, inputs_directory, inputs):
                '-I' + str(source / 'sources/shiboken6/libshiboken'), '-I' + str(generated),
                str(generated / 'shiboken_module_wrapper.cpp'), '-L' + str(libraries),
                '-l:libshiboken6.abi3.so', '-l:' + python_library.name,
-               '-L' + str(Path(ctx.ndk.sysroot_lib_dir) / arch.command_prefix), '-lc++_shared',
+               # Do not add the unversioned NDK directory with -L: its libc.a
+               # shadows the API-specific libc.so selected by the target clang.
+               str(cxx_library),
                '-o', str(target)]
     print('GiftFinder: rebuilding exact Qt Shiboken wrapper for', arch.arch, flush=True)
     subprocess.run(command, check=True)
