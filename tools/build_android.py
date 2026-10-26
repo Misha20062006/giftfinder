@@ -349,8 +349,31 @@ def patch_buildozer(stage, output, app_version, architecture, *, compilation=Non
         java.parent.mkdir(parents=True, exist_ok=True)
         java.write_text('''package org.giftfinder.diagnostics;
 import android.os.Bundle;
+import android.os.Build;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.WindowInsets;
 public class GiftFinderDiagnosticsActivity extends org.kivy.android.PythonActivity {
+    private String imeInsets() {
+        WindowInsets insets = getWindow().getDecorView().getRootWindowInsets();
+        if (insets == null || Build.VERSION.SDK_INT < 30) return "unknown";
+        return Boolean.toString(insets.isVisible(WindowInsets.Type.ime()));
+    }
+    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK)
+            Log.i("GiftFinderInput", "physicalBack=down repeat=" + event.getRepeatCount()
+                  + "; imeInsetsVisible=" + imeInsets());
+        boolean handled = super.onKeyDown(keyCode, event);
+        if (keyCode == KeyEvent.KEYCODE_BACK)
+            Log.i("GiftFinderInput", "physicalBack=down handled=" + handled);
+        return handled;
+    }
+    @Override public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK)
+            Log.i("GiftFinderInput", "physicalBack=up repeat=" + event.getRepeatCount()
+                  + "; imeInsetsVisible=" + imeInsets());
+        return super.onKeyUp(keyCode, event);
+    }
     @Override public void onCreate(Bundle state) {
         Log.i("GiftFinderLifecycle", "before PythonActivity.onCreate");
         super.onCreate(state);
@@ -429,12 +452,12 @@ def manifest_metadata(badging):
 
 
 def input_method_visible(dump):
-    shown = re.search(r'\bmInputShown\s*[=:]\s*(true|false)', dump, re.IGNORECASE)
-    if shown:
-        return shown.group(1).lower() == 'true'
     visibility = re.search(r'\bmImeWindowVis\s*=\s*(0x[0-9a-f]+)', dump, re.IGNORECASE)
     if visibility:
         return bool(int(visibility.group(1), 16) & 2)
+    shown = re.search(r'\bmInputShown\s*[=:]\s*(true|false)', dump, re.IGNORECASE)
+    if shown:
+        return shown.group(1).lower() == 'true'
     raise RuntimeError('Cannot determine the Android input-method visibility for the Back test')
 
 
@@ -520,15 +543,36 @@ def main_popup_and_language_test(adb, output, pid):
 
 
 def category_popup_draft_test(adb, output, pid):
+    draft = 'egg'
     tree = native_hierarchy(adb, output, 'category-draft-start')
     search = native_find(tree, lambda n: native_id(n, 'mobileFilterListSearch'), 'filter draft search')
     native_tap(adb, search)
-    run([adb, 'shell', 'input', 'text', 'Egg'], timeout=15)
-    native_hierarchy(adb, output, 'category-draft-typed')
+    tree = native_hierarchy(adb, output, 'category-draft-focused')
+    search = native_find(tree, lambda n: native_id(n, 'mobileFilterListSearch'), 'focused filter draft search')
+    if search.get('focused') != 'true':
+        raise RuntimeError('The native filter search did not acquire input focus before typing')
+    ready_ime = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
+    (output / 'category-ime-before-typing.txt').write_text(ready_ime, encoding='utf-8')
+    if not re.search(r'\bpackageName\s*=\s*' + re.escape(PACKAGE_ID) + r'\b', ready_ime):
+        raise RuntimeError('Android has not bound an input editor for the focused application')
+    run([adb, 'shell', 'input', 'text', draft], timeout=15)
+    tree = native_hierarchy(adb, output, 'category-draft-typed')
     ime = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
+    (output / 'category-ime-before-dismiss.txt').write_text(ime, encoding='utf-8')
+    windows = run([adb, 'shell', 'dumpsys', 'window', 'windows'], capture=True, timeout=30)
+    (output / 'category-windows-before-dismiss.txt').write_text(windows, encoding='utf-8')
+    with (output / 'android-category-draft-before-back.png').open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+    search = native_find(tree, lambda n: native_id(n, 'mobileFilterListSearch'), 'entered filter draft')
+    if draft not in (search.get('text', ''), search.get('content-desc', '')):
+        raise RuntimeError('Android text injection did not enter the complete filter draft')
     if input_method_visible(ime):
         run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
         time.sleep(1)
+        ime = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
+        (output / 'category-ime-after-dismiss.txt').write_text(ime, encoding='utf-8')
+        windows = run([adb, 'shell', 'dumpsys', 'window', 'windows'], capture=True, timeout=30)
+        (output / 'category-windows-after-dismiss.txt').write_text(windows, encoding='utf-8')
     tree = native_hierarchy(adb, output, 'category-draft-before-popup')
     native_tap(adb, native_find(tree, lambda n: native_id(n, 'mobileFilterCategory'), 'filter category selector'))
     tree = native_hierarchy(adb, output, 'category-popup-open')
@@ -537,7 +581,7 @@ def category_popup_draft_test(adb, output, pid):
     tree = native_hierarchy(adb, output, 'category-popup-after-back')
     native_find(tree, lambda n: native_id(n, 'mobileFilterCategory'), 'category selector after popup Back')
     search = native_find(tree, lambda n: native_id(n, 'mobileFilterListSearch'), 'preserved filter draft')
-    if 'Egg' not in (search.get('text', ''), search.get('content-desc', '')):
+    if draft not in (search.get('text', ''), search.get('content-desc', '')):
         raise RuntimeError('Back from the category popup did not preserve the draft text')
     logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'threadtime'], capture=True)
     if 'GIFTFINDER_ANDROID_FILTERS_CLOSED' in logs:
@@ -901,6 +945,7 @@ def capture_emulator_failure(args):
         'android-runtime-failure.png': ['exec-out', 'screencap', '-p'],
         'runtime-failure-activities.txt': ['shell', 'dumpsys', 'activity', 'activities'],
         'runtime-failure-windows.txt': ['shell', 'dumpsys', 'window', 'windows'],
+        'runtime-failure-input-method.txt': ['shell', 'dumpsys', 'input_method'],
         'runtime-failure-pid.txt': ['shell', 'pidof', PACKAGE_ID],
     }
     for filename, command in captures.items():

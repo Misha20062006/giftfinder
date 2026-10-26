@@ -78,6 +78,34 @@ def smoke_runtime_checks(window):
     print('GIFTFINDER_ANDROID_IMAGE_READY', flush=True)
 
 
+def install_smoke_key_trace(window):
+    """Observe CI Back dispatch before the ordinary window filter consumes it."""
+    if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') != '1':
+        return None
+    from PySide6.QtCore import QEvent, QObject, Qt
+    from PySide6.QtGui import QGuiApplication
+    from PySide6.QtWidgets import QApplication
+    import json
+
+    class KeyTrace(QObject):
+        def eventFilter(self, target, event):
+            if (event.type() in (QEvent.Type.KeyPress, QEvent.Type.KeyRelease)
+                    and event.key() in (Qt.Key.Key_Back, Qt.Key.Key_Escape)):
+                record = {'type': event.type().name, 'key': Qt.Key(event.key()).name,
+                          'target_class': target.metaObject().className(),
+                          'target_name': target.objectName(),
+                          'auto_repeat': event.isAutoRepeat(), 'count': event.count(),
+                          'timestamp': event.timestamp(),
+                          'input_method_visible': QGuiApplication.inputMethod().isVisible()}
+                print('GIFTFINDER_ANDROID_KEY_EVENT ' + json.dumps(record, sort_keys=True), flush=True)
+            return False
+
+    observer = KeyTrace(window)
+    window._android_smoke_key_observer = observer
+    QApplication.instance().installEventFilter(observer)
+    return observer
+
+
 def main():
     from PySide6.QtCore import QTimer, Qt
     from giftfinder.mobile_ui import MobileWindow
@@ -91,6 +119,7 @@ def main():
     smoke = os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1'
     window = MobileWindow(offline=smoke)
     if smoke:
+        install_smoke_key_trace(window)
         smoke_runtime_checks(window)
     window.show()
     QTimer.singleShot(250, lambda: print('GIFTFINDER_ANDROID_READY', flush=True))

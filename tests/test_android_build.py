@@ -386,7 +386,7 @@ def test_native_failure_capture_keeps_frame_process_and_window_state(tmp_path, m
             raise build_android.subprocess.TimeoutExpired(command, 20)
     monkeypatch.setattr(build_android.subprocess, 'run', capture)
     build_android.capture_emulator_failure(SimpleNamespace(evidence=str(tmp_path)))
-    assert len(commands) == 4
+    assert len(commands) == 5
     assert (tmp_path / 'android-runtime-failure.png').read_bytes() == b'captured state'
     assert (tmp_path / 'runtime-failure-windows.txt').read_bytes() == b'captured state'
     assert (tmp_path / 'runtime-failure-pid.txt').read_bytes() == b'captured state'
@@ -518,7 +518,9 @@ def test_only_cached_installer_venv_is_removed_and_compiled_recipes_are_preserve
 
 
 @pytest.mark.parametrize('dump,visible', [('mInputShown=true', True), ('mInputShown=false', False),
-                                         ('mImeWindowVis=0x3', True), ('mImeWindowVis=0x1', False)])
+                                         ('mImeWindowVis=0x3', True), ('mImeWindowVis=0x1', False),
+                                         ('mInputShown=true\nmImeWindowVis=0x1', False),
+                                         ('mInputShown=false\nmImeWindowVis=0x3', True)])
 def test_android_back_check_distinguishes_keyboard_visibility(dump, visible):
     assert build_android.input_method_visible(dump) is visible
 
