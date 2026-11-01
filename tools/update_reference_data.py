@@ -23,8 +23,9 @@ def main():
     directory = ROOT/'giftfinder'
     if args.refresh:
         catalog = Catalog(args.work)
+        started_at = time.time()
         catalog.refresh(print, include_references=False)
-        if not catalog.data.get('updated_at') or catalog.data.get('failures'):
+        if catalog.data.get('updated_at',0) < started_at or catalog.data.get('failures'):
             raise SystemExit('Public metadata refresh was incomplete; bundled data was not changed')
         (directory/'catalog_full.json').write_text(json.dumps(catalog.data, ensure_ascii=False, separators=(',',':'))+'\n', encoding='utf-8')
     contents = {name:(directory/name).read_text(encoding='utf-8') for name in FILES}

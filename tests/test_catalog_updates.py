@@ -168,7 +168,7 @@ def test_portals_refreshes_expired_metadata_and_follows_every_page(monkeypatch):
 def test_portals_incomplete_metadata_does_not_replace_cache(monkeypatch):
     original={'collections':[{'id':'old','name':'Old Gift'}]}
     monkeypatch.setattr(providers,'_portals_collections',original)
-    monkeypatch.setattr(providers,'_portals_updated_at',0)
+    monkeypatch.setattr(providers,'_portals_updated_at',time.monotonic()-providers.PORTALS_CATALOG_TTL-1)
     monkeypatch.setattr(providers,'request',lambda *a,**k:Response({'unexpected':[]}))
     with pytest.raises(ValueError): providers.portals_catalog()
     assert providers._portals_collections is original
@@ -194,6 +194,18 @@ def test_running_search_keeps_its_monochrome_snapshot_on_refresh(tmp_path, monke
     monkeypatch.setattr(providers,'index_search',index)
     result = providers.SearchEngine(catalog).search(SearchQuery(collection='Future Gift',mono_colors=('black',),markets=('telegram',)))
     assert result.offers == [offer]
+
+
+def test_reference_publisher_does_not_present_old_metadata_as_a_successful_refresh(tmp_path, monkeypatch):
+    import runpy
+    import sys
+    scope = runpy.run_path(str(reference_data.Path(__file__).parents[1]/'tools/update_reference_data.py'))
+    class OfflineCatalog:
+        def __init__(self, directory): self.data = {'updated_at':1,'failures':[]}
+        def refresh(self,*args,**kwargs): return self.data
+    monkeypatch.setitem(scope['main'].__globals__,'Catalog',OfflineCatalog)
+    monkeypatch.setattr(sys,'argv',['update_reference_data.py','--work',str(tmp_path),'--refresh'])
+    with pytest.raises(SystemExit,match='incomplete'): scope['main']()
 
 
 @pytest.mark.parametrize('mobile',[False,True])
