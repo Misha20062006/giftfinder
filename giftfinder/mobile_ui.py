@@ -446,13 +446,8 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
             if fixed_width:
                 child.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.fit_dialog(dialog)
-        # A fullscreen Android dialog already has its final geometry. Desktop
-        # window-position/opacity animation changes the native surface while
-        # Android accessibility may be synchronously querying the Qt thread.
-        dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-        self.dialogs.append(dialog)
-        dialog.finished.connect(lambda _: self.dialogs.remove(dialog) if dialog in self.dialogs else None)
-        dialog.show()
+        super().keep_dialog(dialog)
+        self.fit_dialog(dialog)
 
     def show_details(self, index):
         offer = index.data(Qt.ItemDataRole.UserRole)

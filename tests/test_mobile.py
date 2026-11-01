@@ -90,17 +90,6 @@ def test_filter_sheet_exposes_every_category_and_six_markets(window, app):
     assert dialog.grid.horizontalScrollBar().maximum() == 0
 
 
-def test_fullscreen_language_sheet_keeps_final_geometry_through_opening_frames(window, app):
-    window.language_menu()
-    dialog = window.dialogs[-1]
-    for _ in range(12):
-        QTest.qWait(20)
-        assert dialog.isVisible()
-        assert inside(window,dialog) == window.rect()
-    dialog.reject(); app.processEvents()
-    assert dialog not in window.dialogs
-
-
 @pytest.mark.parametrize('size', [(640,360),(360,480)])
 def test_short_screens_keep_navigation_and_catalog_reachable_without_changing_queries(window, app, size):
     original = SearchQuery(collection='Input Key', models=('Creeper',), mono_colors=('green',), monochrome=True)

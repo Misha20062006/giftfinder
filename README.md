@@ -15,7 +15,7 @@
 | macOS 14+ · Intel · DMG | [![Скачать macOS Intel](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-macOS-x64.dmg) | Перенести приложение в Applications |
 | Linux x64 · glibc 2.35+ · tar.gz | [![Скачать Linux x64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Linux-x64.tar.gz) | Распаковать → `start-giftfinder.sh` |
 | Linux ARM64 · glibc 2.39+ · tar.gz | [![Скачать Linux ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Linux-arm64.tar.gz) | Распаковать → `start-giftfinder.sh` |
-| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0-android.1/GiftFinder-0.8.0-Android-arm64-v8a.apk) | Открыть APK и разрешить установку из выбранного источника |
+| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1-android.1/GiftFinder-0.7.1-Android-arm64-v8a.apk) | Открыть APK и разрешить установку из выбранного источника |
 
 <p align="center">
   <a href="docs/USER_GUIDE.md">Руководство</a>
@@ -24,6 +24,9 @@
 </p>
 
 ![Каталог GiftFinder с тематическими подборками](docs/images/catalog.png)
+
+Android пока доступен в предыдущей версии 0.7.1. Выпуск 0.8.0 задержан из-за воспроизводимого сбоя Qt при открытии окна языка.
+
 
 ## Что умеет
 
