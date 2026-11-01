@@ -341,6 +341,9 @@ def test_filter_category_opens_from_one_touch_tap_and_back_keeps_draft(window, a
     original = SearchQuery(collection='Input Key', models=('Creeper',))
     window.filter_query = original
     window.open_filters(); dialog = window.filter_dialog
+    # This regression exercises touch dispatch on the settled sheet. Its native
+    # opening animation can otherwise deactivate the synthetic press mid-tap.
+    settle(window)
     dialog.search.setText('egg'); dialog.search.setFocus(); app.processEvents()
     category = dialog.category_select
     point = category.rect().center()

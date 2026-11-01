@@ -97,13 +97,15 @@ def rebuild_surface_java(source_root, specification, sdk, wheel, directory, envi
         for name in names: (original_directory / Path(name).name).write_bytes(archive.read(name))
     bootclasspath = Path(sdk) / 'platforms/android-35/android.jar'
     if not bootclasspath.is_file(): raise RuntimeError('Android API 35 Java stubs are missing')
+    lambda_stubs = Path(sdk) / 'build-tools/35.0.0/core-lambda-stubs.jar'
+    if not lambda_stubs.is_file(): raise RuntimeError('Android build-tools 35 Java lambda stubs are missing')
     sources = [Path(source_root) / name for name in specification['java_sources']]
     owners = {name.split('/src/', 1)[1].removesuffix('.java') for name in specification['java_sources']}
     classpath = os.pathsep.join(str(path) for path in sorted(original_directory.glob('*.jar')))
     with tempfile.TemporaryDirectory(prefix='classes-', dir=directory) as temporary:
         output = Path(temporary)
         subprocess.run(['javac', '-encoding', 'UTF-8', '-source', '8', '-target', '8',
-                        '-bootclasspath', str(bootclasspath), '-classpath', classpath,
+                        '-bootclasspath', os.pathsep.join(map(str, (bootclasspath, lambda_stubs))), '-classpath', classpath,
                         '-d', str(output), *map(str, sources)], env=environment, check=True)
         classes = {path.relative_to(output).as_posix():path.read_bytes() for path in output.rglob('*.class')}
         if any(payload[:4] != b'\xca\xfe\xba\xbe' or struct.unpack_from('>H', payload, 6)[0] != 52 for payload in classes.values()):
