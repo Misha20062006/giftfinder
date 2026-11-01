@@ -30,7 +30,8 @@ jobs:
         include:
           - runner: windows-2022
             target: Windows-x64
-          - runner: macos-14
+          # macOS 14 images retire on 2026-11-02 (actions/runner-images#13518).
+          - runner: macos-15
             target: macOS-arm64
           - runner: macos-15-intel
             target: macOS-x64
