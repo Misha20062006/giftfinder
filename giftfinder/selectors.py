@@ -101,7 +101,7 @@ class TileDelegate(QStyledItemDelegate):
             for i,(collection,model) in enumerate(row.get('members',[])[:1]):
                 if row.get('key')=='monochrome':
                     box=QRectF(r.right()-70,r.center().y()-32,64,64)
-                    key=self.renderer.paint(p,box,collection,model,monochrome.backgrounds(collection,model)[0])
+                    key=self.renderer.paint(p,box,collection,model,self.renderer.catalog.monochrome.backgrounds(collection,model)[0])
                     if isinstance(view,CardView):view.watch(key,index)
                     continue
                 url=asset_url('model',collection,model,256);image=self.renderer.assets.get(url)
@@ -130,7 +130,7 @@ class TileDelegate(QStyledItemDelegate):
             for i,(collection,model) in enumerate(row.get('members',[])[:4]):
                 if row.get('key')=='monochrome':
                     box=QRectF(art.left()+(i%2)*art.width()/2,art.top()+(i//2)*art.height()/2,art.width()/2,art.height()/2)
-                    key=self.renderer.paint(p,box,collection,model,monochrome.backgrounds(collection,model)[0])
+                    key=self.renderer.paint(p,box,collection,model,self.renderer.catalog.monochrome.backgrounds(collection,model)[0])
                     if isinstance(view,CardView):view.watch(key,index)
                     continue
                 url=asset_url('model',collection,model,256);image=self.renderer.assets.get(url)
@@ -231,7 +231,7 @@ class FilterDialog(QDialog):
         if key=='colors':
             from collections import Counter
             candidates=c.selected_models(replace(self.state,monochrome=True,mono_colors=()))
-            counts=Counter(monochrome.family(r['collection'],r['name']) for r in candidates)
+            counts=Counter(c.monochrome.family(r['collection'],r['name']) for r in candidates)
             self.all_rows=[{'kind':'color','name':tr('all_colors'),'key':'','color':'','subtitle':tr('models_count',count=len(candidates))}]
             self.all_rows.extend({'kind':'color','name':tr('color_'+color),'key':color,'color':hexcode,'subtitle':tr('models_count',count=counts[color])} for color,hexcode in monochrome.COLORS.items())
         elif key=='collections':
@@ -245,7 +245,7 @@ class FilterDialog(QDialog):
         elif key=='backdrops':
             self.all_rows=[{'kind':'backdrop','name':r['name'],'key':r['name'],'subtitle':self.renderer.palette(r['name'])[0].upper()} for r in c.data['backdrops']]
             if self.state.monochrome:
-                possible={b for r in c.selected_models(replace(self.state,backdrops=())) for b in monochrome.backgrounds(r['collection'],r['name'])}
+                possible={b for r in c.selected_models(replace(self.state,backdrops=())) for b in c.monochrome.backgrounds(r['collection'],r['name'])}
                 self.all_rows=[r for r in self.all_rows if r['name'] in possible]
         elif key=='symbols':
             collections={r['collection'] for r in c.selected_models(replace(self.state,models=(),targets=()))}

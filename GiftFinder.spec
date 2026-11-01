@@ -13,6 +13,7 @@ a = Analysis(
     binaries=[],
     datas=[(str(root / 'giftfinder' / 'catalog_seed.json'), 'giftfinder'),
            (str(root / 'giftfinder' / 'catalog_full.json'), 'giftfinder'),
+           (str(root / 'giftfinder' / 'catalog_updates.json'), 'giftfinder'),
            (str(root / 'giftfinder' / 'themes_curated.json'), 'giftfinder'),
            (str(root / 'giftfinder' / 'monochrome_pairs.json'), 'giftfinder'),
            (str(root / 'giftfinder' / 'rates_seed.json'), 'giftfinder'),

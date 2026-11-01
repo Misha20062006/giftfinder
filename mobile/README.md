@@ -4,7 +4,7 @@
 курсы, избранное и локальный кеш, что и настольное приложение. Для телефона
 используется отдельная компоновка; Windows-интерфейс в APK не растягивается.
 
-[Предварительный ARM64 APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1-android.1/GiftFinder-0.7.1-Android-arm64-v8a.apk)
+[Предварительный ARM64 APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0-android.1/GiftFinder-0.8.0-Android-arm64-v8a.apk)
 предназначен для Android 9+. Он подписан постоянным ключом проекта и
 работает с обычными сетевыми источниками. Физический ARM64-телефон и
 живой поиск на всех площадках пока не проверены.

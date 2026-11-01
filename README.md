@@ -10,12 +10,12 @@
 
 | Платформа | Прямая загрузка | Как запустить |
 |---|:---:|---|
-| Windows 10/11 x64 · ZIP | [![Скачать Windows ZIP](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-Windows-x64.zip) | Распаковать ZIP → `GiftFinder.exe` |
-| macOS 14+ · Apple Silicon · DMG | [![Скачать macOS Apple Silicon](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-macOS-arm64.dmg) | Перенести приложение в Applications |
-| macOS 14+ · Intel · DMG | [![Скачать macOS Intel](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-macOS-x64.dmg) | Перенести приложение в Applications |
-| Linux x64 · glibc 2.35+ · tar.gz | [![Скачать Linux x64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-Linux-x64.tar.gz) | Распаковать → `start-giftfinder.sh` |
-| Linux ARM64 · glibc 2.39+ · tar.gz | [![Скачать Linux ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1/GiftFinder-0.7.1-Linux-arm64.tar.gz) | Распаковать → `start-giftfinder.sh` |
-| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1-android.1/GiftFinder-0.7.1-Android-arm64-v8a.apk) | Открыть APK и разрешить установку из выбранного источника |
+| Windows 10/11 x64 · ZIP | [![Скачать Windows ZIP](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Windows-x64.zip) | Распаковать ZIP → `GiftFinder.exe` |
+| macOS 14+ · Apple Silicon · DMG | [![Скачать macOS Apple Silicon](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-macOS-arm64.dmg) | Перенести приложение в Applications |
+| macOS 14+ · Intel · DMG | [![Скачать macOS Intel](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-macOS-x64.dmg) | Перенести приложение в Applications |
+| Linux x64 · glibc 2.35+ · tar.gz | [![Скачать Linux x64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Linux-x64.tar.gz) | Распаковать → `start-giftfinder.sh` |
+| Linux ARM64 · glibc 2.39+ · tar.gz | [![Скачать Linux ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Linux-arm64.tar.gz) | Распаковать → `start-giftfinder.sh` |
+| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0-android.1/GiftFinder-0.8.0-Android-arm64-v8a.apk) | Открыть APK и разрешить установку из выбранного источника |
 
 <p align="center">
   <a href="docs/USER_GUIDE.md">Руководство</a>
@@ -39,7 +39,7 @@
 | Быстрый повторный поиск | Избранное, сохранённые фильтры и локальный кеш предложений |
 | Выгрузка и обновление | Экспорт результатов в CSV, обновление по F5 и автоматическая догрузка страниц Fragment и Portals |
 
-В комплектном каталоге на **24 октября 2026 года**: 123 коллекции, 7 806 моделей и 80 фонов. В версии 0.7.1 добавлены девять визуально проверенных подборок — 110 моделей; подборка Пепе включает 32 модели за пределами отдельно доступной коллекции Plush Pepe. Каталог обновляется в фоне. Тематические подборки и монохромки — наша группировка, а не официальный атрибут Telegram.
+В комплектном каталоге на **1 ноября 2026 года**: 124 коллекции, 7 940 моделей и 80 фонов, включая Myth Mask. Каталог обновляется при запуске и каждые 15 минут во время работы. Новые коллекции и модели появляются после обновления источника; проверенные тематические подборки и монохромки загружаются из опубликованного справочника проекта без переустановки приложения. При сбое остаётся последняя корректная копия. Подборки — наша группировка, а не официальный атрибут Telegram; новые модели не классифицируются по одному названию.
 
 ## Какие площадки и откуда данные
 

@@ -1,6 +1,7 @@
 from dataclasses import replace
 from decimal import Decimal
 import threading
+import time
 
 import pytest
 import requests
@@ -57,6 +58,7 @@ def test_live_direct_response_keeps_priority_over_index_even_if_price_increases(
 
 def test_missing_portals_mapping_is_not_a_complete_empty_listing_response(monkeypatch):
     monkeypatch.setattr(providers, '_portals_collections', {'collections':[]})
+    monkeypatch.setattr(providers, '_portals_updated_at', time.monotonic())
     monkeypatch.setattr(providers, 'request', lambda *args, **kwargs: pytest.fail('Do not add a metadata refresh or listing request'))
     result = providers.portals_search(SearchQuery(collection='Easter Egg', markets=('portals',)))
     assert not result.offers and len(result.statuses) == 1
@@ -69,6 +71,7 @@ def test_missing_portals_metadata_never_purges_index_or_saved_offers(tmp_path, m
     old = indexed_offer('portals'); fresh = replace(old, amount=Decimal('10'), checked_at=2000)
     engine.cache.save([old]); calls = []
     monkeypatch.setattr(providers, '_portals_collections', {'collections':[]})
+    monkeypatch.setattr(providers, '_portals_updated_at', time.monotonic())
     monkeypatch.setattr(providers, 'request', lambda *args, **kwargs: pytest.fail('Do not add a metadata refresh or listing request'))
     def index(query, **kwargs):
         calls.append(query)

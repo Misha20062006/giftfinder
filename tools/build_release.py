@@ -113,12 +113,13 @@ def package_artifacts(dist, executable, output, build, version, target):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=ROOT / 'release-dist')
+    parser.add_argument('--work-root', type=Path, default=ROOT / 'build', help='Build and smoke-test working directory')
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     version = runpy.run_path(str(ROOT / 'giftfinder' / '__init__.py'))['__version__']
     target = target_name()
-    build = ROOT / 'build' / target
+    build = args.work_root.resolve() / target
     dist = build / 'dist'
     if sys.platform == 'darwin':
         make_macos_icon()

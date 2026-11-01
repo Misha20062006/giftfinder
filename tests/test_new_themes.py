@@ -5,8 +5,8 @@ from giftfinder.catalogue import Catalog
 from giftfinder.core import SearchQuery
 from giftfinder.i18n import LANGUAGES, set_language, theme_name, translations
 
-COUNTS = {'pepe':32, 'gold':24, 'silver':8, 'star_wars':10, 'harry_potter':8,
-          'pokemon':6, 'sailor_moon':6, 'doge':7, 'space':9}
+COUNTS = {'pepe':32, 'gold':33, 'silver':16, 'star_wars':10, 'harry_potter':8,
+          'pokemon':6, 'sailor_moon':6, 'doge':7, 'space':12}
 
 
 @pytest.mark.parametrize('key,count', COUNTS.items())

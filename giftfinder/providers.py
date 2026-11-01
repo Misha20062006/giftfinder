@@ -6,6 +6,8 @@ import json
 import re
 import threading
 import time
+from contextvars import copy_context
+from functools import wraps
 from dataclasses import asdict, replace
 from contextlib import nullcontext
 from pathlib import Path
@@ -18,7 +20,7 @@ from .i18n import tr, theme_name
 from .core import (MARKETS, Offer, SearchQuery, SearchResult, SourceStatus,
                    compact, merge_offers, norm, number, safe_url, stamp)
 
-USER_AGENT = 'GiftFinder/0.6 (Windows; read-only gift search)'
+USER_AGENT = 'GiftFinder/0.8 (read-only gift search)'
 TIMEOUT = (8, 22)
 
 
@@ -107,14 +109,29 @@ def index_search(query: SearchQuery, cancelled=None) -> SearchResult:
 
 
 _portals_collections = None
+_portals_updated_at = 0.0
+PORTALS_CATALOG_TTL = 15 * 60
 _portals_lock = threading.Lock()
 
 
-def portals_catalog():
-    global _portals_collections
+def portals_catalog(cancelled=None):
+    global _portals_collections, _portals_updated_at
     with _portals_lock:
-        if _portals_collections is None:
-            _portals_collections = request('GET','https://portal-market.com/api/collections',params={'offset':0,'limit':200}).json()
+        if _portals_collections is None or time.monotonic() - _portals_updated_at >= PORTALS_CATALOG_TTL:
+            rows = []; seen = set(); offset = 0
+            while True:
+                if cancelled and cancelled.is_set(): return _portals_collections or {'collections':[]}
+                page = request('GET','https://portal-market.com/api/collections',params={'offset':offset,'limit':200}).json()
+                batch = page.get('collections') if isinstance(page,dict) else None
+                if not isinstance(batch,list) or any(not isinstance(row,dict) or not row.get('id') or not isinstance(row.get('name'),str) for row in batch):
+                    raise ValueError('portals collections shape')
+                ids = {row['id'] for row in batch}
+                if batch and ids <= seen: raise ValueError('portals repeated collections page')
+                rows.extend(row for row in batch if row['id'] not in seen); seen.update(ids)
+                if len(batch) < 200: break
+                offset += len(batch)
+            _portals_collections = {'collections':rows}
+            _portals_updated_at = time.monotonic()
         return _portals_collections
 
 
@@ -124,7 +141,7 @@ def portals_search(query: SearchQuery, offset: int = 0, cancelled=None) -> Searc
     params = {'offset': offset, 'limit': 50, 'sort_by': 'price desc' if query.sort_mode == 'price_desc' else 'price asc', 'status': 'listed'}
     if query.collection:
         # Public collections metadata supplies the marketplace's own collection ID.
-        data = portals_catalog()
+        data = portals_catalog(cancelled)
         collection = next((x for x in data.get('collections', []) if compact(x.get('name', '')) == compact(query.collection)), None)
         if not collection:
             # A cached metadata map cannot establish that every live offer is absent.
@@ -290,7 +307,16 @@ def fragment_search(query: SearchQuery, known: dict[str, Offer], offset: str = '
 
 
 from .catalogue import Catalog, query_from_dict
+from . import monochrome
 from .cache import ListingCache
+
+
+def _catalog_monochrome(method):
+    @wraps(method)
+    def bound(self, *args, **kwargs):
+        with monochrome.use(getattr(self.catalog,'monochrome',None)):
+            return method(self, *args, **kwargs)
+    return bound
 
 
 class SearchEngine:
@@ -298,15 +324,25 @@ class SearchEngine:
         self.catalog=catalog
         self.cache=ListingCache(catalog.directory) if hasattr(catalog,'directory') else None
 
+    def _resolve(self, query):
+        # Resolve the model selection and capture its colour rules from one
+        # catalog generation. Worker contexts retain that snapshot on refresh.
+        with getattr(self.catalog,'lock',nullcontext()):
+            result = self.catalog.resolve(query)
+            monochrome._active.set(getattr(self.catalog,'monochrome',None))
+            return result
+
+    @_catalog_monochrome
     def cached(self,query):
-        queries,scope=self.catalog.resolve(query)
+        queries,scope=self._resolve(query)
         result=self.cache.find(queries) if self.cache else SearchResult()
         result.scope=scope
         return result
 
+    @_catalog_monochrome
     def search(self,query,progress=lambda _:None,cancelled=None,on_update=None,auto_pages=True):
         cancelled=cancelled or threading.Event()
-        queries,scope=self.catalog.resolve(query)
+        queries,scope=self._resolve(query)
         if not queries:
             raise ValueError(tr('err_models'))
         result=self.cache.find(queries) if self.cache else SearchResult()
@@ -332,12 +368,12 @@ class SearchEngine:
             def submit(q,market,offset=None):
                 key=(q,market)
                 if market=='index':
-                    future=pool.submit(index_search,q,cancelled=cancelled)
+                    future=pool.submit(copy_context().run,index_search,q,cancelled=cancelled)
                 elif market=='fragment':
                     context=contexts.setdefault(key,{})
-                    future=pool.submit(fragment_search,q,known,offset=offset or '',cancelled=cancelled,context=context)
+                    future=pool.submit(copy_context().run,fragment_search,q,known,offset=offset or '',cancelled=cancelled,context=context)
                 else:
-                    future=pool.submit(portals_search,q,offset=offset or 0,cancelled=cancelled)
+                    future=pool.submit(copy_context().run,portals_search,q,offset=offset or 0,cancelled=cancelled)
                 pending[future]=(q,market)
             for q in queries:
                 submit(q,'index')
@@ -415,6 +451,7 @@ class SearchEngine:
         result.progress=progress_data('stopped' if cancelled.is_set() else 'complete' if closed==walks else 'partial')
         return result
 
+    @_catalog_monochrome
     def more(self,cursors,known,cancelled=None):
         result=SearchResult()
         for cursor in cursors:

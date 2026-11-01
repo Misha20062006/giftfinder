@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "updated_at": 1793552572,
+  "files": {
+    "catalog_full.json": "a30f0d65aa39ee2537066559ea9f7a0ef3540ba68fe57136f4d929c06a5205a9",
+    "themes_curated.json": "e19a7dc1af04bb581b522fc6b4d92742e9f04bc2a43d7495194aaffe20442fd0",
+    "monochrome_pairs.json": "e11c7c84ac2b85c5bf46323bf764a3a6ea79cdf5eb4b79f3a9cedc1b355d5773"
+  }
+}

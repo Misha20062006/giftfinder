@@ -1,4 +1,4 @@
-# Платформы и сборка GiftFinder 0.7.1
+# Платформы и сборка GiftFinder 0.8.0
 
 Общая поисковая логика для Windows, macOS, Linux и Android. Настольные пакеты создаются каждый на своей ОС; Android использует отдельный мобильный интерфейс и официальный инструмент PySide6.
 
@@ -9,7 +9,7 @@
 | macOS x64, DMG | macOS 14+, Intel | Открыть DMG, перенести `GiftFinder.app` в Applications |
 | Linux x64, tar.gz | glibc 2.35+, например Ubuntu 22.04+ | Распаковать архив и запустить `start-giftfinder.sh` |
 | Linux arm64, tar.gz | glibc 2.39+, например Ubuntu 24.04+ | Распаковать архив и запустить `start-giftfinder.sh` |
-| Android arm64-v8a, APK · preview | Android 9+ (API 28), 64-битная ARM-система | [Скачать APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.7.1-android.1/GiftFinder-0.7.1-Android-arm64-v8a.apk), открыть и разрешить установку из выбранного источника |
+| Android arm64-v8a, APK · preview | Android 9+ (API 28), 64-битная ARM-система | [Скачать APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0-android.1/GiftFinder-0.8.0-Android-arm64-v8a.apk), открыть и разрешить установку из выбранного источника |
 
 Для готовых пакетов Python не нужен. Linux-сборки используют системные OpenGL/EGL/X11-библиотеки. На Debian/Ubuntu при их отсутствии:
 

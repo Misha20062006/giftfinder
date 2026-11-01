@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "version": "2026-10-24",
-  "catalog_sha256": "a02caf021e21106e688132200b2c72768ee623d219dba2dee3001a3dd4135bd0",
+  "version": "2026-11-01",
+  "catalog_sha256": "a30f0d65aa39ee2537066559ea9f7a0ef3540ba68fe57136f4d929c06a5205a9",
   "coverage": {
-    "models_analyzed": 7806,
-    "images_available": 7806,
+    "models_analyzed": 7940,
+    "images_available": 7940,
     "backdrops_analyzed": 80,
-    "models_matched": 2589,
-    "pairs": 27637
+    "models_matched": 2650,
+    "pairs": 28278
   },
   "method": {
     "type": "conservative foreground colour matching, approximate; not an official Telegram attribute",
@@ -19,7 +19,7 @@
     "neutral_backdrop_saturation_max": 0.11,
     "black_backdrop_brightness_max": 0.32
   },
-  "visual_review": "Boundary and distributed samples in all 13 colour families; prominent contrasting motifs excluded. All models have image metrics; not every combination was manually reviewed.",
+  "visual_review": "Boundary and distributed samples in all 13 colour families; prominent contrasting motifs excluded. All models have image metrics; not every combination was manually reviewed. Myth Mask: all 134 model thumbnails reviewed on 2026-11-01; eight contrasting candidates excluded.",
   "manual_exclusions": [
     {
       "collection": "Artisan Brick",
@@ -135,6 +135,46 @@
       "collection": "Winter Wreath",
       "model": "Comics",
       "reason": "prominent contrasting motif"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Billy Puppet",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Duality",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Ghostface",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Golden Ra",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Grey Matter",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Holy Crusader",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Patchy",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Temptress",
+      "reason": "prominent contrasting motif or high-contrast foreground; visually reviewed 2026-11-01"
     }
   ],
   "models": [
@@ -58841,6 +58881,1379 @@
         219,
         75,
         194
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Bitcoinicle",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Old Gold",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        210,
+        154,
+        41
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Fatality",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Cappuccino",
+        "Copper",
+        "Old Gold",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        220,
+        159,
+        37
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Frontman",
+      "backdrops": [
+        "Black",
+        "Onyx Black"
+      ],
+      "family": "black",
+      "rgb": [
+        64,
+        64,
+        67
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Golden Ram",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        194,
+        146,
+        76
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Golden Taurus",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        186,
+        144,
+        74
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "The Seeker",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Old Gold",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        210,
+        159,
+        62
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Apollo",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        208,
+        161,
+        97
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Cyber Wolf",
+      "backdrops": [
+        "Navy Blue",
+        "Sapphire",
+        "Silver Blue",
+        "Indigo Dye",
+        "Midnight Blue",
+        "Cobalt Blue",
+        "French Blue",
+        "Marine Blue",
+        "Gunmetal"
+      ],
+      "family": "blue",
+      "rgb": [
+        70,
+        91,
+        119
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Fire Demon",
+      "backdrops": [
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Rosewood",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Fire Engine",
+        "Burnt Sienna",
+        "Carmine"
+      ],
+      "family": "orange",
+      "rgb": [
+        196,
+        76,
+        27
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Gold Golem",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        201,
+        155,
+        76
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Red Phoenix",
+      "backdrops": [
+        "Carrot Juice",
+        "Coral Red",
+        "Strawberry",
+        "Raspberry",
+        "Mystic Pearl",
+        "Cappuccino",
+        "Rosewood",
+        "Burgundy",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Fire Engine",
+        "Burnt Sienna",
+        "Carmine"
+      ],
+      "family": "red",
+      "rgb": [
+        149,
+        56,
+        45
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Wise Goddess",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Copper",
+        "Old Gold",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        213,
+        172,
+        88
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Frostbite",
+      "backdrops": [
+        "Navy Blue",
+        "Sapphire",
+        "Sky Blue",
+        "Azure Blue",
+        "Moonstone",
+        "Silver Blue",
+        "Indigo Dye",
+        "Midnight Blue",
+        "Cobalt Blue",
+        "French Blue",
+        "Marine Blue",
+        "Celtic Blue"
+      ],
+      "family": "blue",
+      "rgb": [
+        105,
+        170,
+        214
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Helios",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        213,
+        148,
+        41
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Mayan Mask",
+      "backdrops": [
+        "Satin Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "brown",
+      "rgb": [
+        143,
+        97,
+        61
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Midas Bear",
+      "backdrops": [
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "brown",
+      "rgb": [
+        159,
+        100,
+        48
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Steel Wisdom",
+      "backdrops": [
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        172,
+        127,
+        90
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Dark Knight",
+      "backdrops": [
+        "Midnight Blue",
+        "Marine Blue"
+      ],
+      "family": "blue",
+      "rgb": [
+        55,
+        63,
+        86
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Baldwin",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver",
+        "Onyx Black",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        149,
+        146,
+        142
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "First Dog",
+      "backdrops": [
+        "Ivory White",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        204,
+        205,
+        209
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Hannibal",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "brown",
+      "rgb": [
+        140,
+        99,
+        54
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Hellspawn",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Copper",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        185,
+        126,
+        24
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Monkey Heist",
+      "backdrops": [
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Fire Engine",
+        "Old Gold",
+        "Burnt Sienna",
+        "Carmine",
+        "Mustard"
+      ],
+      "family": "brown",
+      "rgb": [
+        151,
+        92,
+        56
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Predator",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Persimmon",
+        "Desert Sand",
+        "Copper",
+        "Old Gold",
+        "Mustard"
+      ],
+      "family": "yellow",
+      "rgb": [
+        174,
+        151,
+        89
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "The Donald",
+      "backdrops": [
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        226,
+        148,
+        79
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Wrong Number",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        200,
+        124,
+        48
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Azure Oracle",
+      "backdrops": [
+        "Cyberpunk",
+        "Electric Indigo",
+        "Neon Blue"
+      ],
+      "family": "blue",
+      "rgb": [
+        97,
+        93,
+        179
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Bella Ciao",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        223,
+        172,
+        122
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Death Skull",
+      "backdrops": [
+        "Onyx Black",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        105,
+        100,
+        94
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Gem Tear",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        142,
+        145,
+        150
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Little Ghost",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        188,
+        179,
+        175
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Silver Face",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        157,
+        162,
+        169
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Broken Time",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver",
+        "Onyx Black",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        126,
+        124,
+        122
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Gear Master",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        177,
+        133,
+        50
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Immortal",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        145,
+        145,
+        144
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Liquid Metal",
+      "backdrops": [
+        "Cyberpunk",
+        "Navy Blue",
+        "Sapphire",
+        "Midnight Blue",
+        "Cobalt Blue",
+        "French Blue",
+        "Marine Blue"
+      ],
+      "family": "blue",
+      "rgb": [
+        92,
+        107,
+        143
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "ALL CAPS",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        142,
+        139,
+        135
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Anonymous",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        178,
+        175,
+        165
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Neon Purge",
+      "backdrops": [
+        "Neon Blue",
+        "Navy Blue",
+        "Sapphire",
+        "Sky Blue",
+        "Azure Blue",
+        "Silver Blue",
+        "Indigo Dye",
+        "Midnight Blue",
+        "Cobalt Blue",
+        "French Blue",
+        "Marine Blue",
+        "Gunmetal",
+        "Celtic Blue"
+      ],
+      "family": "blue",
+      "rgb": [
+        44,
+        99,
+        148
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Pink Crush",
+      "backdrops": [
+        "Raspberry",
+        "Mystic Pearl",
+        "Rosewood",
+        "Burgundy",
+        "Mexican Pink",
+        "Fire Engine",
+        "Carmine"
+      ],
+      "family": "red",
+      "rgb": [
+        229,
+        131,
+        145
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Tragic Muse",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        204,
+        166,
+        111
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Wise Owl",
+      "backdrops": [
+        "Ivory White",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        198,
+        194,
+        193
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Zorro",
+      "backdrops": [
+        "Black",
+        "Onyx Black"
+      ],
+      "family": "black",
+      "rgb": [
+        39,
+        37,
+        36
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Night Vision",
+      "backdrops": [
+        "Silver Blue",
+        "Indigo Dye",
+        "Midnight Blue",
+        "Marine Blue",
+        "Gunmetal"
+      ],
+      "family": "blue",
+      "rgb": [
+        34,
+        62,
+        82
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Area 51",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        145,
+        141,
+        133
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Brick Face",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Persimmon",
+        "Old Gold",
+        "Mustard"
+      ],
+      "family": "yellow",
+      "rgb": [
+        219,
+        172,
+        30
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Crimson Face",
+      "backdrops": [
+        "Carrot Juice",
+        "Coral Red",
+        "Strawberry",
+        "Raspberry",
+        "Mystic Pearl",
+        "Cappuccino",
+        "Rosewood",
+        "Burgundy",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Fire Engine",
+        "Burnt Sienna",
+        "Carmine"
+      ],
+      "family": "red",
+      "rgb": [
+        203,
+        51,
+        43
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Cursed Straw",
+      "backdrops": [
+        "Light Olive",
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "brown",
+      "rgb": [
+        140,
+        91,
+        33
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Doomsday",
+      "backdrops": [
+        "Platinum",
+        "Roman Silver",
+        "Onyx Black",
+        "Battleship Grey",
+        "Feldgrau"
+      ],
+      "family": "gray",
+      "rgb": [
+        119,
+        120,
+        124
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Hug Me",
+      "backdrops": [
+        "Raspberry",
+        "Rosewood",
+        "Burgundy",
+        "Mexican Pink",
+        "Fire Engine",
+        "Carmine"
+      ],
+      "family": "red",
+      "rgb": [
+        237,
+        141,
+        159
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "No Face",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        203,
+        196,
+        207
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Red Eye",
+      "backdrops": [
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Fire Engine",
+        "Old Gold",
+        "Burnt Sienna",
+        "Carmine",
+        "Mustard"
+      ],
+      "family": "orange",
+      "rgb": [
+        200,
+        139,
+        110
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Sea Dragon",
+      "backdrops": [
+        "Navy Blue",
+        "Sapphire",
+        "Silver Blue",
+        "Indigo Dye",
+        "Midnight Blue",
+        "Cobalt Blue",
+        "French Blue",
+        "Marine Blue",
+        "Gunmetal"
+      ],
+      "family": "blue",
+      "rgb": [
+        78,
+        102,
+        134
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Wild Stallion",
+      "backdrops": [
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "brown",
+      "rgb": [
+        140,
+        86,
+        37
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Witch King",
+      "backdrops": [
+        "Black",
+        "Onyx Black"
+      ],
+      "family": "black",
+      "rgb": [
+        80,
+        80,
+        79
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Third Eye",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        186,
+        181,
+        178
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Red Devil",
+      "backdrops": [
+        "Carrot Juice",
+        "Coral Red",
+        "Strawberry",
+        "Raspberry",
+        "Mystic Pearl",
+        "Cappuccino",
+        "Rosewood",
+        "Burgundy",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Fire Engine",
+        "Burnt Sienna",
+        "Carmine"
+      ],
+      "family": "red",
+      "rgb": [
+        180,
+        40,
+        28
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Red Oni",
+      "backdrops": [
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Rosewood",
+        "Burgundy",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Tomato",
+        "Fire Engine",
+        "Burnt Sienna",
+        "Carmine"
+      ],
+      "family": "red",
+      "rgb": [
+        171,
+        47,
+        17
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Tragic Face",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        187,
+        185,
+        180
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Wooden Smile",
+      "backdrops": [
+        "Satin Gold",
+        "Pure Gold",
+        "Amber",
+        "Caramel",
+        "Orange",
+        "Carrot Juice",
+        "Coral Red",
+        "Persimmon",
+        "Strawberry",
+        "Mystic Pearl",
+        "Desert Sand",
+        "Cappuccino",
+        "Copper",
+        "Chestnut",
+        "Chocolate",
+        "Seal Brown",
+        "Tomato",
+        "Old Gold",
+        "Burnt Sienna",
+        "Mustard"
+      ],
+      "family": "brown",
+      "rgb": [
+        142,
+        89,
+        44
+      ]
+    },
+    {
+      "collection": "Myth Mask",
+      "model": "Horny",
+      "backdrops": [
+        "Ivory White",
+        "Platinum",
+        "Roman Silver"
+      ],
+      "family": "white",
+      "rgb": [
+        202,
+        200,
+        208
       ]
     }
   ]

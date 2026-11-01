@@ -15,6 +15,9 @@ from .i18n import tr, theme_name
 from .core import SearchQuery, compact, norm
 from . import monochrome
 from .network import request, error_note
+from .reference_data import ReferenceStore, merge_catalog, names, validate_catalog
+
+CATALOG_REFRESH_MS = 15 * 60 * 1000
 
 # Membership is an explicit, visually reviewed allow-list. Keyword rules above
 # are research aids only and never add an item to a shipped theme.
@@ -60,6 +63,9 @@ class Catalog:
         self.full_path = directory / 'catalog-v2.json'
         self.note = ''
         self.lock = threading.RLock()
+        self.refresh_lock = threading.Lock()
+        self.monochrome = monochrome.Lookup()
+        self.theme_definitions = None
         self.data = {'collections': [], 'backdrops': [], 'traits': {}}
         source = seed or Path(__file__).parent / 'catalog_full.json'
         if source.name == 'catalog_seed.json' and source.with_name('catalog_full.json').exists():
@@ -76,10 +82,20 @@ class Catalog:
                     backgrounds.update({r['name']:r for r in self.data['backdrops']})
                     self.data['backdrops'] = list(backgrounds.values())
                 else:
-                    self.data.update(payload)
+                    self.data = merge_catalog(self.data, validate_catalog(payload))
             except (OSError, ValueError):
                 continue
+        self.references = ReferenceStore(directory)
+        if self.references.payloads:
+            self._apply_references(self.references.payloads)
         self.reindex()
+
+    def _apply_references(self, payloads):
+        definitions = {row['key']:{**THEMES[row['key']], **row} for row in payloads['themes_curated.json']['themes'] if row['key'] in THEMES}
+        if set(definitions) != set(THEMES): raise ValueError('Incomplete theme update')
+        self.data = merge_catalog(self.data, payloads['catalog_full.json'])
+        self.theme_definitions = definitions
+        self.monochrome = monochrome.Lookup(payloads['monochrome_pairs.json'])
 
     @_catalog_locked
     def reindex(self):
@@ -87,8 +103,9 @@ class Catalog:
         # Build replacements privately so they always see a complete old or new list.
         model_rows = []
         symbol_rows = []
-        themes = {key: {**value, 'members': []} for key,value in THEMES.items()}
-        reviewed = {key:{(compact(c),norm(m)) for c,m in row['members']} for key,row in THEMES.items()}
+        definitions = self.theme_definitions if self.theme_definitions is not None else THEMES
+        themes = {key: {**value, 'members': []} for key,value in definitions.items()}
+        reviewed = {key:{(compact(c),norm(m)) for c,m in row['members']} for key,row in definitions.items()}
         for collection in sorted(self.data.get('traits', {}), key=norm):
             traits = self.data['traits'][collection]
             for row in traits.get('models', []):
@@ -102,22 +119,39 @@ class Catalog:
         model_lookup = {(compact(x['collection']), norm(x['name'])):x for x in model_rows}
         backdrop_lookup = {norm(x['name']):x for x in self.data.get('backdrops', [])}
         themes['monochrome']={'title':theme_name('monochrome'),'color':'#8296a9',
-            'members':[(r['collection'],r['model']) for r in monochrome.data()['models'] if (compact(r['collection']),norm(r['model'])) in model_lookup]}
+            'members':[(r['collection'],r['model']) for r in self.monochrome.payload['models'] if (compact(r['collection']),norm(r['model'])) in model_lookup]}
         self.model_rows, self.symbol_rows = model_rows, symbol_rows
         self.model_lookup, self.backdrop_lookup, self.themes = model_lookup, backdrop_lookup, themes
 
-    def refresh(self, progress=lambda _: None):
+    def refresh(self, progress=lambda _: None, include_references=True):
+        if not self.refresh_lock.acquire(blocking=False): return self.data
+        try:
+            return self._refresh(progress, include_references)
+        finally:
+            self.refresh_lock.release()
+
+    def _refresh(self, progress, include_references):
+        reference_failed = False
+        if include_references:
+            try:
+                payloads = self.references.refresh()
+                with self.lock:
+                    self._apply_references(payloads)
+                    self.reindex()
+            except Exception:
+                reference_failed = True
         try:
             gifts = request('GET', 'https://api.changes.tg/gifts').json()
             backdrops = request('GET', 'https://api.changes.tg/backdrops').json()
-            if not isinstance(gifts,list) or not gifts:
+            if not isinstance(gifts,list) or not gifts or any(not isinstance(gift,str) or not gift.strip() for gift in gifts):
                 raise ValueError('catalog shape')
+            names(backdrops)
             updated = dict(self.data.get('traits', {}))
             failures = []
             def traits(collection):
                 models = request('GET', f'https://api.changes.tg/models/{quote(collection, safe="")}?sorted').json()
                 symbols = request('GET', f'https://api.changes.tg/symbols/{quote(collection, safe="")}?sorted').json()
-                return {'models':models, 'symbols':symbols}
+                return {'models':names(models), 'symbols':names(symbols)}
             with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
                 jobs = {pool.submit(traits, gift):gift for gift in gifts}
                 for i,future in enumerate(concurrent.futures.as_completed(jobs),1):
@@ -128,14 +162,15 @@ class Catalog:
                     if i % 20 == 0:
                         progress(tr('background_catalog',count=i,total=len(gifts)))
             with self.lock:
-                self.data = {'schema':2, 'collections':sorted(gifts), 'backdrops':backdrops,
-                             'traits':updated, 'updated_at':time.time(), 'failures':failures}
-                self.reindex()
+                candidate = merge_catalog(self.data, {'schema':2, 'collections':sorted(set(gifts)), 'backdrops':backdrops,
+                             'traits':updated, 'updated_at':time.time(), 'failures':failures})
                 self.directory.mkdir(parents=True, exist_ok=True)
                 tmp = self.full_path.with_suffix('.tmp')
-                tmp.write_text(json.dumps(self.data, ensure_ascii=False), encoding='utf-8')
+                tmp.write_text(json.dumps(candidate, ensure_ascii=False), encoding='utf-8')
                 tmp.replace(self.full_path)
-            self.note = tr('catalog_updated') if not failures else tr('catalog_partial')+' ('+str(len(failures))+')'
+                self.data = candidate
+                self.reindex()
+            self.note = tr('catalog_updated') if not failures and not reference_failed else tr('catalog_partial')+(' ('+str(len(failures))+')' if failures else '')
         except Exception as error:
             self.note = tr('local_catalog')+' · ' + error_note(error)
         return self.data
@@ -163,7 +198,7 @@ class Catalog:
             allowed = chosen if allowed is None else allowed & chosen
         return [r for r in self.model_rows if (not query.collection or compact(r['collection']) == compact(query.collection))
                 and (allowed is None or (compact(r['collection']), norm(r['name'])) in allowed)
-                and (not (query.monochrome or query.mono_colors) or monochrome.has_model(r['collection'],r['name'],query.backdrops,query.mono_colors))]
+                and (not (query.monochrome or query.mono_colors) or self.monochrome.has_model(r['collection'],r['name'],query.backdrops,query.mono_colors))]
 
     @_catalog_locked
     def resolve(self, query):

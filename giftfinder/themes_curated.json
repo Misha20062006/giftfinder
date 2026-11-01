@@ -1,5 +1,5 @@
 {
-  "reviewed_on": "2026-10-26",
+  "reviewed_on": "2026-11-01",
   "themes": [
     {
       "key": "minecraft",
@@ -48,6 +48,10 @@
           "Ender Snake"
         ],
         [
+          "Myth Mask",
+          "Enderman"
+        ],
+        [
           "Rare Bird",
           "Zombie Rider"
         ],
@@ -88,7 +92,8 @@
           "Nether House"
         ]
       ],
-      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты.",
+      "reviewed_on": "2026-11-01"
     },
     {
       "key": "cheese",
@@ -308,6 +313,10 @@
           "Pumpkin"
         ],
         [
+          "Myth Mask",
+          "Pumpkin Jack"
+        ],
+        [
           "Plush Pepe",
           "Pumpkin"
         ],
@@ -328,7 +337,8 @@
           "Pumpkin"
         ]
       ],
-      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты.",
+      "reviewed_on": "2026-11-01"
     },
     {
       "key": "bee",
@@ -568,6 +578,22 @@
           "Skeleton"
         ],
         [
+          "Myth Mask",
+          "Dark Skull"
+        ],
+        [
+          "Myth Mask",
+          "Death Skull"
+        ],
+        [
+          "Myth Mask",
+          "La Muerte"
+        ],
+        [
+          "Myth Mask",
+          "Wolf Skull"
+        ],
+        [
           "Restless Jar",
           "Snack Bones"
         ],
@@ -588,7 +614,8 @@
           "Crossbones"
         ]
       ],
-      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты.",
+      "reviewed_on": "2026-11-01"
     },
     {
       "key": "rainbow",
@@ -661,6 +688,18 @@
           "Glass Rainbow"
         ],
         [
+          "Myth Mask",
+          "Kaleidoscope"
+        ],
+        [
+          "Myth Mask",
+          "Neon Rider"
+        ],
+        [
+          "Myth Mask",
+          "Paint Riot"
+        ],
+        [
           "Nail Bracelet",
           "Rainbow Pills"
         ],
@@ -685,7 +724,8 @@
           "Rainbow"
         ]
       ],
-      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты."
+      "review": "Изображения моделей проверены вручную; названия и чужие подборки использованы как кандидаты.",
+      "reviewed_on": "2026-11-01"
     },
     {
       "key": "pepe",
@@ -694,44 +734,124 @@
       "color": "#80ba78",
       "members": [
         [
-          "Kissed Frog",
-          "Happy Pepe"
+          "Bonded Ring",
+          "Froge Ring"
         ],
         [
-          "Sharp Tongue",
-          "Pepelicious"
+          "Bunny Muffin",
+          "Froggy"
         ],
         [
-          "Scared Cat",
-          "Pepe Paws"
-        ],
-        [
-          "Spy Agaric",
-          "Pepe Mania"
-        ],
-        [
-          "Party Sparkler",
-          "Le Pepe"
-        ],
-        [
-          "Jester Hat",
-          "Pepe Hop"
+          "Cupid Charm",
+          "Pepe Love"
         ],
         [
           "Desk Calendar",
           "Pepe Plans"
         ],
         [
+          "Durov's Glasses",
+          "Pepe Dream"
+        ],
+        [
+          "Easter Egg",
+          "Boiled Pepe"
+        ],
+        [
+          "Fresh Socks",
+          "Pepe Socks"
+        ],
+        [
           "Ginger Cookie",
           "Pepe Pryanik"
+        ],
+        [
+          "Ice Cream",
+          "Cryo Pepe"
+        ],
+        [
+          "Jack-in-the-Box",
+          "Shy Pepe"
+        ],
+        [
+          "Jester Hat",
+          "Pepe Hop"
+        ],
+        [
+          "Joyful Bundle",
+          "Pepe Bag"
+        ],
+        [
+          "Kissed Frog",
+          "Happy Pepe"
+        ],
+        [
+          "Loot Bag",
+          "Pepe Bag"
+        ],
+        [
+          "Mood Pack",
+          "Pepe Unleashed"
+        ],
+        [
+          "Nail Bracelet",
+          "Pepe Band"
+        ],
+        [
+          "Neko Helmet",
+          "Turbo Frog"
+        ],
+        [
+          "Party Sparkler",
+          "Le Pepe"
+        ],
+        [
+          "Pool Float",
+          "Pool Pepe"
+        ],
+        [
+          "Resistance Dog",
+          "Plush Pepe"
+        ],
+        [
+          "Restless Jar",
+          "Pepe Pod"
+        ],
+        [
+          "Scared Cat",
+          "Pepe Paws"
+        ],
+        [
+          "Sharp Tongue",
+          "Pepelicious"
+        ],
+        [
+          "Snow Globe",
+          "Pepe Frost"
+        ],
+        [
+          "Spring Basket",
+          "Meme God"
+        ],
+        [
+          "Spy Agaric",
+          "Pepe Mania"
         ],
         [
           "Star Notepad",
           "Pepe Diary"
         ],
         [
-          "Loot Bag",
-          "Pepe Bag"
+          "Surge Board",
+          "Pepe Surfer"
+        ],
+        [
+          "Tama Gadget",
+          "Pepe Feels"
+        ],
+        [
+          "Timeless Book",
+          "Froges"
         ],
         [
           "Toy Bear",
@@ -740,86 +860,6 @@
         [
           "Winter Wreath",
           "Festive Pepe"
-        ],
-        [
-          "Snow Globe",
-          "Pepe Frost"
-        ],
-        [
-          "Tama Gadget",
-          "Pepe Feels"
-        ],
-        [
-          "Jack-in-the-Box",
-          "Shy Pepe"
-        ],
-        [
-          "Easter Egg",
-          "Boiled Pepe"
-        ],
-        [
-          "Restless Jar",
-          "Pepe Pod"
-        ],
-        [
-          "Nail Bracelet",
-          "Pepe Band"
-        ],
-        [
-          "Cupid Charm",
-          "Pepe Love"
-        ],
-        [
-          "Joyful Bundle",
-          "Pepe Bag"
-        ],
-        [
-          "Fresh Socks",
-          "Pepe Socks"
-        ],
-        [
-          "Ice Cream",
-          "Cryo Pepe"
-        ],
-        [
-          "Pool Float",
-          "Pool Pepe"
-        ],
-        [
-          "Mood Pack",
-          "Pepe Unleashed"
-        ],
-        [
-          "Surge Board",
-          "Pepe Surfer"
-        ],
-        [
-          "Durov's Glasses",
-          "Pepe Dream"
-        ],
-        [
-          "Resistance Dog",
-          "Plush Pepe"
-        ],
-        [
-          "Bunny Muffin",
-          "Froggy"
-        ],
-        [
-          "Neko Helmet",
-          "Turbo Frog"
-        ],
-        [
-          "Bonded Ring",
-          "Froge Ring"
-        ],
-        [
-          "Timeless Book",
-          "Froges"
-        ],
-        [
-          "Spring Basket",
-          "Meme God"
         ]
       ],
       "reviewed_on": "2026-10-26"
@@ -831,16 +871,8 @@
       "color": "#dab65f",
       "members": [
         [
-          "Plush Pepe",
-          "Midas Pepe"
-        ],
-        [
-          "Astral Shard",
-          "Gold 999"
-        ],
-        [
-          "Easter Egg",
-          "Pure Gold"
+          "Algorithm Cup",
+          "Gold"
         ],
         [
           "Artisan Brick",
@@ -851,8 +883,108 @@
           "Gold Block"
         ],
         [
+          "Astral Shard",
+          "Gold 999"
+        ],
+        [
+          "Bunny Muffin",
+          "Gold"
+        ],
+        [
+          "Cookie Heart",
+          "Gold Bar"
+        ],
+        [
+          "Easter Egg",
+          "Pure Gold"
+        ],
+        [
+          "Happy Brownie",
+          "Gold Nugget"
+        ],
+        [
+          "Heroic Helmet",
+          "King Midas"
+        ],
+        [
           "Ice Cream",
           "Gold Ingot"
+        ],
+        [
+          "Intelligence Cup",
+          "Gold"
+        ],
+        [
+          "Ion Gem",
+          "King Midas"
+        ],
+        [
+          "Jingle Bells",
+          "Solid Gold"
+        ],
+        [
+          "Jolly Chimp",
+          "Golden Monkey"
+        ],
+        [
+          "Joyful Bundle",
+          "Pure Gold"
+        ],
+        [
+          "Love Potion",
+          "Molten Gold"
+        ],
+        [
+          "Money Pot",
+          "Gold Miner"
+        ],
+        [
+          "Myth Mask",
+          "Bitcoinicle"
+        ],
+        [
+          "Myth Mask",
+          "Fatality"
+        ],
+        [
+          "Myth Mask",
+          "Gold Golem"
+        ],
+        [
+          "Myth Mask",
+          "Golden Ram"
+        ],
+        [
+          "Myth Mask",
+          "Golden Taurus"
+        ],
+        [
+          "Myth Mask",
+          "Helios"
+        ],
+        [
+          "Myth Mask",
+          "Hellspawn"
+        ],
+        [
+          "Myth Mask",
+          "The Seeker"
+        ],
+        [
+          "Myth Mask",
+          "Wise Goddess"
+        ],
+        [
+          "Neko Helmet",
+          "Gold Rush"
+        ],
+        [
+          "Pet Snake",
+          "Pure Gold"
+        ],
+        [
+          "Plush Pepe",
+          "Midas Pepe"
         ],
         [
           "Precious Peach",
@@ -863,71 +995,15 @@
           "Gold"
         ],
         [
-          "Bunny Muffin",
-          "Gold"
-        ],
-        [
-          "Ion Gem",
-          "King Midas"
-        ],
-        [
           "Toy Bear",
           "Golden Cub"
         ],
         [
           "Victory Medal",
           "Gold"
-        ],
-        [
-          "Algorithm Cup",
-          "Gold"
-        ],
-        [
-          "Intelligence Cup",
-          "Gold"
-        ],
-        [
-          "Cookie Heart",
-          "Gold Bar"
-        ],
-        [
-          "Jingle Bells",
-          "Solid Gold"
-        ],
-        [
-          "Love Potion",
-          "Molten Gold"
-        ],
-        [
-          "Happy Brownie",
-          "Gold Nugget"
-        ],
-        [
-          "Pet Snake",
-          "Pure Gold"
-        ],
-        [
-          "Joyful Bundle",
-          "Pure Gold"
-        ],
-        [
-          "Neko Helmet",
-          "Gold Rush"
-        ],
-        [
-          "Heroic Helmet",
-          "King Midas"
-        ],
-        [
-          "Jolly Chimp",
-          "Golden Monkey"
-        ],
-        [
-          "Money Pot",
-          "Gold Miner"
         ]
       ],
-      "reviewed_on": "2026-10-26"
+      "reviewed_on": "2026-11-01"
     },
     {
       "key": "silver",
@@ -935,6 +1011,58 @@
       "subtitle": "Визуально серебристый металл; радужный хром и спорные медные оттенки исключены.",
       "color": "#adbcc9",
       "members": [
+        [
+          "Algorithm Cup",
+          "Silver"
+        ],
+        [
+          "Bunny Muffin",
+          "Silver"
+        ],
+        [
+          "Eternal Rose",
+          "Silver Flower"
+        ],
+        [
+          "Intelligence Cup",
+          "Silver"
+        ],
+        [
+          "Kissed Frog",
+          "Silver"
+        ],
+        [
+          "Myth Mask",
+          "ALL CAPS"
+        ],
+        [
+          "Myth Mask",
+          "Area 51"
+        ],
+        [
+          "Myth Mask",
+          "Cyber Wolf"
+        ],
+        [
+          "Myth Mask",
+          "Death Blossom"
+        ],
+        [
+          "Myth Mask",
+          "Doomsday"
+        ],
+        [
+          "Myth Mask",
+          "Gem Tear"
+        ],
+        [
+          "Myth Mask",
+          "Immortal"
+        ],
+        [
+          "Myth Mask",
+          "Silver Face"
+        ],
         [
           "Signet Ring",
           "Platinum"
@@ -944,31 +1072,11 @@
           "Silver"
         ],
         [
-          "Kissed Frog",
-          "Silver"
-        ],
-        [
-          "Eternal Rose",
-          "Silver Flower"
-        ],
-        [
-          "Bunny Muffin",
-          "Silver"
-        ],
-        [
-          "Algorithm Cup",
-          "Silver"
-        ],
-        [
-          "Intelligence Cup",
-          "Silver"
-        ],
-        [
           "Victory Medal",
           "Silver"
         ]
       ],
-      "reviewed_on": "2026-10-26"
+      "reviewed_on": "2026-11-01"
     },
     {
       "key": "star_wars",
@@ -977,28 +1085,24 @@
       "color": "#8da9c4",
       "members": [
         [
-          "Hex Pot",
-          "Death Star"
-        ],
-        [
-          "Party Sparkler",
-          "Lord Vader"
-        ],
-        [
-          "Sleigh Bell",
-          "Darth Vader"
+          "Bow Tie",
+          "Baby Yoda"
         ],
         [
           "Gem Signet",
           "Death Star"
         ],
         [
-          "Light Sword",
-          "Wrath of Vader"
+          "Hex Pot",
+          "Death Star"
         ],
         [
           "Light Sword",
           "Jedi Luke"
+        ],
+        [
+          "Light Sword",
+          "Jedi Princess"
         ],
         [
           "Light Sword",
@@ -1010,11 +1114,15 @@
         ],
         [
           "Light Sword",
-          "Jedi Princess"
+          "Wrath of Vader"
         ],
         [
-          "Bow Tie",
-          "Baby Yoda"
+          "Party Sparkler",
+          "Lord Vader"
+        ],
+        [
+          "Sleigh Bell",
+          "Darth Vader"
         ]
       ],
       "reviewed_on": "2026-10-26"
@@ -1035,6 +1143,10 @@
         ],
         [
           "Flying Broom",
+          "Nimbus"
+        ],
+        [
+          "Flying Broom",
           "Ravenclaw"
         ],
         [
@@ -1042,20 +1154,16 @@
           "Slytherin"
         ],
         [
-          "Flying Broom",
-          "Nimbus"
-        ],
-        [
           "Lush Bouquet",
           "Mandrake"
         ],
         [
-          "Witch Hat",
-          "Sorting Cat"
-        ],
-        [
           "Pet Snake",
           "Dobby"
+        ],
+        [
+          "Witch Hat",
+          "Sorting Cat"
         ]
       ],
       "reviewed_on": "2026-10-26"
@@ -1067,28 +1175,28 @@
       "color": "#e3c265",
       "members": [
         [
+          "Big Year",
+          "Pokeball"
+        ],
+        [
           "Durov's Cap",
           "Pokemon"
-        ],
-        [
-          "Hex Pot",
-          "Pikabrew"
-        ],
-        [
-          "Party Sparkler",
-          "Pika Pika"
         ],
         [
           "Ginger Cookie",
           "Pika Pika"
         ],
         [
-          "Big Year",
-          "Pokeball"
+          "Hex Pot",
+          "Pikabrew"
         ],
         [
           "Instant Ramen",
           "Pika-Pika!"
+        ],
+        [
+          "Party Sparkler",
+          "Pika Pika"
         ]
       ],
       "reviewed_on": "2026-10-26"
@@ -1100,14 +1208,6 @@
       "color": "#cc9dbd",
       "members": [
         [
-          "Party Sparkler",
-          "Sailor Moon"
-        ],
-        [
-          "Lol Pop",
-          "Sailor Moon"
-        ],
-        [
           "Bow Tie",
           "Sailor Moon"
         ],
@@ -1116,12 +1216,20 @@
           "Moon Prism"
         ],
         [
+          "Fresh Socks",
+          "Moon Prism"
+        ],
+        [
           "Joyful Bundle",
           "Sailor Moon"
         ],
         [
-          "Fresh Socks",
-          "Moon Prism"
+          "Lol Pop",
+          "Sailor Moon"
+        ],
+        [
+          "Party Sparkler",
+          "Sailor Moon"
         ]
       ],
       "reviewed_on": "2026-10-26"
@@ -1133,6 +1241,10 @@
       "color": "#c7a16f",
       "members": [
         [
+          "Bow Tie",
+          "Doge Gem"
+        ],
+        [
           "Bunny Muffin",
           "Shiba Inu"
         ],
@@ -1141,24 +1253,20 @@
           "Dogel Mogel"
         ],
         [
-          "Bow Tie",
-          "Doge Gem"
-        ],
-        [
-          "Spring Basket",
-          "Strong Doge"
-        ],
-        [
           "Lucky Locket",
           "DOGE"
+        ],
+        [
+          "Nail Bracelet",
+          "Hachikō"
         ],
         [
           "Spring Basket",
           "Cheems"
         ],
         [
-          "Nail Bracelet",
-          "Hachikō"
+          "Spring Basket",
+          "Strong Doge"
         ]
       ],
       "reviewed_on": "2026-10-26"
@@ -1174,39 +1282,51 @@
           "Black Hole"
         ],
         [
-          "Top Hat",
-          "Solar System"
+          "Hypno Lollipop",
+          "Saturn"
         ],
         [
           "Mini Oscar",
           "Astronaut"
         ],
         [
-          "Snow Mittens",
-          "Astronaut"
+          "Myth Mask",
+          "Alien Visitor"
+        ],
+        [
+          "Myth Mask",
+          "Area 51"
+        ],
+        [
+          "Myth Mask",
+          "Star Seeker"
         ],
         [
           "Neko Helmet",
           "Astronaut"
         ],
         [
+          "Scared Cat",
+          "Nebula"
+        ],
+        [
           "Signet Ring",
           "Saturn Ring"
         ],
         [
-          "Hypno Lollipop",
-          "Saturn"
+          "Snow Mittens",
+          "Astronaut"
+        ],
+        [
+          "Top Hat",
+          "Solar System"
         ],
         [
           "Voodoo Doll",
           "Far Galaxy"
-        ],
-        [
-          "Scared Cat",
-          "Nebula"
         ]
       ],
-      "reviewed_on": "2026-10-26"
+      "reviewed_on": "2026-11-01"
     }
   ],
   "research_sources": [

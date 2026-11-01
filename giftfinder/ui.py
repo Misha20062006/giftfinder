@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QMainWindow, QFrame, QWidget, QVBoxLayout, QHBoxL
     QStyledItemDelegate, QStyle, QDialog, QSizeGrip, QFileDialog, QApplication, QMenu, QProgressBar)
 
 from .core import MARKETS, SearchQuery, SearchResult, Store, number, fmt, age_label, norm, safe_url
-from .catalogue import Catalog, query_from_dict
+from .catalogue import Catalog, query_from_dict, CATALOG_REFRESH_MS
 from .providers import SearchEngine
 from .currency import RateBook, NAMES, SYMBOLS
 from .previews import Assets, PreviewRenderer
@@ -125,6 +125,7 @@ class MainWindow(QMainWindow):
         self.renderer = PreviewRenderer(self.catalog,self.assets)
         self.pool = QThreadPool(self); self.tasks = []
         self.cancelled = threading.Event(); self.generation = 0; self.busy = False; self.closing = False
+        self.catalog_refreshing = False
         self.result = SearchResult(); self.offers = []; self.mode = 'catalog'; self.dialogs = []; self.filter_dialog = None
         settings = self.store.data['settings']
         try: self.filter_query = query_from_dict(settings.get('last_filter',{}))
@@ -137,10 +138,19 @@ class MainWindow(QMainWindow):
         self.add_shortcut(QKeySequence.StandardKey.Find, self.search_edit.setFocus)
         self.add_shortcut('F5', self.start_search)
         if not offline:
-            if any((self.filter_query.collection,self.filter_query.theme,self.filter_query.models,self.filter_query.targets,self.filter_query.text,self.filter_query.monochrome,self.filter_query.mono_colors)):
-                QTimer.singleShot(0,self.start_search)
+            self.restore_search_after_catalog = any((self.filter_query.collection,self.filter_query.theme,self.filter_query.models,self.filter_query.targets,self.filter_query.text,self.filter_query.monochrome,self.filter_query.mono_colors))
+            if self.restore_search_after_catalog:
+                try: self.engine.cached(self.current_query())
+                except ValueError: pass
+                else:
+                    self.restore_search_after_catalog = False
+                    QTimer.singleShot(0,self.start_search)
             QTimer.singleShot(100,self.refresh_rates)
             QTimer.singleShot(450,self.refresh_catalog)
+            self.catalog_timer = QTimer(self)
+            self.catalog_timer.setInterval(CATALOG_REFRESH_MS)
+            self.catalog_timer.timeout.connect(self.refresh_catalog)
+            self.catalog_timer.start()
 
     def add_shortcut(self, sequence, fn):
         action = QAction(self); action.setShortcut(QKeySequence(sequence)); action.triggered.connect(fn); self.addAction(action)
@@ -297,16 +307,26 @@ class MainWindow(QMainWindow):
     def populate_catalog(self):
         rows = [{'kind':'collection','name':c,'collection':c,'key':c,'subtitle':tr('models_count',count=len(self.catalog.data.get('traits',{}).get(c,{}).get('models',[])))} for c in self.catalog.data['collections']]
         self.home_model.replace(rows)
-        self.catalog_note.setText(tr('collections_count',count=len(rows)))
+        self.catalog_note.setText(tr('collections_count',count=len(rows))+(' · '+self.catalog.note if self.catalog.note else ''))
         self.theme_model.replace([{**row,'name':theme_name(k),'kind':'theme','key':k} for k,row in self.catalog.themes.items()])
         self.update_theme_height()
 
     def refresh_catalog(self):
-        self.task(lambda emit:self.catalog.refresh(emit), self.catalog_ready)
+        if self.offline or self.closing or self.catalog_refreshing: return
+        self.catalog_refreshing = True
+        self.task(lambda emit:self.catalog.refresh(emit), self.catalog_ready, self.catalog_failed)
+
+    def catalog_failed(self, message):
+        self.catalog_refreshing = False
+        self.show_notice(message)
 
     def catalog_ready(self,_):
+        self.catalog_refreshing = False
         self.populate_catalog()
         if self.filter_dialog: self.filter_dialog.populate()
+        if getattr(self,'restore_search_after_catalog',False):
+            self.restore_search_after_catalog = False
+            if not self.busy and not self.closing: self.start_search()
 
     def refresh_rates(self):
         if not self.rate_button.isEnabled(): return
@@ -438,6 +458,7 @@ class MainWindow(QMainWindow):
         return replace(self.filter_query,text=self.search_edit.text().strip(),sort_mode=self.sort.currentData())
 
     def start_search(self):
+        self.restore_search_after_catalog = False
         query = self.current_query()
         try: cached = self.engine.cached(query)
         except ValueError as error: self.show_notice(str(error)); return
@@ -615,5 +636,6 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self,event):
         self.closing = True; self.cancelled.set(); self.generation += 1
+        if hasattr(self,'catalog_timer'): self.catalog_timer.stop()
         for dialog in list(self.dialogs): dialog.close()
         super().closeEvent(event)

@@ -49,7 +49,7 @@ def test_color_apply_searches_every_collection_and_remembers_selection(window,ap
     assert w.filter_query.monochrome and w.filter_query.mono_colors==('black',) and not w.filter_query.collection
     variants,_=w.catalog.resolve(w.filter_query)
     assert len(variants)>10 and all(v.mono_colors==('black',) for v in variants)
-    assert sum(len(v.models) for v in variants)==100
+    assert sum(len(v.models) for v in variants)==103
     assert Store(w.data_dir).data['settings']['last_filter']['mono_colors']==['black']
     w.open_filters();assert w.filter_dialog.state.mono_colors==('black',)
 

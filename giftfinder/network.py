@@ -1,7 +1,7 @@
 from .i18n import tr, theme_name
 import requests
 
-USER_AGENT = 'GiftFinder/0.6 (Windows; read-only gift search)'
+USER_AGENT = 'GiftFinder/0.8 (read-only gift search)'
 TIMEOUT = (8, 22)
 
 

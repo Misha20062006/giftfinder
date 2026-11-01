@@ -61,7 +61,7 @@ def test_phone_layout_has_reachable_header_search_and_navigation(window, app, la
         assert widget.isVisible(), name
         assert window.rect().contains(inside(window, widget)), (name, widget.geometry())
         assert widget.height() >= 40
-    assert window.home_model.rowCount() == 123 and window.theme_model.rowCount() == len(window.catalog.themes)
+    assert window.home_model.rowCount() == len(window.catalog.data['collections']) >= 124 and window.theme_model.rowCount() == len(window.catalog.themes)
     assert window.home_grid.horizontalScrollBar().maximum() == 0
     assert window.theme_grid.verticalScrollBar().maximum() > 0
     assert window.filter_button.accessibleName() == 'Filters'
