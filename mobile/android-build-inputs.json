@@ -145,6 +145,91 @@
         "sha256": "347dd1c17a499362b1eade91e5239c676cf2612cd94f4d9cc20fb4f9aa299cc8",
         "filename": "6.12.0-0-202609280346qtbase-Linux-RHEL_9_6-Clang-Android-Android_ANY-X86_64.7z"
       }
+    },
+    "surface_lifecycle": {
+      "upstream_commit": "f31445f99717c06cbca904d752d9fe47e88ca338",
+      "upstream_parent": "62311c96d897c45aee6900de1f0531506d5f8e20",
+      "patch": "mobile/qt_platform/surface-lifecycle.patch",
+      "patch_sha256": "e91412e16ba1d13750e4ab69d6a5474dc401898d52a8808c8684ce426c62cb40",
+      "adaptation": "Upstream surface lifecycle and required background-priming/legacy-lock cleanup for Qt 6.12.0. Preserve 6.12.0 system UI ownership/JNI registration and three-argument longPress ABI; omit unrelated upstream system-UI and keyboard metadata changes.",
+      "files": {
+        "src/android/jar/src/org/qtproject/qt/android/QtSurface.java": {
+          "original_sha256": "d0234f5bd054a647518a9a8182cdd2fff4716582b0c8c1904cb8534f27c1a371",
+          "patched_sha256": "9abb371b622267279b4600250fedf87690601ea0ad15c7edb312f715fd2a9cf8",
+          "upstream_postimage_sha256": "9abb371b622267279b4600250fedf87690601ea0ad15c7edb312f715fd2a9cf8"
+        },
+        "src/android/jar/src/org/qtproject/qt/android/QtSurfaceInterface.java": {
+          "original_sha256": "355e25a9d79cc0a746fe3bd79cd69a2d7f0e5445c9248331b822922ea51a9740",
+          "patched_sha256": "4b8ed19c368d8374c86e345d020fd03d88bb868e3129065b19626424bdb0530b",
+          "upstream_postimage_sha256": "4b8ed19c368d8374c86e345d020fd03d88bb868e3129065b19626424bdb0530b"
+        },
+        "src/android/jar/src/org/qtproject/qt/android/QtTextureView.java": {
+          "original_sha256": "e7b278f2a815f2d5cc190a0420dcd1e5b7d79e1eb355c79998e54c6c832df8a9",
+          "patched_sha256": "9f16babc5606e1f04d06dfaf0269127b602cd0a1f5eb2bd799e3584ecf6f88bf",
+          "upstream_postimage_sha256": "9f16babc5606e1f04d06dfaf0269127b602cd0a1f5eb2bd799e3584ecf6f88bf"
+        },
+        "src/android/jar/src/org/qtproject/qt/android/QtWindow.java": {
+          "original_sha256": "f4ba4a63bb0c97825c0751b27e839956f93b6add3058c8a24c38a34c00b73615",
+          "patched_sha256": "f07db20b95192e066d03849ef7ef2ed11b6e22973c9c568a225501219cea5ffd",
+          "upstream_postimage_sha256": "69bf2dbdefb6f100bd6c051340425b7ec527638ee2c6cb186febe21a47a4bfc2"
+        },
+        "src/plugins/platforms/android/qandroidplatformforeignwindow.cpp": {
+          "original_sha256": "e826f8ad27f759c7cee0d9c59223284e4fac147da43c9c381797d5fab9706eb2",
+          "patched_sha256": "ba75ccef15fb60b25c59dca0f7232e42fdacf88409e56d9c5542f286f5c8e311",
+          "upstream_postimage_sha256": "ba75ccef15fb60b25c59dca0f7232e42fdacf88409e56d9c5542f286f5c8e311"
+        },
+        "src/plugins/platforms/android/qandroidplatformforeignwindow.h": {
+          "original_sha256": "bc020d8661c1eff76d6ba305f5cc02f29d3a0c3a1b74e9676510288b00a17689",
+          "patched_sha256": "a68294d64c56491b858cf9de67c3a2dd1b91b2b6cecba14f83a970beb5ad10fe",
+          "upstream_postimage_sha256": "a68294d64c56491b858cf9de67c3a2dd1b91b2b6cecba14f83a970beb5ad10fe"
+        },
+        "src/plugins/platforms/android/qandroidplatformopenglcontext.cpp": {
+          "original_sha256": "6d3ad8d69b19a25b44cd7826128d8758971bb942f62851668d2e2f68a8801aba",
+          "patched_sha256": "3ef4ec344187576fa22c911407e430a82ffc373441a553e7dba10f1905b7876c",
+          "upstream_postimage_sha256": "3ef4ec344187576fa22c911407e430a82ffc373441a553e7dba10f1905b7876c"
+        },
+        "src/plugins/platforms/android/qandroidplatformopenglcontext.h": {
+          "original_sha256": "77fb25a70e8d2de74473a822fc29eaa419e80931c2beea01dfd20838eed30c81",
+          "patched_sha256": "54dc538d35104aa413a6a9bcbd52c8761f1765f8a2aa804a4777ea7ec771d173",
+          "upstream_postimage_sha256": "54dc538d35104aa413a6a9bcbd52c8761f1765f8a2aa804a4777ea7ec771d173"
+        },
+        "src/plugins/platforms/android/qandroidplatformopenglwindow.cpp": {
+          "original_sha256": "8df2072f2f46414f90fe3bc1768d2e1844f07e688ec07034a8814f31b9d55c56",
+          "patched_sha256": "4c449145d2e9feb47e7428802756ab54bce729d88cc785933c5e21546c5c4402",
+          "upstream_postimage_sha256": "4c449145d2e9feb47e7428802756ab54bce729d88cc785933c5e21546c5c4402"
+        },
+        "src/plugins/platforms/android/qandroidplatformopenglwindow.h": {
+          "original_sha256": "780bf5888cf3fd3d61f54fa1c87e2203fbef8c0960163c8f3c457fb987557630",
+          "patched_sha256": "329a24af5d390f107f6cb66b08c5c7ebeb789975e30786e0773e33ccf62d1e15",
+          "upstream_postimage_sha256": "329a24af5d390f107f6cb66b08c5c7ebeb789975e30786e0773e33ccf62d1e15"
+        },
+        "src/plugins/platforms/android/qandroidplatformvulkanwindow.cpp": {
+          "original_sha256": "2c9655488b744c5ae50d201798166851f5c82189281292292b81cc2efa81169d",
+          "patched_sha256": "c7f1a70ab518818d2caf38391e50fa2c4db3a622fe8e34b9a612a729e787adf7",
+          "upstream_postimage_sha256": "c7f1a70ab518818d2caf38391e50fa2c4db3a622fe8e34b9a612a729e787adf7"
+        },
+        "src/plugins/platforms/android/qandroidplatformvulkanwindow.h": {
+          "original_sha256": "d9464e8565f450c9809f0c6c93eac6c4fdee43030952e5f7b931a9f884624a1b",
+          "patched_sha256": "34cfad6fe06f35326ff20029bae38c619085cb2cb16c9f09b4b7b7a54888b1f1",
+          "upstream_postimage_sha256": "34cfad6fe06f35326ff20029bae38c619085cb2cb16c9f09b4b7b7a54888b1f1"
+        },
+        "src/plugins/platforms/android/qandroidplatformwindow.cpp": {
+          "original_sha256": "7d7b6f75f4a772c478a84e5f68849ec07f32ca8e4219cfd7b5913c5c32d14328",
+          "patched_sha256": "e69597e3701cbc9c5f03062566408813c8e9922d9556c1f5a75fbc2d1d61ba9a",
+          "upstream_postimage_sha256": "2dc77fbd9d10b548473889512650521f684a7b37f9ab8a775f4d47f69566e738"
+        },
+        "src/plugins/platforms/android/qandroidplatformwindow.h": {
+          "original_sha256": "e19085ce609d17e65229e8d76c9802ffdcd28d67973fda53d0fe94c01e4fff88",
+          "patched_sha256": "4905f02fec153485af79cb7d34427efe0d4d9ce6c1180148913419e811cfe4cc",
+          "upstream_postimage_sha256": "698aaa837eb167c857b459fe965950de0debf11a38c93ec5edd5c6fee563a82e"
+        }
+      },
+      "java_sources": [
+        "src/android/jar/src/org/qtproject/qt/android/QtSurface.java",
+        "src/android/jar/src/org/qtproject/qt/android/QtSurfaceInterface.java",
+        "src/android/jar/src/org/qtproject/qt/android/QtTextureView.java",
+        "src/android/jar/src/org/qtproject/qt/android/QtWindow.java"
+      ]
     }
   }
 }

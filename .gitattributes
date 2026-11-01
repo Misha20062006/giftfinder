@@ -2,6 +2,7 @@
 *.py text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+*.patch text eol=lf whitespace=-blank-at-eol
 *.spec text eol=lf
 *.svg text eol=lf
 *.png binary

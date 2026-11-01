@@ -147,7 +147,8 @@ def build_fingerprint(inputs=None, templates=None):
     payload = {'inputs': inputs if inputs is not None else INPUTS, 'qt_recipe_templates': templates,
                'build_hooks': {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
                                for name in ('mobile/android_hook.py', 'mobile/android_runtime.py',
-                                            'tools/android_qt_platform.py', 'mobile/qt_platform/CMakeLists.txt')}}
+                                            'tools/android_qt_platform.py', 'mobile/qt_platform/CMakeLists.txt',
+                                            'mobile/qt_platform/surface-lifecycle.patch')}}
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode('utf-8')).hexdigest()
 
 
@@ -312,7 +313,7 @@ def include_native_qt_plugins(apk, config_path, wheel, architecture):
     return added
 
 
-def patch_buildozer(stage, output, app_version, architecture, *, compilation=None):
+def patch_buildozer(stage, output, app_version, architecture, *, compilation=None, lifecycle_jar=None):
     target = stage / 'buildozer.spec'
     config = configparser.ConfigParser(interpolation=None, strict=False)
     config.read(target, encoding='utf-8')
@@ -342,6 +343,14 @@ def patch_buildozer(stage, output, app_version, architecture, *, compilation=Non
         'android.no-byte-compile-python': 'True', 'orientation': 'all', 'fullscreen': '0',
         'p4a.hook': str(ROOT / 'mobile/android_hook.py'),
     }
+    if lifecycle_jar is not None:
+        jars = [value.strip() for value in config.get('app', 'android.add_jars').split(',') if value.strip()]
+        matches = [index for index, value in enumerate(jars) if Path(value).name == 'Qt6Android.jar']
+        if len(matches) != 1: raise RuntimeError('Official Qt bootstrap has no unique Android lifecycle Java archive')
+        jar = Path(lifecycle_jar).resolve()
+        if not jar.is_file(): raise RuntimeError('Rebuilt Qt lifecycle Java archive is missing')
+        jars[matches[0]] = str(jar)
+        fields['android.add_jars'] = ','.join(jars)
     if architecture == 'x86_64':
         # A separate launcher only adds lifecycle logs to the labelled smoke APK.
         # Normal ARM releases keep the official, non-debuggable Qt launcher.
@@ -680,7 +689,8 @@ def build(args):
         # the staging deployment directory, so its cache is preserved.
         run(initialize, cwd=stage, env=environment)
     app_version = version()
-    patch_buildozer(stage, binary, app_version, args.arch, compilation=compilation)
+    patch_buildozer(stage, binary, app_version, args.arch, compilation=compilation,
+                    lifecycle_jar=runtime_inputs / platform_rebuild['surface_java']['jar'])
     clear_cached_installer_environment(base, args.arch, compilation=compilation)
     run([sys.executable, '-m', 'buildozer', '-v', 'android', 'release'], cwd=stage, env=environment)
     apks = list(binary.glob('*.apk'))

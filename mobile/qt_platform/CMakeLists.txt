@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 project(GiftFinderQtAndroidPlatform LANGUAGES C CXX)
 
 # Build the exact Qt 6.12 Android platform sources against its SDK headers and
-# the pinned PySide wheel's actual Core/Gui libraries. The two-line accessibility
-# change is applied and hash-verified before configuration.
+# the pinned PySide wheel's actual Core/Gui libraries. The accessibility and
+# approved surface lifecycle changes are applied and hash-verified first.
 find_package(Qt6 6.12.0 EXACT REQUIRED COMPONENTS Core Gui CorePrivate GuiPrivate)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 17)

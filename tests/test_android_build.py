@@ -458,6 +458,131 @@ def test_qt_platform_verification_rejects_a_stale_nested_plugin(tmp_path):
         android_qt_platform.verify_packaged_platform(apk, 'arm64-v8a', metadata)
 
 
+def lifecycle_fixture(tmp_path):
+    source = tmp_path / 'qt-source'; source.mkdir()
+    project = tmp_path / 'project'; project.mkdir()
+    original = b'first\nold surface callback\nlast\n'
+    patched = b'first\nqueued surface callback\nlast\n'
+    (source / 'surface.cpp').write_bytes(original)
+    patch = project / 'lifecycle.patch'
+    patch.write_bytes(b'--- a/surface.cpp\n+++ b/surface.cpp\n@@ -1,3 +1,3 @@\n first\n-old surface callback\n+queued surface callback\n last\n')
+    pins = {'patch':patch.name, 'patch_sha256':hashlib.sha256(patch.read_bytes()).hexdigest(),
+            'files':{'surface.cpp':{'original_sha256':hashlib.sha256(original).hexdigest(),
+                                    'patched_sha256':hashlib.sha256(patched).hexdigest()}}}
+    return source, project, pins, patched
+
+
+def test_surface_backport_applies_exact_source_and_is_idempotent(tmp_path):
+    source, project, pins, patched = lifecycle_fixture(tmp_path)
+    android_qt_platform.patch_surface_lifecycle(source,pins,project)
+    assert (source/'surface.cpp').read_bytes() == patched
+    android_qt_platform.patch_surface_lifecycle(source,pins,project)
+    assert (source/'surface.cpp').read_bytes() == patched
+
+
+@pytest.mark.parametrize('changed',['source','patch'])
+def test_surface_backport_rejects_source_or_patch_drift_before_writing(tmp_path, changed):
+    source, project, pins, _ = lifecycle_fixture(tmp_path)
+    path = source/'surface.cpp' if changed == 'source' else project/'lifecycle.patch'
+    path.write_bytes(path.read_bytes()+b'unexpected change\n')
+    before = (source/'surface.cpp').read_bytes()
+    with pytest.raises(RuntimeError): android_qt_platform.patch_surface_lifecycle(source,pins,project)
+    assert (source/'surface.cpp').read_bytes() == before
+
+
+def test_java_class_replacement_removes_stale_inner_classes_and_preserves_other_qt_apis():
+    original = io.BytesIO()
+    with zipfile.ZipFile(original,'w') as archive:
+        archive.writestr('org/qtproject/qt/android/QtWindow.class',b'old window')
+        archive.writestr('org/qtproject/qt/android/QtWindow$Old.class',b'old inner class')
+        archive.writestr('org/qtproject/qt/android/QtInputDelegate.class',b'pinned input ABI')
+    new = {'org/qtproject/qt/android/QtWindow.class':b'new window',
+           'org/qtproject/qt/android/QtWindow$Release.class':b'new release callback'}
+    result = android_qt_platform.replace_jar_classes(original.getvalue(),new,{'org/qtproject/qt/android/QtWindow'})
+    with zipfile.ZipFile(io.BytesIO(result)) as archive:
+        assert 'org/qtproject/qt/android/QtWindow$Old.class' not in archive.namelist()
+        assert archive.read('org/qtproject/qt/android/QtInputDelegate.class') == b'pinned input ABI'
+        assert all(archive.read(name) == data for name,data in new.items())
+
+
+def native_dex_fixture(native=True):
+    # Minimal DEX tables for QtWindow's three declarations, including method
+    # prototypes and class_data flags. Not an installable application fixture.
+    owner='Lorg/qtproject/qt/android/QtWindow;'
+    strings=[owner,'V','I','Landroid/view/Surface;','Ljava/lang/Runnable;',
+             'surfaceCreated','surfaceRedrawNeeded','surfaceDestroyed','VIL']
+    def leb(value):
+        result=bytearray()
+        while value>127: result.append((value&127)|128); value >>= 7
+        result.append(value); return bytes(result)
+    string_off=112; type_off=string_off+len(strings)*4
+    proto_off=type_off+5*4; methods_off=proto_off+2*12; class_off=methods_off+3*8
+    data=bytearray(class_off+32)
+    string_offsets=[]
+    for value in strings:
+        string_offsets.append(len(data)); data.extend(leb(len(value))+value.encode()+b'\0')
+    while len(data)%4:data.append(0)
+    params=[]
+    for last in (3,4):
+        params.append(len(data)); data.extend(struct.pack('<IHH',2,2,last))
+    class_data=len(data); data.extend(bytes((0,0,3,0)))
+    for index in range(3): data.extend(leb(0 if index==0 else 1)+leb(0x10a if native else 0x0a)+leb(0))
+    data[:8]=b'dex\n035\0'
+    for offset,value in ((32,len(data)),(36,112),(40,0x12345678),(56,len(strings)),(60,string_off),
+                         (64,5),(68,type_off),(72,2),(76,proto_off),(88,3),(92,methods_off),(96,1),(100,class_off)):
+        struct.pack_into('<I',data,offset,value)
+    for index,offset in enumerate(string_offsets):struct.pack_into('<I',data,string_off+index*4,offset)
+    for index in range(5):struct.pack_into('<I',data,type_off+index*4,index)
+    for index,offset in enumerate(params):struct.pack_into('<III',data,proto_off+index*12,8,1,offset)
+    for index,name in enumerate((5,6,7)):struct.pack_into('<HHI',data,methods_off+index*8,0,0 if index==0 else 1,name)
+    struct.pack_into('<IIIIIIII',data,class_off,0,1,0xffffffff,0,0xffffffff,0,class_data,0)
+    return bytes(data),owner
+
+
+def test_dex_verification_requires_native_declarations_with_matching_signatures():
+    data,owner=native_dex_fixture()
+    assert android_qt_platform.dex_native_methods(data,owner) == {
+        ('surfaceCreated','(ILandroid/view/Surface;)V'),
+        ('surfaceRedrawNeeded','(ILjava/lang/Runnable;)V'),
+        ('surfaceDestroyed','(ILjava/lang/Runnable;)V')}
+    assert not android_qt_platform.dex_native_methods(data,'Lorg/other/Window;')
+    data,owner=native_dex_fixture(native=False)
+    assert not android_qt_platform.dex_native_methods(data,owner)
+
+
+def test_buildozer_selects_rebuilt_java_archive_and_keeps_other_qt_jars(tmp_path):
+    stage=tmp_path/'stage';stage.mkdir()
+    (stage/'buildozer.spec').write_text('[app]\np4a.bootstrap = qt\nandroid.add_jars = /original/Qt6Android.jar,/original/Qt6AndroidBindings.jar\n[buildozer]\n',encoding='utf-8')
+    rebuilt=tmp_path/'rebuilt/Qt6Android.jar';rebuilt.parent.mkdir();rebuilt.write_bytes(b'rebuilt')
+    build_android.patch_buildozer(stage,tmp_path/'apk','0.8.0','arm64-v8a',lifecycle_jar=rebuilt)
+    config=configparser.ConfigParser();config.read(stage/'buildozer.spec')
+    assert config.get('app','android.add_jars').split(',') == [str(rebuilt.resolve()),'/original/Qt6AndroidBindings.jar']
+
+
+@pytest.mark.parametrize('mode',['valid','stale_jar','stale_dex'])
+def test_packaged_lifecycle_requires_matching_native_java_and_dex(tmp_path, mode):
+    native='libplugins_platforms_qtforandroid_arm64-v8a.so'
+    plugin=b'rebuilt native platform'; java=b'rebuilt surface classes'
+    metadata={'sha256':hashlib.sha256(plugin).hexdigest(),
+              'surface_java':{'sha256':hashlib.sha256(java).hexdigest()}}
+    nested=io.BytesIO()
+    with tarfile.open(fileobj=nested,mode='w:gz') as archive:
+        for path,payload in [('_python_bundle/site-packages/PySide6/Qt/plugins/platforms/'+native,plugin),
+                             ('_python_bundle/site-packages/PySide6/jar/Qt6Android.jar',b'stale classes' if mode=='stale_jar' else java)]:
+            entry=tarfile.TarInfo(path);entry.size=len(payload);archive.addfile(entry,io.BytesIO(payload))
+    apk=tmp_path/'app.apk'
+    with zipfile.ZipFile(apk,'w') as archive:
+        archive.writestr('lib/arm64-v8a/'+native,plugin)
+        archive.writestr('lib/arm64-v8a/libpybundle.so',nested.getvalue())
+        archive.writestr('classes.dex',native_dex_fixture(native=mode!='stale_dex')[0])
+    if mode!='valid':
+        with pytest.raises(RuntimeError,match='stale|incompatible'):
+            android_qt_platform.verify_packaged_platform(apk,'arm64-v8a',metadata)
+    else:
+        result=android_qt_platform.verify_packaged_platform(apk,'arm64-v8a',metadata)
+        assert result['all_packaged_java_copies_match'] and result['lifecycle_jni_declarations_verified']
+
+
 def test_qt_activity_hook_preserves_listeners_and_lifecycle_and_is_idempotent(tmp_path):
     activity = tmp_path / 'src/main/java/org/kivy/android/PythonActivity.java'
     activity.parent.mkdir(parents=True)
