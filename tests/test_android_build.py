@@ -677,3 +677,34 @@ def test_emulator_cpu_evidence_does_not_invent_unmeasured_host_or_requested_coun
     monkeypatch.delenv('GIFT_FINDER_TEST_EMULATOR_CORES', raising=False)
     monkeypatch.setattr(build_android, 'run', lambda *args, **kwargs: '0-1\n')
     assert build_android.emulator_cpu_metadata('/android/adb') == {'actual_guest_cpu_online': '0-1'}
+
+
+def test_native_hierarchy_never_reads_the_old_xml_after_null_root(monkeypatch, tmp_path):
+    calls = []
+    fresh = '<hierarchy><node focused="true" /></hierarchy>'
+    def android(command, **kwargs):
+        calls.append(command)
+        if command[1:4] == ['shell', 'uiautomator', 'dump']:
+            if len(calls) == 1:
+                return 'ERROR: null root node returned by UiTestAutomationBridge.\n'
+            return 'UI hierchary dumped to: ' + command[-1]
+        assert command[1:3] == ['exec-out', 'cat']
+        assert command[-1] == calls[-2][-1]
+        return fresh
+    monkeypatch.setattr(build_android, 'run', android)
+    tree = build_android.native_hierarchy('adb', tmp_path, 'focused')
+    assert tree.find('node').get('focused') == 'true'
+    assert (tmp_path / 'focused.xml').read_text() == fresh
+    assert len(calls) == 3 and calls[0][-1] != calls[1][-1]
+
+
+def test_native_hierarchy_fails_without_a_fresh_dump(monkeypatch, tmp_path):
+    calls = []
+    def android(command, **kwargs):
+        calls.append(command)
+        assert command[1:4] == ['shell', 'uiautomator', 'dump']
+        return 'ERROR: null root node returned by UiTestAutomationBridge.\n'
+    monkeypatch.setattr(build_android, 'run', android)
+    with pytest.raises(RuntimeError, match='fresh accessibility hierarchy'):
+        build_android.native_hierarchy('adb', tmp_path, 'focused')
+    assert len(calls) == 3 and not (tmp_path / 'focused.xml').exists()

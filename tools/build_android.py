@@ -471,10 +471,20 @@ def input_method_visible(dump):
 
 
 def native_hierarchy(adb, output, name):
-    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-regression.xml'], timeout=45)
-    source = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-regression.xml'], capture=True)
-    (output / (name + '.xml')).write_text(source, encoding='utf-8')
-    return ET.fromstring(source)
+    # uiautomator can exit zero with "null root node" while the keyboard is
+    # appearing, leaving its previous XML untouched. Never read that stale file.
+    for attempt in range(3):
+        remote = f'/sdcard/giftfinder-hierarchy-{time.monotonic_ns()}-{attempt}.xml'
+        result = run([adb, 'shell', 'uiautomator', 'dump', remote], capture=True, timeout=45)
+        if 'dumped to:' not in result or remote not in result:
+            continue
+        source = run([adb, 'exec-out', 'cat', remote], capture=True)
+        tree = ET.fromstring(source)
+        if tree.tag != 'hierarchy' or not list(tree.iter('node')):
+            raise RuntimeError('Android returned an empty accessibility hierarchy')
+        (output / (name + '.xml')).write_text(source, encoding='utf-8')
+        return tree
+    raise RuntimeError('Android did not produce a fresh accessibility hierarchy')
 
 
 def native_bounds(node):
@@ -602,10 +612,7 @@ def category_popup_draft_test(adb, output, pid):
 def csv_picker_test(adb, output, pid):
     """Save the explicitly synthetic smoke offer through Android's real SAF UI."""
     def hierarchy(name):
-        run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-csv.xml'], timeout=45)
-        source = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-csv.xml'], capture=True)
-        (output / (name + '.xml')).write_text(source, encoding='utf-8')
-        return ET.fromstring(source)
+        return native_hierarchy(adb, output, name)
 
     def tap(tree, predicate, purpose):
         nodes = [node for node in tree.iter('node') if predicate(node) and node.get('enabled') == 'true']
@@ -891,10 +898,7 @@ def emulator_test(args):
     if len(colors) < 16:
         raise RuntimeError('Android screenshot is blank or nearly blank')
     language_swipes = main_popup_and_language_test(adb, output, pid)
-    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-ui.xml'], timeout=45)
-    hierarchy = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-ui.xml'], capture=True)
-    (output / 'home-accessibility.xml').write_text(hierarchy, encoding='utf-8')
-    tree = ET.fromstring(hierarchy)
+    tree = native_hierarchy(adb, output, 'home-accessibility')
     filters = next((node for node in tree.iter('node') if
                     node.get('text') == 'Filters' or node.get('content-desc') == 'Filters'), None)
     if filters is None:
@@ -967,10 +971,8 @@ def emulator_test(args):
     (output / 'application-logcat.txt').write_text(rotated_logs, encoding='utf-8')
     if any(marker in rotated_logs for marker in ('FATAL EXCEPTION', 'Fatal Python error:', 'Traceback (most recent call last):')):
         raise RuntimeError('Crash detected after rotating the mobile viewport')
-    run([adb, 'shell', 'uiautomator', 'dump', '/sdcard/giftfinder-landscape.xml'], timeout=45)
-    landscape_hierarchy = run([adb, 'exec-out', 'cat', '/sdcard/giftfinder-landscape.xml'], capture=True)
-    (output / 'landscape-accessibility.xml').write_text(landscape_hierarchy, encoding='utf-8')
-    landscape_filters = next((node for node in ET.fromstring(landscape_hierarchy).iter('node')
+    landscape_hierarchy = native_hierarchy(adb, output, 'landscape-accessibility')
+    landscape_filters = next((node for node in landscape_hierarchy.iter('node')
                               if node.get('text') == 'Filters' or node.get('content-desc') == 'Filters'), None)
     landscape_bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]',
                                    landscape_filters.get('bounds', '') if landscape_filters is not None else '')
