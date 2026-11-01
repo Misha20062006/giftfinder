@@ -7,7 +7,7 @@ from decimal import Decimal
 import io
 import os
 
-from PySide6.QtCore import QEvent, QFile, QIODevice, QPoint, QRect, QRectF, QSize, Qt, QTimer, QUrl
+from PySide6.QtCore import QEvent, QFile, QIODevice, QObject, QPoint, QRect, QRectF, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QPainter, QPen
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout,
     QHBoxLayout, QLabel, QLayout, QListView, QListWidget, QListWidgetItem, QMenu,
@@ -51,10 +51,47 @@ def list_view(view, delegate, height):
 def touch_scroll_list(view):
     view.setVerticalScrollMode(QListView.ScrollMode.ScrollPerPixel)
     QScroller.grabGesture(view.viewport(), QScroller.ScrollerGestureType.TouchGesture)
+    view.touch_scroll_guard = TouchScrollGuard(view)
 
 
 def is_scrolling(view):
-    return QScroller.scroller(view.viewport()).state() in (QScroller.State.Dragging, QScroller.State.Scrolling)
+    return (QScroller.scroller(view.viewport()).state() in (QScroller.State.Dragging, QScroller.State.Scrolling)
+            or getattr(getattr(view, 'touch_scroll_guard', None), 'dragged', False))
+
+
+class TouchScrollGuard(QObject):
+    """Keep the gesture's drag result until the next genuine press."""
+    def __init__(self, view):
+        super().__init__(view)
+        self.scroller = QScroller.scroller(view.viewport())
+        self.origin = None
+        self.dragged = False
+        self.scroller.stateChanged.connect(self.scroller_changed)
+        view.viewport().installEventFilter(self)
+
+    def scroller_changed(self, state):
+        if state in (QScroller.State.Dragging, QScroller.State.Scrolling):
+            self.dragged = True
+
+    def eventFilter(self, obj, event):
+        kind = event.type()
+        touch = kind in (QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate, QEvent.Type.TouchEnd)
+        mouse = kind in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseMove, QEvent.Type.MouseButtonRelease)
+        # Qt can synthesize a mouse press/release after the touch gesture ends.
+        # Those events must retain the actual finger movement, not reset it.
+        if touch or (mouse and event.source() == Qt.MouseEventSource.MouseEventNotSynthesized):
+            position = None
+            if touch and event.points():
+                position = event.points()[0].globalPosition()
+            elif mouse:
+                position = event.globalPosition()
+            if position is not None:
+                if kind in (QEvent.Type.TouchBegin, QEvent.Type.MouseButtonPress):
+                    self.origin = position
+                    self.dragged = self.scroller.state() in (QScroller.State.Dragging, QScroller.State.Scrolling)
+                elif self.origin is not None and (position - self.origin).manhattanLength() >= QApplication.startDragDistance():
+                    self.dragged = True
+        return False
 
 
 class MobileTileDelegate(QStyledItemDelegate):

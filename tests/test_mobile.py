@@ -9,7 +9,7 @@ import pytest
 from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QRect, Qt
 from PySide6.QtGui import QDesktopServices, QKeyEvent
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog, QListWidget, QMenu
+from PySide6.QtWidgets import QApplication, QFileDialog, QListWidget, QMenu, QScroller
 
 from giftfinder.core import MARKETS, Offer, SearchQuery, Store
 from giftfinder.mobile_ui import MobileFilterDialog, MobileWindow
@@ -486,6 +486,40 @@ def test_language_list_still_accepts_an_ordinary_touch_tap(window, app, touch_de
     app.processEvents()
     assert window.store.data['settings']['language'] == 'ru'
     assert dialog not in window.dialogs
+
+
+def test_language_drag_release_after_scroller_stops_does_not_select(window, app, touch_device):
+    window.language_menu(); settle(window)
+    dialog = window.dialogs[-1]
+    languages = dialog.findChild(QListWidget)
+    before = window.store.data['settings']['language']
+    swipe_up(languages, touch_device)
+    # Android can deliver the synthesized click after QScroller is Inactive.
+    QScroller.scroller(languages.viewport()).stop()
+    languages.itemClicked.emit(languages.item(0))
+    assert dialog.isVisible() and window.store.data['settings']['language'] == before
+    # A new normal tap remains a selection, without a cooldown or extra step.
+    target = languages.itemAt(QPoint(40, 60))
+    expected = target.data(Qt.ItemDataRole.UserRole)
+    point = languages.visualItemRect(target).center()
+    sequence = QTest.touchEvent(languages.viewport(), touch_device)
+    sequence.press(0, point, languages.viewport()).commit()
+    QTest.qWait(30)
+    sequence.release(0, point, languages.viewport()).commit()
+    app.processEvents()
+    assert window.store.data['settings']['language'] == expected
+    assert dialog not in window.dialogs
+
+
+def test_repeated_language_swipes_do_not_select_a_language(window, app, touch_device):
+    window.language_menu(); settle(window)
+    dialog = window.dialogs[-1]
+    languages = dialog.findChild(QListWidget)
+    before = window.store.data['settings']['language']
+    for _ in range(3):
+        swipe_up(languages, touch_device)
+        QScroller.scroller(languages.viewport()).stop()
+        assert dialog.isVisible() and window.store.data['settings']['language'] == before
 
 
 def test_saved_search_list_scrolls_by_touch_without_loading_a_query(window, app, touch_device):
