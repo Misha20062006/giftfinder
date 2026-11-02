@@ -582,7 +582,9 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
             path = self.export_csv()
         finally:
             self.offer_model.replace(previous)
-        if not path: return
+        print('GIFTFINDER_ANDROID_CSV_DIALOG_RETURNED', bool(path), flush=True)
+        if not path:
+            raise RuntimeError('Native CSV Save returned no saved document')
         if not path.startswith('content://'):
             raise RuntimeError('Android smoke CSV export must use a native content document URI')
         saved = QFile(path)

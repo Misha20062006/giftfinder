@@ -403,6 +403,12 @@ public class GiftFinderDiagnosticsActivity extends org.kivy.android.PythonActivi
         }
         Log.i("GiftFinderLifecycle", "after PythonActivity.onCreate; finishing=" + isFinishing());
     }
+    @Override protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        Log.i("GiftFinderResult", "request=" + requestCode + "; result=" + resultCode
+              + "; scheme=" + (data == null || data.getData() == null ? "none" : data.getData().getScheme()));
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i("GiftFinderResult", "result delegation completed");
+    }
     @Override public void finish() {
         Log.i("GiftFinderLifecycle", "Activity.finish requested", new Throwable("finish caller"));
         super.finish();
