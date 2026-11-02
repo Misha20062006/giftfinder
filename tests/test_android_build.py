@@ -778,3 +778,14 @@ def test_apk_staging_timeout_cannot_be_reported_as_a_success(tmp_path, monkeypat
     with pytest.raises(RuntimeError,match='finish staging'):
         build_android.wait_for_apk_staging('adb',tmp_path)
     assert not (tmp_path/'update-installer-ready-activity.txt').exists()
+
+
+@pytest.mark.parametrize('package,text,expected', [
+    ('com.google.android.packageinstaller','GiftFinder Do you want to update this app? Cancel Update',True),
+    ('com.google.android.packageinstaller','Unknown Staging app... Cancel',False),
+    ('com.google.android.packageinstaller','GiftFinder App not installed. Done',False),
+    ('org.giftfinder.giftfinder','GiftFinder Do you want to update this app? Cancel Update',False)])
+def test_protected_installer_requires_a_rendered_confirmation_not_only_an_activity(package, text, expected):
+    import xml.etree.ElementTree as ET
+    tree = ET.fromstring('<hierarchy><node package="'+package+'" class="android.widget.FrameLayout" /></hierarchy>')
+    assert build_android.apk_confirmation_visible(tree,text) is expected

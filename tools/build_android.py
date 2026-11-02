@@ -654,6 +654,16 @@ def wait_for_apk_staging(adb, output):
     raise RuntimeError('Android did not finish staging the update APK')
 
 
+def apk_confirmation_visible(tree, image_text=''):
+    if not any('packageinstaller' in node.get('package', '') for node in tree.iter('node')):
+        return False
+    labels = [(node.get('text','')+' '+node.get('content-desc','')).strip().casefold() for node in tree.iter('node')]
+    if any(label in ('install','update') for label in labels) and any('giftfinder' in label for label in labels):
+        return True
+    text = ' '.join(image_text.casefold().split())
+    return bool(re.search(r'gift\s*finder',text) and re.search(r'do you want to (?:update|install) this app',text))
+
+
 def apk_update_picker_test(adb, output, pid):
     """Open the real system APK prompt, then cancel without installing anything."""
     run([adb, 'shell', 'appops', 'set', PACKAGE_ID, 'REQUEST_INSTALL_PACKAGES', 'allow'], timeout=20)
@@ -662,13 +672,22 @@ def apk_update_picker_test(adb, output, pid):
     tree = native_hierarchy(adb, output, 'update-menu')
     native_tap(adb, native_find(tree, lambda node: native_label(node, 'Install update'), 'explicit installer probe'))
     wait_for_apk_staging(adb, output)
-    tree = native_hierarchy(adb, output, 'update-system-installer')
-    if not any('packageinstaller' in node.get('package', '') for node in tree.iter('node')):
-        raise RuntimeError('The real Android APK installer prompt did not open')
-    if not any(node.get('text','').strip().casefold() in ('install','update') for node in tree.iter('node')):
-        raise RuntimeError('Android did not finish parsing the update APK into an installation prompt')
-    with (output / 'android-update-installer.png').open('wb') as stream:
-        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+    deadline = time.monotonic() + 60
+    screenshot = output / 'android-update-installer.png'
+    while time.monotonic() < deadline:
+        tree = native_hierarchy(adb, output, 'update-system-installer')
+        with screenshot.open('wb') as stream:
+            subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+        if apk_confirmation_visible(tree):
+            break
+        # Android 16 can expose only the protected dialog's FrameLayout. Verify
+        # its actual rendered app name and confirmation, not a staging spinner.
+        text = run(['tesseract', screenshot, 'stdout', '--psm', '11'], capture=True, timeout=30)
+        (output / 'update-installer-rendered-text.txt').write_text(text, encoding='utf-8')
+        if apk_confirmation_visible(tree, text):
+            break
+    else:
+        raise RuntimeError('Android did not render the real GiftFinder APK installation confirmation')
     run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
     tree = native_hierarchy(adb, output, 'update-installer-cancelled')
     native_find(tree, lambda node: native_label(node, 'Filters'), 'main screen after cancelling update')
