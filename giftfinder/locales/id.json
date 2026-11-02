@@ -179,5 +179,14 @@
   "theme_pokemon": "Pokémon",
   "theme_sailor_moon": "Sailor Moon",
   "theme_doge": "Doge dan Shiba Inu",
-  "theme_space": "Luar angkasa"
+  "theme_space": "Luar angkasa",
+  "app_updates": "Pembaruan aplikasi",
+  "install_update": "Pasang pembaruan",
+  "update_checking": "Memeriksa pembaruan…",
+  "update_available": "Perbarui ke {version}",
+  "update_description": "GiftFinder {version} tersedia. Pengaturan dan favorit akan dipertahankan.",
+  "update_current": "Anda menggunakan versi terbaru.",
+  "update_failed": "Pembaruan gagal. Periksa koneksi dan coba lagi.",
+  "update_downloading": "Mengunduh dan memverifikasi pemasang…",
+  "update_opened": "Selesaikan pemasangan sistem, lalu buka kembali GiftFinder."
 }

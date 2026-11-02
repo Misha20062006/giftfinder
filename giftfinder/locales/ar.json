@@ -179,5 +179,14 @@
   "theme_pokemon": "بوكيمون",
   "theme_sailor_moon": "سيلور مون",
   "theme_doge": "دوج وشيبا إينو",
-  "theme_space": "الفضاء"
+  "theme_space": "الفضاء",
+  "app_updates": "تحديثات التطبيق",
+  "install_update": "تثبيت التحديث",
+  "update_checking": "جارٍ البحث عن تحديثات…",
+  "update_available": "التحديث إلى {version}",
+  "update_description": "يتوفر GiftFinder {version}. سيتم الاحتفاظ بالإعدادات والمفضلة.",
+  "update_current": "لديك أحدث إصدار.",
+  "update_failed": "تعذر التحديث. تحقق من الاتصال وحاول مجددًا.",
+  "update_downloading": "جارٍ تنزيل المثبّت والتحقق منه…",
+  "update_opened": "أكمل التثبيت عبر النظام ثم افتح GiftFinder مجددًا."
 }

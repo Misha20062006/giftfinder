@@ -179,5 +179,14 @@
   "theme_pokemon": "宝可梦",
   "theme_sailor_moon": "美少女战士",
   "theme_doge": "Doge 与柴犬",
-  "theme_space": "太空"
+  "theme_space": "太空",
+  "app_updates": "应用更新",
+  "install_update": "安装更新",
+  "update_checking": "正在检查更新…",
+  "update_available": "更新到 {version}",
+  "update_description": "GiftFinder {version} 已发布。设置和收藏将会保留。",
+  "update_current": "已是最新版本。",
+  "update_failed": "更新失败。请检查网络连接后重试。",
+  "update_downloading": "正在下载并验证安装程序…",
+  "update_opened": "完成系统安装后，请重新打开 GiftFinder。"
 }

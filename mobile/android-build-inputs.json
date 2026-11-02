@@ -231,5 +231,10 @@
         "src/android/jar/src/org/qtproject/qt/android/QtWindow.java"
       ]
     }
+  },
+  "android_updates": {
+    "androidx_core": "androidx.core:core:1.15.0",
+    "provider_authority": "org.giftfinder.giftfinder.qtprovider",
+    "shared_content": "cached update APKs only; user-approved system installer"
   }
 }

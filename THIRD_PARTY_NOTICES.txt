@@ -1,4 +1,4 @@
-GiftFinder 0.8.0 — third-party components
+GiftFinder 0.9.0 — third-party components
 
 GiftFinder's original source code is released under the Unlicense; see UNLICENSE.
 Third-party components, data and artwork retain their own licenses and terms.
@@ -140,3 +140,8 @@ in mobile/android-build-inputs.json and mobile/qt_platform/README.md.
 Additional bundled model previews for the reviewed themes are Telegram gift
 artwork retrieved through Gift Changes. URLs and file hashes are recorded in
 giftfinder/preview_seed/SOURCES-new-themes.json; artwork is not under Unlicense.
+
+AndroidX Core 1.15.0 (Android update installer FileProvider)
+Source: https://android.googlesource.com/platform/frameworks/support/
+License: Apache License 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+The Android package uses AndroidX Core and its declared transitive dependencies for private cached APK sharing.

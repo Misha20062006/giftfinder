@@ -7,7 +7,7 @@ from decimal import Decimal
 import io
 import os
 
-from PySide6.QtCore import QEvent, QFile, QIODevice, QObject, QPoint, QRect, QRectF, QSize, Qt, QTimer, QUrl
+from PySide6.QtCore import QEvent, QFile, QIODevice, QObject, QPoint, QRect, QRectF, QSize, QStandardPaths, Qt, QTimer, QUrl
 from PySide6.QtGui import QColor, QDesktopServices, QFont, QPainter, QPen
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout,
     QHBoxLayout, QLabel, QLayout, QListView, QListWidget, QListWidgetItem, QMenu,
@@ -355,6 +355,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         self.language_button.setAccessibleIdentifier('mobileLanguageButton')
         self.mobile_menu_button = touch(button('⋮', self.mobile_menu, 'quiet')); self.mobile_menu_button.setFont(font(24)); self.mobile_menu_button.setFixedWidth(44); self.mobile_menu_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed); self.mobile_menu_button.setAccessibleName(tr('actions'))
         header.addWidget(self.mobile_menu_button); outer.addLayout(header)
+        self.update_button.setProperty('mobileUpdate', True);self.update_button.hide();outer.addWidget(touch(self.update_button))
         outer.addWidget(touch(self.search_edit))
         search = QHBoxLayout()
         self.mobile_search_row = search
@@ -378,9 +379,12 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         self.notice.setWordWrap(True); self.notice.setMaximumHeight(96); outer.addWidget(self.notice)
         old_home = self.stack.widget(0); self.stack.removeWidget(old_home); old_home.setParent(old); old_home.hide()
         home = QWidget(); home_layout = QVBoxLayout(home); home_layout.setContentsMargins(0,0,0,0); home_layout.setSpacing(6)
-        home_layout.addWidget(touch(self.theme_toggle))
+        self.mobile_home_layout=home_layout;self.mobile_catalog_header=QWidget();self.mobile_catalog_header.setFixedHeight(48)
+        self.mobile_catalog_row=QHBoxLayout(self.mobile_catalog_header);self.mobile_catalog_row.setContentsMargins(0,0,0,0)
+        self.mobile_catalog_row.addWidget(touch(self.theme_toggle));home_layout.addWidget(self.mobile_catalog_header)
         list_view(self.theme_grid, MobileTileDelegate(self.renderer, self.theme_grid), 92); home_layout.addWidget(self.theme_grid)
         home_layout.addWidget(self.catalog_note)
+        home_layout.addWidget(touch(self.catalog_search))
         list_view(self.home_grid, MobileTileDelegate(self.renderer, self.home_grid), 92); home_layout.addWidget(self.home_grid, 1)
         self.stack.insertWidget(0, home); self.stack.setCurrentIndex(0)
         list_view(self.view, MobileOfferDelegate(self), 148)
@@ -418,8 +422,12 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         if compact != self.compact_search_row:
             if compact:
                 self.mobile_search_row.insertWidget(0, self.search_edit, 3)
+                self.theme_toggle.setFixedWidth(160)
+                self.mobile_catalog_row.addWidget(self.catalog_search, 1)
             else:
                 self.mobile_outer.insertWidget(1, self.search_edit)
+                self.theme_toggle.setMinimumWidth(0);self.theme_toggle.setMaximumWidth(16777215)
+                self.mobile_home_layout.insertWidget(2, self.catalog_search)
             self.compact_search_row = compact
         self.update_theme_visibility()
 
@@ -525,13 +533,22 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
 
     def mobile_menu(self):
         menu = QMenu(self)
-        for title, callback in (('rates',self.rates_info), ('sources',self.sources_info), ('save_search',self.save_search), ('export',self.export_csv), ('refresh',self.start_search)):
+        for title, callback in (('app_updates',self.updates.show), ('rates',self.rates_info), ('sources',self.sources_info), ('save_search',self.save_search), ('export',self.export_csv), ('refresh',self.start_search)):
             smoke_export = title == 'export' and os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1'
             if smoke_export: callback = self.smoke_export_csv
             action = menu.addAction(tr(title)); action.triggered.connect(callback)
             if title == 'export': action.setEnabled(bool(self.offer_model.offers) or smoke_export)
+        if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1':
+            menu.addAction(tr('install_update')).triggered.connect(self.smoke_update_installer)
         menu.exec(self.mobile_menu_button.mapToGlobal(QPoint(0,self.mobile_menu_button.height())))
         menu.deleteLater()
+
+    def smoke_update_installer(self):
+        from pathlib import Path
+        path = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.GenericCacheLocation)) / 'updates/GiftFinder-update-smoke.apk'
+        if not path.is_file() or not QDesktopServices.openUrl(QUrl.fromLocalFile(str(path))):
+            raise RuntimeError('Android did not open the explicit update-installer probe')
+        print('GIFTFINDER_ANDROID_UPDATE_INSTALLER_OPEN', flush=True)
 
     def export_csv(self):
         if not self.offer_model.offers: return

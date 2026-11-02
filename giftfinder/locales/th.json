@@ -179,5 +179,14 @@
   "theme_pokemon": "โปเกมอน",
   "theme_sailor_moon": "เซเลอร์มูน",
   "theme_doge": "Doge และชิบะอินุ",
-  "theme_space": "อวกาศ"
+  "theme_space": "อวกาศ",
+  "app_updates": "อัปเดตแอป",
+  "install_update": "ติดตั้งอัปเดต",
+  "update_checking": "กำลังตรวจหาอัปเดต…",
+  "update_available": "อัปเดตเป็น {version}",
+  "update_description": "มี GiftFinder {version} ให้ใช้งาน การตั้งค่าและรายการโปรดจะยังคงอยู่",
+  "update_current": "คุณใช้เวอร์ชันล่าสุดแล้ว",
+  "update_failed": "อัปเดตไม่ได้ ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+  "update_downloading": "กำลังดาวน์โหลดและตรวจสอบตัวติดตั้ง…",
+  "update_opened": "ติดตั้งผ่านระบบให้เสร็จ แล้วเปิด GiftFinder อีกครั้ง"
 }

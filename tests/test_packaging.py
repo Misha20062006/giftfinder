@@ -59,15 +59,20 @@ def test_repeated_package_omits_removed_files_and_does_not_clean_existing_direct
     output = tmp_path / 'releases'
     output.mkdir()
     monkeypatch.setattr(builder, 'add_documentation', lambda stage: (stage / 'README.md').write_text('current docs', encoding='utf-8'))
+    def capture_installer(stage, output, version, target, work):
+        archive = output / 'payload-test.zip'
+        builder.write_zip(stage, archive)
+        return [archive]
+    monkeypatch.setattr(builder.installers, 'linux', capture_installer)
 
     archive, = builder.package_artifacts(dist, executable, output, build, '0.7.1', 'Linux-x64')
-    with tarfile.open(archive) as package:
-        assert 'GiftFinder/GiftFinder/removed.so' in package.getnames()
+    with zipfile.ZipFile(archive) as package:
+        assert 'GiftFinder/removed.so' in package.namelist()
     removed.unlink()
     builder.package_artifacts(dist, executable, output, build, '0.7.1', 'Linux-x64')
-    with tarfile.open(archive) as package:
-        assert 'GiftFinder/GiftFinder/removed.so' not in package.getnames()
-        assert package.extractfile('GiftFinder/GiftFinder/GiftFinder').read() == b'current executable'
-        assert 'GiftFinder/README.md' in package.getnames()
+    with zipfile.ZipFile(archive) as package:
+        assert 'GiftFinder/removed.so' not in package.namelist()
+        assert package.read('GiftFinder/GiftFinder') == b'current executable'
+        assert 'README.md' in package.namelist()
     assert (legacy / 'keep-existing-artifact.txt').read_text(encoding='utf-8') == 'untouched'
     assert not list(build.glob('package-*'))

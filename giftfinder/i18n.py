@@ -94,6 +94,15 @@ EN = {
     'source':'Source','source_time':'Source time','link':'Link','yes':'Yes','no':'No',
 }
 _root=Path(__file__).parent/'locales'
+EN.update({
+    'app_updates':'App updates', 'install_update':'Install update',
+    'update_checking':'Checking for updates…', 'update_available':'Update {version}',
+    'update_description':'GiftFinder {version} is available. Your settings and favorites will be preserved.',
+    'update_current':'You have the latest version.',
+    'update_failed':'Could not update. Check your connection and try again.',
+    'update_downloading':'Downloading and verifying the installer…',
+    'update_opened':'Complete the system installation, then reopen GiftFinder.',
+})
 _language='ru'
 _requested='system'
 

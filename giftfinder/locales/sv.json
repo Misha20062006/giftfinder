@@ -179,5 +179,14 @@
   "theme_pokemon": "Pokémon",
   "theme_sailor_moon": "Sailor Moon",
   "theme_doge": "Doge och shiba inu",
-  "theme_space": "Rymden"
+  "theme_space": "Rymden",
+  "app_updates": "Appuppdateringar",
+  "install_update": "Installera uppdatering",
+  "update_checking": "Söker efter uppdateringar…",
+  "update_available": "Uppdatera till {version}",
+  "update_description": "GiftFinder {version} är tillgängligt. Inställningar och favoriter behålls.",
+  "update_current": "Du har den senaste versionen.",
+  "update_failed": "Uppdateringen misslyckades. Kontrollera anslutningen och försök igen.",
+  "update_downloading": "Hämtar och verifierar installationsfilen…",
+  "update_opened": "Slutför systeminstallationen och öppna GiftFinder igen."
 }

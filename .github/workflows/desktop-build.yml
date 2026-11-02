@@ -14,6 +14,9 @@ on:
       - 'requirements*.txt'
       - 'version-info.txt'
       - 'tools/build_release.py'
+      - 'tools/installers.py'
+      - 'tools/verify_installers.py'
+      - 'packaging/**'
       - '.github/workflows/desktop-build.yml'
   pull_request:
   workflow_dispatch:
@@ -53,13 +56,26 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y libegl1 libopengl0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-randr0 libxcb-shape0 fonts-dejavu-core fonts-noto-core
+          sudo apt-get install -y rpm libegl1 libopengl0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-randr0 libxcb-shape0 fonts-dejavu-core fonts-noto-core
+      - name: Prepare the pinned Windows installer compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $download = Join-Path $env:RUNNER_TEMP 'innosetup-7.1.1-x64.exe'
+          Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-7_1_1/innosetup-7.1.1-x64.exe' -OutFile $download
+          if ((Get-FileHash -LiteralPath $download -Algorithm SHA256).Hash.ToLowerInvariant() -ne '8a5a6711c3766a6e5fb74f280ba0e3551e719ce94538d901fdbd1f8f9920b3f0') { throw 'Installer compiler checksum mismatch' }
+          $compiler = Join-Path $env:RUNNER_TEMP 'inno-setup'
+          $process = Start-Process -FilePath $download -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=$compiler") -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw 'Installer compiler installation failed' }
+          "ISCC_EXE=$compiler\ISCC.exe" >> $env:GITHUB_ENV
       - name: Install pinned dependencies
         run: python -m pip install -r requirements-lock.txt
       - name: Run tests with an isolated profile
         run: python -m pytest tests -q --basetemp .test-work
       - name: Build and smoke-test native package
         run: python tools/build_release.py
+      - name: Install and update with the system installer, preserving the profile
+        run: python tools/verify_installers.py
       - name: Upload native packages
         uses: actions/upload-artifact@v7
         with:
@@ -74,6 +90,10 @@ jobs:
           name: verification-${{ matrix.target }}
           path: |
             build/${{ matrix.target }}/verification.json
+            build/${{ matrix.target }}/installer-test/verification.json
+            build/${{ matrix.target }}/installer-test/smoke/*.txt
+            build/${{ matrix.target }}/installer-test/smoke/*.png
+            build/${{ matrix.target }}/installer-test/rpm-smoke/*.txt
             build/${{ matrix.target }}/smoke-test/*.txt
             build/${{ matrix.target }}/smoke-test/*.png
           if-no-files-found: ignore

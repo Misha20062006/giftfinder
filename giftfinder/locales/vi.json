@@ -179,5 +179,14 @@
   "theme_pokemon": "Pokémon",
   "theme_sailor_moon": "Sailor Moon",
   "theme_doge": "Doge và Shiba Inu",
-  "theme_space": "Vũ trụ"
+  "theme_space": "Vũ trụ",
+  "app_updates": "Cập nhật ứng dụng",
+  "install_update": "Cài đặt bản cập nhật",
+  "update_checking": "Đang kiểm tra bản cập nhật…",
+  "update_available": "Cập nhật lên {version}",
+  "update_description": "Đã có GiftFinder {version}. Cài đặt và mục yêu thích sẽ được giữ lại.",
+  "update_current": "Bạn đang dùng phiên bản mới nhất.",
+  "update_failed": "Không thể cập nhật. Hãy kiểm tra kết nối và thử lại.",
+  "update_downloading": "Đang tải và xác minh trình cài đặt…",
+  "update_opened": "Hoàn tất cài đặt của hệ thống rồi mở lại GiftFinder."
 }

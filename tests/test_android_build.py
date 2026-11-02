@@ -78,7 +78,8 @@ def test_buildozer_patch_preserves_official_qt_recipe_and_includes_runtime(tmp_p
     assert 'requests==' not in app['requirements']  # Installed from verified universal wheels, not host pip.
     assert 'requests==2.34.2' in build_android.PURE_REQUIREMENTS
     assert all(ext in app['source.include_exts'].split(',') for ext in ('json', 'png', 'svg', 'pem'))
-    assert set(app['android.permissions'].split(',')) == {'INTERNET', 'ACCESS_NETWORK_STATE'}
+    assert set(app['android.permissions'].split(',')) == {'INTERNET', 'ACCESS_NETWORK_STATE', 'REQUEST_INSTALL_PACKAGES'}
+    assert app['android.gradle_dependencies'] == 'androidx.core:core:1.15.0'
     assert app['package.domain'] + '.' + app['package.name'] == build_android.PACKAGE_ID
     assert app['android.release_artifact'] == 'apk'
     assert app['android.numeric_version'] == '70000'
@@ -708,3 +709,21 @@ def test_native_hierarchy_fails_without_a_fresh_dump(monkeypatch, tmp_path):
     with pytest.raises(RuntimeError, match='fresh accessibility hierarchy'):
         build_android.native_hierarchy('adb', tmp_path, 'focused')
     assert len(calls) == 3 and not (tmp_path / 'focused.xml').exists()
+
+
+def test_update_apk_sharing_is_private_and_does_not_expose_the_profile(tmp_path):
+    import xml.etree.ElementTree as ET
+    manifest = tmp_path/'src/main/AndroidManifest.xml'
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application /></manifest>')
+    android_hook.enable_update_installer(tmp_path)
+    android_hook.enable_update_installer(tmp_path)
+    android = '{http://schemas.android.com/apk/res/android}'
+    tree = ET.parse(manifest)
+    providers = tree.getroot().find('application').findall('provider')
+    assert len(providers) == 1
+    assert providers[0].get(android+'exported') == 'false'
+    assert providers[0].get(android+'grantUriPermissions') == 'true'
+    paths = ET.parse(tmp_path/'src/main/res/xml/qtprovider_paths.xml').getroot()
+    assert all(child.tag == 'cache-path' and child.get('path').endswith('updates/') for child in paths)
+    assert not list(paths.iter('files-path')) and not list(paths.iter('external-path'))

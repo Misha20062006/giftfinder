@@ -179,5 +179,14 @@
   "theme_pokemon": "پوکمون",
   "theme_sailor_moon": "سیلور مون",
   "theme_doge": "دوج و شیبا اینو",
-  "theme_space": "فضا"
+  "theme_space": "فضا",
+  "app_updates": "به‌روزرسانی برنامه",
+  "install_update": "نصب به‌روزرسانی",
+  "update_checking": "در حال بررسی به‌روزرسانی‌ها…",
+  "update_available": "به‌روزرسانی به {version}",
+  "update_description": "GiftFinder {version} در دسترس است. تنظیمات و علاقه‌مندی‌ها حفظ می‌شوند.",
+  "update_current": "آخرین نسخه را دارید.",
+  "update_failed": "به‌روزرسانی انجام نشد. اتصال را بررسی و دوباره تلاش کنید.",
+  "update_downloading": "در حال دریافت و بررسی نصب‌کننده…",
+  "update_opened": "نصب سیستم را کامل کنید و GiftFinder را دوباره باز کنید."
 }

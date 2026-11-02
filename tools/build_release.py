@@ -16,6 +16,8 @@ import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from tools import installers
 
 
 def target_name(system=None, machine=None):
@@ -87,26 +89,13 @@ def package_artifacts(dist, executable, output, build, version, target):
         add_documentation(stage)
         if target.startswith('Windows-'):
             shutil.copy2(executable, stage / 'GiftFinder.exe')
-            standalone = output / f'{prefix}.exe'
-            shutil.copy2(executable, standalone)
-            artifacts.append(standalone)
-            archive = output / f'{prefix}.zip'
-            write_zip(stage, archive)
+            artifacts.append(installers.windows(stage, output, version))
         elif target.startswith('macOS-'):
             shutil.copytree(dist / 'GiftFinder.app', stage / 'GiftFinder.app', symlinks=True)
-            (stage / 'Applications').symlink_to('/Applications', target_is_directory=True)
-            archive = output / f'{prefix}.dmg'
-            run('hdiutil', 'create', '-volname', 'GiftFinder', '-srcfolder', stage,
-                '-ov', '-format', 'UDZO', archive)
+            artifacts.append(installers.macos(stage, output, version, target, stage / 'installer-work'))
         else:
             shutil.copytree(dist / 'GiftFinder', stage / 'GiftFinder', symlinks=True)
-            (stage / 'start-giftfinder.sh').write_text(
-                '#!/bin/sh\ncd -- "$(dirname -- "$0")" || exit 1\nexec ./GiftFinder/GiftFinder "$@"\n', encoding='utf-8')
-            (stage / 'start-giftfinder.sh').chmod(0o755)
-            archive = output / f'{prefix}.tar.gz'
-            with tarfile.open(archive, 'w:gz') as package:
-                package.add(stage, arcname='GiftFinder')
-        artifacts.append(archive)
+            artifacts.extend(installers.linux(stage, output, version, target, stage / 'installer-work'))
     return artifacts
 
 

@@ -324,6 +324,7 @@ def patch_buildozer(stage, output, app_version, architecture, *, compilation=Non
                    if value.strip() and value.strip().rsplit('.', 1)[-1] not in legacy_storage}
     if not any(value.rsplit('.', 1)[-1] == 'INTERNET' for value in permissions):
         permissions.add('INTERNET')
+    permissions.add('REQUEST_INSTALL_PACKAGES')
     major, minor, patch = map(int, app_version.split('.'))
     fields = {
         'package.name': 'giftfinder', 'package.domain': 'org.giftfinder',
@@ -339,6 +340,8 @@ def patch_buildozer(stage, output, app_version, architecture, *, compilation=Non
         'p4a.commit': INPUTS['p4a_commit'],
         'android.archs': architecture, 'android.api': '35', 'android.minapi': '28', 'android.ndk_api': '28',
         'android.accept_sdk_license': 'True', 'android.permissions': ','.join(sorted(permissions)),
+        'android.enable_androidx': 'True',
+        'android.gradle_dependencies': INPUTS['android_updates']['androidx_core'],
         'android.release_artifact': 'apk', 'android.debug_artifact': 'apk',
         'android.no-byte-compile-python': 'True', 'orientation': 'all', 'fullscreen': '0',
         'p4a.hook': str(ROOT / 'mobile/android_hook.py'),
@@ -386,6 +389,15 @@ public class GiftFinderDiagnosticsActivity extends org.kivy.android.PythonActivi
     @Override public void onCreate(Bundle state) {
         Log.i("GiftFinderLifecycle", "before PythonActivity.onCreate");
         super.onCreate(state);
+        try {
+            java.io.File updates = new java.io.File(getCacheDir(), "updates");
+            updates.mkdirs();
+            java.nio.file.Files.copy(java.nio.file.Paths.get(getApplicationInfo().sourceDir),
+                new java.io.File(updates, "GiftFinder-update-smoke.apk").toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (java.io.IOException error) {
+            throw new RuntimeException("Cannot prepare the explicit update-installer probe", error);
+        }
         Log.i("GiftFinderLifecycle", "after PythonActivity.onCreate; finishing=" + isFinishing());
     }
     @Override public void finish() {
@@ -607,6 +619,25 @@ def category_popup_draft_test(adb, output, pid):
         raise RuntimeError('Back from category popup closed the entire filter sheet')
     if run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip() != pid:
         raise RuntimeError('Back from category popup exited the application')
+
+
+def apk_update_picker_test(adb, output, pid):
+    """Open the real system APK prompt, then cancel without installing anything."""
+    run([adb, 'shell', 'appops', 'set', PACKAGE_ID, 'REQUEST_INSTALL_PACKAGES', 'allow'], timeout=20)
+    tree = native_hierarchy(adb, output, 'update-home')
+    native_tap(adb, native_find(tree, lambda node: native_label(node, 'Actions'), 'Actions before update'))
+    tree = native_hierarchy(adb, output, 'update-menu')
+    native_tap(adb, native_find(tree, lambda node: native_label(node, 'Install update'), 'explicit installer probe'))
+    tree = native_hierarchy(adb, output, 'update-system-installer')
+    if not any('packageinstaller' in node.get('package', '') for node in tree.iter('node')):
+        raise RuntimeError('The real Android APK installer prompt did not open')
+    with (output / 'android-update-installer.png').open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+    run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)
+    tree = native_hierarchy(adb, output, 'update-installer-cancelled')
+    native_find(tree, lambda node: native_label(node, 'Filters'), 'main screen after cancelling update')
+    if run([adb, 'shell', 'pidof', PACKAGE_ID], capture=True).strip() != pid:
+        raise RuntimeError('Cancelling the system installer exited the app')
 
 
 def csv_picker_test(adb, output, pid):
@@ -982,6 +1013,7 @@ def emulator_test(args):
     if not (0 <= lx1 < lx2 <= landscape.width() and 0 <= ly1 < ly2 <= landscape.height()):
         raise RuntimeError('The rotated Android Filters button is outside its viewport')
     csv_picker_test(adb, output, pid)
+    apk_update_picker_test(adb, output, pid)
     evidence = {'apk': apk.name, 'package_id': PACKAGE_ID, 'emulator_architecture': 'x86_64',
                 'ready_marker_seen': True, 'process_alive_after_startup': True,
                 'actual_android_page_size': page_size, 'charset_detector_runtime_check': True,
@@ -1002,6 +1034,7 @@ def emulator_test(args):
                 'landscape_screenshot_size': [landscape.width(), landscape.height()],
                 'landscape_sampled_colors': len(landscape_colors), 'landscape_filters_button_inside_viewport': True,
                 'native_csv_document_picker_opened': True, 'native_csv_content_uri_written_and_read_back': True,
+                'native_apk_update_installer_opened_and_cancelled': True,
                 'csv_export_uses_explicit_synthetic_smoke_offer': True,
                 'no_python_crash_in_application_log': True, 'screenshot_size': [image.width(), image.height()],
                 'sampled_colors': len(colors), 'offline_smoke_package': True,

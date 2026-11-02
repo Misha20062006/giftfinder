@@ -176,6 +176,15 @@ class Catalog:
         return self.data
 
     @_catalog_locked
+    def find_collections(self, text=''):
+        # Canonical marketplace names stay intact; common localized gift names
+        # are only search aliases, never a source of thematic classification.
+        aliases = {'Myth Mask': ('маска', 'мифическая маска', 'мифическая', 'mythmask')}
+        query = norm(text).strip()
+        return [collection for collection in self.data['collections'] if not query
+                or any(query in norm(name) for name in (collection, *aliases.get(collection, ())))]
+
+    @_catalog_locked
     def facets(self, collection):
         traits = self.data.get('traits', {}).get(collection, {})
         return {'gift':collection, 'models':traits.get('models', []), 'symbols':traits.get('symbols', []),

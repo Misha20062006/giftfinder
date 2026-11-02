@@ -179,5 +179,14 @@
   "theme_pokemon": "Покемони",
   "theme_sailor_moon": "Сейлор Мун",
   "theme_doge": "Doge і сіба-іну",
-  "theme_space": "Космос"
+  "theme_space": "Космос",
+  "app_updates": "Оновлення застосунку",
+  "install_update": "Установити оновлення",
+  "update_checking": "Перевіряємо оновлення…",
+  "update_available": "Оновити до {version}",
+  "update_description": "Доступний GiftFinder {version}. Налаштування й обране збережуться.",
+  "update_current": "У вас остання версія.",
+  "update_failed": "Не вдалося оновити. Перевірте з’єднання та спробуйте ще раз.",
+  "update_downloading": "Завантажуємо та перевіряємо інсталятор…",
+  "update_opened": "Завершіть установлення засобами системи та знову відкрийте GiftFinder."
 }

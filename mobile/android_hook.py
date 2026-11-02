@@ -85,7 +85,42 @@ def after_apk_build(toolchain):
     """Runs after p4a renders resources and before Gradle packages/signs the APK."""
     changed = fix_binding_library_names(toolchain._dist.dist_dir)
     fix_qt_activity_delegation(toolchain._dist.dist_dir)
+    enable_update_installer(toolchain._dist.dist_dir)
     print('GiftFinder: installable Qt binding library names:', ', '.join(changed), flush=True)
+
+
+def enable_update_installer(distribution):
+    """Share only cached update APKs through Qt's documented FileProvider URI."""
+    distribution = Path(distribution)
+    android = '{http://schemas.android.com/apk/res/android}'
+    ET.register_namespace('android', android[1:-1])
+    path = distribution / 'src/main/AndroidManifest.xml'
+    tree = ET.parse(path)
+    application = tree.getroot().find('application')
+    if application is None:
+        raise RuntimeError('Qt Android application manifest is missing')
+    authority = 'org.giftfinder.giftfinder.qtprovider'
+    providers = [item for item in application.findall('provider') if item.get(android+'authorities') == authority]
+    if len(providers) > 1:
+        raise RuntimeError('Duplicate Qt update FileProvider')
+    if not providers:
+        provider = ET.SubElement(application, 'provider', {
+            android+'name':'androidx.core.content.FileProvider', android+'authorities':authority,
+            android+'exported':'false', android+'grantUriPermissions':'true'})
+        ET.SubElement(provider, 'meta-data', {android+'name':'android.support.FILE_PROVIDER_PATHS',
+                                             android+'resource':'@xml/qtprovider_paths'})
+    queries = tree.getroot().find('queries')
+    if queries is None:
+        queries = ET.SubElement(tree.getroot(), 'queries')
+    if not any(item.get(android+'mimeType') == 'application/vnd.android.package-archive' for item in queries.iter('data')):
+        intent = ET.SubElement(queries, 'intent')
+        ET.SubElement(intent, 'action', {android+'name':'android.intent.action.VIEW'})
+        ET.SubElement(intent, 'data', {android+'mimeType':'application/vnd.android.package-archive'})
+    tree.write(path, encoding='utf-8', xml_declaration=True)
+    resource = distribution / 'src/main/res/xml/qtprovider_paths.xml'
+    resource.parent.mkdir(parents=True, exist_ok=True)
+    resource.write_text('<paths><cache-path name="updates" path="updates/"/>'
+                        '<cache-path name="qt_updates" path="GiftFinder/GiftFinder/updates/"/></paths>\n', encoding='utf-8')
 
 
 def before_apk_build(toolchain):

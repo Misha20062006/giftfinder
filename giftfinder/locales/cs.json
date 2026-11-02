@@ -179,5 +179,14 @@
   "theme_pokemon": "Pokémon",
   "theme_sailor_moon": "Sailor Moon",
   "theme_doge": "Doge a shiba inu",
-  "theme_space": "Vesmír"
+  "theme_space": "Vesmír",
+  "app_updates": "Aktualizace",
+  "install_update": "Nainstalovat aktualizaci",
+  "update_checking": "Kontrola aktualizací…",
+  "update_available": "Aktualizovat na {version}",
+  "update_description": "Je dostupný GiftFinder {version}. Nastavení a oblíbené zůstanou zachovány.",
+  "update_current": "Máte nejnovější verzi.",
+  "update_failed": "Aktualizace selhala. Zkontrolujte připojení a zkuste to znovu.",
+  "update_downloading": "Stahování a ověřování instalátoru…",
+  "update_opened": "Dokončete systémovou instalaci a znovu otevřete GiftFinder."
 }

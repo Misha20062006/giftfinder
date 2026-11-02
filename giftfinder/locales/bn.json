@@ -179,5 +179,14 @@
   "theme_pokemon": "পোকেমন",
   "theme_sailor_moon": "সেইলর মুন",
   "theme_doge": "ডোজ ও শিবা ইনু",
-  "theme_space": "মহাকাশ"
+  "theme_space": "মহাকাশ",
+  "app_updates": "অ্যাপ আপডেট",
+  "install_update": "আপডেট ইনস্টল করুন",
+  "update_checking": "আপডেট খোঁজা হচ্ছে…",
+  "update_available": "{version} সংস্করণে আপডেট করুন",
+  "update_description": "GiftFinder {version} উপলব্ধ। সেটিংস ও পছন্দের তালিকা অক্ষত থাকবে।",
+  "update_current": "আপনার কাছে সর্বশেষ সংস্করণ রয়েছে।",
+  "update_failed": "আপডেট করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  "update_downloading": "ইনস্টলার ডাউনলোড ও যাচাই করা হচ্ছে…",
+  "update_opened": "সিস্টেমে ইনস্টলেশন শেষ করে GiftFinder আবার খুলুন।"
 }

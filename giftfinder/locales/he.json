@@ -179,5 +179,14 @@
   "theme_pokemon": "פוקימון",
   "theme_sailor_moon": "סיילור מון",
   "theme_doge": "דוג׳ ושיבה אינו",
-  "theme_space": "חלל"
+  "theme_space": "חלל",
+  "app_updates": "עדכוני יישום",
+  "install_update": "התקנת העדכון",
+  "update_checking": "בודק עדכונים…",
+  "update_available": "עדכון לגרסה {version}",
+  "update_description": "GiftFinder {version} זמין. ההגדרות והמועדפים יישמרו.",
+  "update_current": "ברשותך הגרסה העדכנית ביותר.",
+  "update_failed": "העדכון נכשל. בדוק את החיבור ונסה שוב.",
+  "update_downloading": "מוריד ומאמת את קובץ ההתקנה…",
+  "update_opened": "השלם את התקנת המערכת ופתח שוב את GiftFinder."
 }

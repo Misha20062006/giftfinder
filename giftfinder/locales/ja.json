@@ -179,5 +179,14 @@
   "theme_pokemon": "ポケモン",
   "theme_sailor_moon": "美少女戦士セーラームーン",
   "theme_doge": "Dogeと柴犬",
-  "theme_space": "宇宙"
+  "theme_space": "宇宙",
+  "app_updates": "アプリの更新",
+  "install_update": "更新をインストール",
+  "update_checking": "更新を確認しています…",
+  "update_available": "{version} に更新",
+  "update_description": "GiftFinder {version} を利用できます。設定とお気に入りは保持されます。",
+  "update_current": "最新バージョンです。",
+  "update_failed": "更新できませんでした。接続を確認して再試行してください。",
+  "update_downloading": "インストーラーをダウンロードして検証しています…",
+  "update_opened": "システムのインストールを完了し、GiftFinder を再度開いてください。"
 }

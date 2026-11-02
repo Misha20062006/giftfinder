@@ -17,6 +17,8 @@ from PySide6.QtWidgets import (QMainWindow, QFrame, QWidget, QVBoxLayout, QHBoxL
 
 from .core import MARKETS, SearchQuery, SearchResult, Store, number, fmt, age_label, norm, safe_url
 from .catalogue import Catalog, query_from_dict, CATALOG_REFRESH_MS
+from . import __version__
+from .update_ui import UpdateController
 from .providers import SearchEngine
 from .currency import RateBook, NAMES, SYMBOLS
 from .previews import Assets, PreviewRenderer
@@ -131,13 +133,15 @@ class MainWindow(QMainWindow):
         try: self.filter_query = query_from_dict(settings.get('last_filter',{}))
         except (ValueError,TypeError): self.filter_query = SearchQuery()
         self.filter_extra = dict(settings.get('last_filter_extra',{}))
-        self.setWindowTitle('GiftFinder'); self.resize(1400,900); self.setMinimumSize(1050,740)
+        self.setWindowTitle('GiftFinder '+__version__); self.resize(1400,900); self.setMinimumSize(1050,740)
         self.setWindowIcon(QIcon(str(Path(__file__).parent/'icon.png')))
         self.setStyleSheet(MODERN_STYLE)
         self.build_ui(); self.populate_catalog(); self.filter_summary(); self.update_rates_text()
+        self.updates = UpdateController(self)
         self.add_shortcut(QKeySequence.StandardKey.Find, self.search_edit.setFocus)
         self.add_shortcut('F5', self.start_search)
         if not offline:
+            QTimer.singleShot(0, self.updates.check)
             self.restore_search_after_catalog = any((self.filter_query.collection,self.filter_query.theme,self.filter_query.models,self.filter_query.targets,self.filter_query.text,self.filter_query.monochrome,self.filter_query.mono_colors))
             if self.restore_search_after_catalog:
                 try: self.engine.cached(self.current_query())
@@ -177,6 +181,7 @@ class MainWindow(QMainWindow):
         for b in (self.nav_catalog,self.nav_favorites):b.setMinimumHeight(54);bar.addWidget(b)
         saved=button('searches',self.saved_searches,'nav');saved.setMinimumHeight(54);bar.addWidget(saved);bar.addStretch()
         bar.addWidget(button('rates',self.rates_info,'quiet'))
+        self.update_button=button('app_updates',lambda:self.updates.show(),'quiet');bar.addWidget(self.update_button)
         self.language_button=button('',self.language_menu,'select');bar.addWidget(self.language_button);outer.addWidget(header)
         body=QWidget();outer.addWidget(body,1);layout=QVBoxLayout(body);layout.setContentsMargins(30,22,30,18);layout.setSpacing(14)
         self.page_intro=QWidget(root);self.page_intro.hide()
@@ -223,6 +228,8 @@ class MainWindow(QMainWindow):
         self.theme_grid.clicked.connect(lambda index:self.search_theme(index.data(Qt.ItemDataRole.UserRole)['key']));home_layout.addWidget(self.theme_grid)
         rule=QFrame();rule.setFixedHeight(1);rule.setStyleSheet('background:#2b3741;');home_layout.addWidget(rule)
         self.catalog_note=label('','muted');home_layout.addWidget(self.catalog_note)
+        self.catalog_search=QLineEdit();self.catalog_search.setObjectName('catalogSearch');self.catalog_search.setClearButtonEnabled(True)
+        bind(self.catalog_search,'search_list','setPlaceholderText');self.catalog_search.textChanged.connect(self.populate_catalog);home_layout.addWidget(self.catalog_search)
         self.home_grid=CardView(self.renderer,cell=QSize(188,266));self.home_model=TileModel();self.home_grid.setModel(self.home_model)
         self.home_grid.setItemDelegate(TileDelegate(self.renderer,parent=self.home_grid,cell=QSize(188,266)));self.home_grid.clicked.connect(self.choose_collection);home_layout.addWidget(self.home_grid,1);self.stack.addWidget(home)
         self.view=CardView(self.renderer,cell=QSize(220,386));self.offer_model=OfferModel();self.view.setModel(self.offer_model);self.view.setItemDelegate(OfferDelegate(self))
@@ -305,7 +312,9 @@ class MainWindow(QMainWindow):
         self.simple_dialog('source_status',contents)
 
     def populate_catalog(self):
-        rows = [{'kind':'collection','name':c,'collection':c,'key':c,'subtitle':tr('models_count',count=len(self.catalog.data.get('traits',{}).get(c,{}).get('models',[])))} for c in self.catalog.data['collections']]
+        text = self.catalog_search.text() if hasattr(self,'catalog_search') else ''
+        collections = self.catalog.find_collections(text)
+        rows = [{'kind':'collection','name':c,'collection':c,'key':c,'subtitle':tr('models_count',count=len(self.catalog.data.get('traits',{}).get(c,{}).get('models',[])))} for c in collections]
         self.home_model.replace(rows)
         self.catalog_note.setText(tr('collections_count',count=len(rows))+(' · '+self.catalog.note if self.catalog.note else ''))
         self.theme_model.replace([{**row,'name':theme_name(k),'kind':'theme','key':k} for k,row in self.catalog.themes.items()])

@@ -179,5 +179,14 @@
   "theme_pokemon": "Pokémon",
   "theme_sailor_moon": "Sailor Moon",
   "theme_doge": "Doge ve Shiba Inu",
-  "theme_space": "Uzay"
+  "theme_space": "Uzay",
+  "app_updates": "Uygulama güncellemeleri",
+  "install_update": "Güncellemeyi yükle",
+  "update_checking": "Güncellemeler denetleniyor…",
+  "update_available": "{version} sürümüne güncelle",
+  "update_description": "GiftFinder {version} kullanılabilir. Ayarlar ve favoriler korunacak.",
+  "update_current": "En son sürümü kullanıyorsunuz.",
+  "update_failed": "Güncellenemedi. Bağlantıyı kontrol edip tekrar deneyin.",
+  "update_downloading": "Yükleyici indiriliyor ve doğrulanıyor…",
+  "update_opened": "Sistem kurulumunu tamamlayıp GiftFinder’ı yeniden açın."
 }
