@@ -640,6 +640,20 @@ def category_popup_draft_test(adb, output, pid):
         raise RuntimeError('Back from category popup exited the application')
 
 
+def wait_for_apk_staging(adb, output):
+    # The real installer copies/parses a ~190 MB APK before its confirmation UI
+    # becomes idle. Accessibility snapshots during InstallStaging can be empty.
+    deadline = time.monotonic() + 300
+    while time.monotonic() < deadline:
+        activities = run([adb, 'shell', 'dumpsys', 'activity', 'activities'], capture=True, timeout=20)
+        top = next((line.strip() for line in activities.splitlines() if 'topResumedActivity=' in line), '')
+        if ('packageinstaller' in top and 'InstallStaging' not in top and 'InstallStart' not in top):
+            (output / 'update-installer-ready-activity.txt').write_text(top+'\n', encoding='utf-8')
+            return
+        time.sleep(1)
+    raise RuntimeError('Android did not finish staging the update APK')
+
+
 def apk_update_picker_test(adb, output, pid):
     """Open the real system APK prompt, then cancel without installing anything."""
     run([adb, 'shell', 'appops', 'set', PACKAGE_ID, 'REQUEST_INSTALL_PACKAGES', 'allow'], timeout=20)
@@ -647,9 +661,12 @@ def apk_update_picker_test(adb, output, pid):
     native_tap(adb, native_find(tree, lambda node: native_label(node, 'Actions'), 'Actions before update'))
     tree = native_hierarchy(adb, output, 'update-menu')
     native_tap(adb, native_find(tree, lambda node: native_label(node, 'Install update'), 'explicit installer probe'))
+    wait_for_apk_staging(adb, output)
     tree = native_hierarchy(adb, output, 'update-system-installer')
     if not any('packageinstaller' in node.get('package', '') for node in tree.iter('node')):
         raise RuntimeError('The real Android APK installer prompt did not open')
+    if not any(node.get('text','').strip().casefold() in ('install','update') for node in tree.iter('node')):
+        raise RuntimeError('Android did not finish parsing the update APK into an installation prompt')
     with (output / 'android-update-installer.png').open('wb') as stream:
         subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
     run([adb, 'shell', 'input', 'keyevent', 'KEYCODE_BACK'], timeout=15)

@@ -755,3 +755,26 @@ def test_native_check_only_dismisses_the_emulator_launcher_error(tmp_path, monke
         assert tree.find('node').get('resource-id') == 'Actions'
     else:
         assert tree.find('node').get('text') == title
+
+
+def test_apk_confirmation_waits_for_the_foreground_staging_activity(tmp_path, monkeypatch):
+    states = iter(['topResumedActivity=packageinstaller/InstallStaging',
+                   'topResumedActivity=packageinstaller/InstallStaging',
+                   'topResumedActivity=packageinstaller/PackageInstallerActivity\noldActivity=InstallStaging'])
+    calls = []
+    def activity(command, **kwargs):
+        calls.append(command)
+        return next(states)
+    monkeypatch.setattr(build_android, 'run', activity)
+    monkeypatch.setattr(build_android.time, 'sleep', lambda _:None)
+    build_android.wait_for_apk_staging('adb',tmp_path)
+    assert len(calls) == 3
+    assert 'PackageInstallerActivity' in (tmp_path/'update-installer-ready-activity.txt').read_text()
+
+
+def test_apk_staging_timeout_cannot_be_reported_as_a_success(tmp_path, monkeypatch):
+    ticks = iter([0,301])
+    monkeypatch.setattr(build_android.time,'monotonic',lambda:next(ticks))
+    with pytest.raises(RuntimeError,match='finish staging'):
+        build_android.wait_for_apk_staging('adb',tmp_path)
+    assert not (tmp_path/'update-installer-ready-activity.txt').exists()
