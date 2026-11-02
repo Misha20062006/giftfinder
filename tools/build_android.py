@@ -503,6 +503,16 @@ def native_hierarchy(adb, output, name):
         tree = ET.fromstring(source)
         if tree.tag != 'hierarchy' or not list(tree.iter('node')):
             raise RuntimeError('Android returned an empty accessibility hierarchy')
+        launcher_anr = any(node.get('package') == 'android'
+                           and node.get('resource-id') == 'android:id/alertTitle'
+                           and node.get('text') == "Pixel Launcher isn't responding" for node in tree.iter('node'))
+        if launcher_anr:
+            (output / (name + '-pixel-launcher-anr.xml')).write_text(source, encoding='utf-8')
+            close = native_find(tree, lambda node: node.get('resource-id') == 'android:id/aerr_close',
+                                'external Pixel Launcher error close button')
+            print('Closing the emulator Pixel Launcher ANR; GiftFinder errors remain fatal', flush=True)
+            native_tap(adb, close)
+            continue
         (output / (name + '.xml')).write_text(source, encoding='utf-8')
         return tree
     raise RuntimeError('Android did not produce a fresh accessibility hierarchy')

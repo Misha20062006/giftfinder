@@ -727,3 +727,31 @@ def test_update_apk_sharing_is_private_and_does_not_expose_the_profile(tmp_path)
     paths = ET.parse(tmp_path/'src/main/res/xml/qtprovider_paths.xml').getroot()
     assert all(child.tag == 'cache-path' and child.get('path').endswith('updates/') for child in paths)
     assert not list(paths.iter('files-path')) and not list(paths.iter('external-path'))
+
+
+@pytest.mark.parametrize('title,dismissed', [("Pixel Launcher isn't responding",True),
+                                           ("GiftFinder isn't responding",False)])
+def test_native_check_only_dismisses_the_emulator_launcher_error(tmp_path, monkeypatch, title, dismissed):
+    anr = ('<hierarchy><node package="android" resource-id="android:id/alertTitle" text="'+title+'" />'
+           '<node resource-id="android:id/aerr_close" enabled="true" bounds="[10,20][110,70]" /></hierarchy>')
+    normal = '<hierarchy><node resource-id="Actions" /></hierarchy>'
+    reads = []
+    taps = []
+    def android(command, **kwargs):
+        if command[1:4] == ['shell','uiautomator','dump']:
+            return 'UI hierchary dumped to: '+command[-1]
+        if command[1:3] == ['exec-out','cat']:
+            reads.append(command[-1])
+            return anr if len(reads) == 1 else normal
+        assert command[1:4] == ['shell','input','tap']
+        taps.append(command)
+        return ''
+    monkeypatch.setattr(build_android,'run',android)
+    tree = build_android.native_hierarchy('adb',tmp_path,'home')
+    assert bool(taps) is dismissed
+    assert len(reads) == (2 if dismissed else 1)
+    if dismissed:
+        assert (tmp_path/'home-pixel-launcher-anr.xml').is_file()
+        assert tree.find('node').get('resource-id') == 'Actions'
+    else:
+        assert tree.find('node').get('text') == title
