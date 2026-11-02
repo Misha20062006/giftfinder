@@ -8,6 +8,7 @@ from giftfinder.ui_common import application
 from giftfinder.ui import MainWindow
 from giftfinder.mobile_ui import MobileWindow
 from giftfinder.qa import settle
+from giftfinder.previews import asset_url
 
 
 @pytest.mark.parametrize('window_class', [MainWindow, MobileWindow])
@@ -24,6 +25,7 @@ def test_myth_mask_can_be_found_on_main_catalog_with_an_old_profile(tmp_path, mo
             assert [row['name'] for row in window.home_model.rows] == ['Myth Mask']
             assert window.home_grid.visualRect(window.home_model.index(0)).intersects(window.home_grid.viewport().rect())
             assert len(window.catalog.facets('Myth Mask')['models']) == 134
+            assert window.assets.image(asset_url('collection','Myth Mask',size=256)) is not None
         window.catalog_search.clear()
         assert window.home_model.rowCount() >= 124
         assert window.filter_query.collection == ''

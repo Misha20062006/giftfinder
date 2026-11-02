@@ -1,15 +1,15 @@
-# Платформы и сборка GiftFinder 0.8.0
+# Платформы и сборка GiftFinder 0.9.0
 
 Общая поисковая логика для Windows, macOS, Linux и Android. Настольные пакеты создаются каждый на своей ОС; Android использует отдельный мобильный интерфейс и официальный инструмент PySide6.
 
 | Пакет | Требования | Как запустить |
 |---|---|---|
-| Windows x64, ZIP / EXE | Windows 10 или 11 x64 | Распаковать ZIP и запустить `GiftFinder.exe` |
-| macOS arm64, DMG | macOS 14+, Apple Silicon (M1 и новее) | Открыть DMG, перенести `GiftFinder.app` в Applications |
-| macOS x64, DMG | macOS 14+, Intel | Открыть DMG, перенести `GiftFinder.app` в Applications |
-| Linux x64, tar.gz | glibc 2.35+, например Ubuntu 22.04+ | Распаковать архив и запустить `start-giftfinder.sh` |
-| Linux arm64, tar.gz | glibc 2.39+, например Ubuntu 24.04+ | Распаковать архив и запустить `start-giftfinder.sh` |
-| Android arm64-v8a, APK · preview | Android 9+ (API 28), 64-битная ARM-система | [Скачать APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0-android.1/GiftFinder-0.8.0-Android-arm64-v8a.apk), открыть и разрешить установку из выбранного источника |
+| Windows x64, Setup EXE | Windows 10 или 11 x64 | Открыть установщик; установка для текущего пользователя без прав администратора, с ярлыками и удалением через настройки Windows |
+| macOS arm64, PKG | macOS 14+, Apple Silicon (M1 и новее) | Открыть PKG и завершить установку в Applications |
+| macOS x64, PKG | macOS 14+, Intel | Открыть PKG и завершить установку в Applications |
+| Linux x64, DEB/RPM | glibc 2.35+, например Ubuntu 22.04+ или Fedora | Открыть DEB для Ubuntu/Debian или RPM для Fedora системным установщиком |
+| Linux arm64, DEB/RPM | glibc 2.39+, например Ubuntu 24.04+ или Fedora | Открыть подходящий системный пакет; приложение появится в меню |
+| Android arm64-v8a, APK · preview | Android 9+ (API 28), 64-битная ARM-система | [Скачать APK](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0-android.1/GiftFinder-0.9.0-Android-arm64-v8a.apk), открыть и разрешить установку из выбранного источника |
 
 Для готовых пакетов Python не нужен. Linux-сборки используют системные OpenGL/EGL/X11-библиотеки. На Debian/Ubuntu при их отсутствии:
 
@@ -25,6 +25,8 @@ sudo apt-get install libegl1 libopengl0 libxkbcommon-x11-0 libxcb-cursor0 libxcb
 
 На Android профиль хранится во внутренней папке приложения. Установка новой версии APK поверх прежней с тем же ключом сохраняет профиль; удаление приложения удаляет его локальные данные.
 
+При запуске приложение проверяет GitHub Releases. Проверка не устанавливает обновление: необходима кнопка «Установить обновление». Скачивается пакет для текущей ОС, архитектуры и формата Linux; файл проверяется по размеру и SHA-256 из GitHub. Только после проверки открывается системный установщик. Windows закрывает прежнюю программу и запускает установленную версию, остальные системы завершают установку в своём интерфейсе. Удаление настольной программы не удаляет отдельный профиль; Android управляет данными по своим правилам выше.
+
 ## Сборка из исходников
 
 Нужен Python 3.12, соответствующий архитектуре пакета. Из корня репозитория, в отдельном виртуальном окружении:
@@ -34,7 +36,7 @@ python -m pip install -r requirements-lock.txt
 python tools/build_release.py
 ```
 
-Скрипт создаёт пакет в `release-dist/`, запускает его вне экрана с отдельным профилем и записывает SHA-256. На macOS для DMG нужны стандартные `sips`, `iconutil` и `hdiutil`. Локальный запуск исходников: `python app.py`.
+Скрипт создаёт установщик в `release-dist/`, запускает программу вне экрана с отдельным профилем и записывает SHA-256. Windows использует Inno Setup 7.1.1 (`ISCC_EXE` указывает на компилятор), macOS — штатные `sips`, `iconutil` и `pkgbuild`, Linux — `dpkg-deb` и `rpmbuild`. В CI `tools/verify_installers.py` устанавливает пакет, повторяет установку, проверяет исполняемый файл и сохранность профиля; RPM проверяется через DNF в Fedora. Локальный запуск исходников: `python app.py`.
 
 [GitHub Actions](../.github/workflows/desktop-build.yml) запускает тесты, нативную сборку и проверку упакованной программы на пяти системах. Внеэкранная проверка подтверждает запуск и основные функции интерфейса, но не заменяет ручную проверку на каждом компьютере, графическом драйвере или живой площадке.
 

@@ -42,12 +42,25 @@ Filename: "{app}\GiftFinder.exe"; Description: "GiftFinder"; Flags: nowait posti
 Filename: "{app}\GiftFinder.exe"; Flags: nowait; Check: ShouldLaunchUpdate
 
 [Code]
+function HasSwitch(Value: String): Boolean;
+var
+  Index: Integer;
+begin
+  Result := False;
+  for Index := 1 to ParamCount do
+    if CompareText(ParamStr(Index), Value) = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+end;
+
 function ShouldLaunch: Boolean;
 begin
-  Result := not CmdLineParamExists('/NOAUTORUN') and not CmdLineParamExists('/UPDATE');
+  Result := not HasSwitch('/NOAUTORUN') and not HasSwitch('/UPDATE');
 end;
 
 function ShouldLaunchUpdate: Boolean;
 begin
-  Result := CmdLineParamExists('/UPDATE') and not CmdLineParamExists('/NOAUTORUN');
+  Result := HasSwitch('/UPDATE') and not HasSwitch('/NOAUTORUN');
 end;

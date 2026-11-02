@@ -539,7 +539,8 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
             action = menu.addAction(tr(title)); action.triggered.connect(callback)
             if title == 'export': action.setEnabled(bool(self.offer_model.offers) or smoke_export)
         if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') == '1':
-            menu.addAction(tr('install_update')).triggered.connect(self.smoke_update_installer)
+            action=menu.addAction(tr('install_update'));action.triggered.connect(self.smoke_update_installer)
+            menu.insertAction(menu.actions()[0],action)
         menu.exec(self.mobile_menu_button.mapToGlobal(QPoint(0,self.mobile_menu_button.height())))
         menu.deleteLater()
 

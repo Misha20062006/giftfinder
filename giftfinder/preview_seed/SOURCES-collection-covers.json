@@ -1,0 +1,12 @@
+{
+  "downloaded_on": "2026-11-02",
+  "source": "Gift Changes / Telegram gift artwork",
+  "files": {
+    "37ccfc33647d25f9d0a023214e460b8de159b4817b5233d30d9f4b68e013e06c.png": {
+      "collection": "Myth Mask",
+      "kind": "collection",
+      "url": "https://api.changes.tg/original/Myth%20Mask.png?size=256",
+      "sha256": "88aae942ee5917e2618d0303f24d94bfe926208bc8316bfc54a90b8e6f1b50b3"
+    }
+  }
+}

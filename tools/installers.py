@@ -77,7 +77,7 @@ def linux(stage, output, version, target, work):
     (control / 'control').write_text(
         f'Package: giftfinder\nVersion: {version}\nArchitecture: {architecture}\n'
         'Maintainer: Misha20062006 <Misha20062006@users.noreply.github.com>\n'
-        f'Depends: libc6 (>= {minimum}), libegl1, libopengl0, libxkbcommon-x11-0, '
+        f'Depends: libc6 (>= {minimum}), libegl1, libgl1, libopengl0, fontconfig, libxkbcommon-x11-0, '
         'libxcb-cursor0, libxcb-icccm4, libxcb-image0, libxcb-keysyms1, libxcb-render-util0, '
         'libxcb-xinerama0, libxcb-randr0, libxcb-shape0\n'
         'Section: utils\nPriority: optional\nHomepage: https://github.com/Misha20062006/giftfinder\n'
@@ -96,7 +96,7 @@ def linux(stage, output, version, target, work):
         f'Name: giftfinder\nVersion: {version}\nRelease: 1\nSummary: Telegram gift search\n'
         'License: Unlicense AND LGPL-3.0-only\nURL: https://github.com/Misha20062006/giftfinder\n'
         f'BuildArch: {rpm_arch}\nAutoReqProv: no\nRequires: glibc >= {minimum}\n'
-        'Requires: libstdc++, libglvnd-egl, libglvnd-opengl, libxkbcommon-x11, xcb-util-cursor, '
+        'Requires: libstdc++, libglvnd-egl, libglvnd-glx, libglvnd-opengl, fontconfig, libxkbcommon-x11, xcb-util-cursor, '
         'xcb-util-wm, xcb-util-image, xcb-util-keysyms, xcb-util-renderutil, libxcb\n'
         '%description\nFind Telegram gifts and compare marketplace offers.\n'
         '%prep\n%build\n%install\n'

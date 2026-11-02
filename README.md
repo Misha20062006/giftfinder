@@ -10,12 +10,14 @@
 
 | Платформа | Прямая загрузка | Как запустить |
 |---|:---:|---|
-| Windows 10/11 x64 · ZIP | [![Скачать Windows ZIP](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Windows-x64.zip) | Распаковать ZIP → `GiftFinder.exe` |
-| macOS 14+ · Apple Silicon · DMG | [![Скачать macOS Apple Silicon](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-macOS-arm64.dmg) | Перенести приложение в Applications |
-| macOS 14+ · Intel · DMG | [![Скачать macOS Intel](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-macOS-x64.dmg) | Перенести приложение в Applications |
-| Linux x64 · glibc 2.35+ · tar.gz | [![Скачать Linux x64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Linux-x64.tar.gz) | Распаковать → `start-giftfinder.sh` |
-| Linux ARM64 · glibc 2.39+ · tar.gz | [![Скачать Linux ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0/GiftFinder-0.8.0-Linux-arm64.tar.gz) | Распаковать → `start-giftfinder.sh` |
-| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.8.0-android.1/GiftFinder-0.8.0-Android-arm64-v8a.apk) | Открыть APK и разрешить установку из выбранного источника |
+| Windows 10/11 x64 · установщик | [![Скачать установщик Windows](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Windows-x64-Setup.exe) | Запустить установщик; приложение появится в меню «Пуск» и на рабочем столе |
+| macOS 14+ · Apple Silicon · PKG | [![Скачать macOS Apple Silicon](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-macOS-arm64.pkg) | Открыть PKG; системный установщик добавит GiftFinder в Applications |
+| macOS 14+ · Intel · PKG | [![Скачать macOS Intel](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-macOS-x64.pkg) | Открыть PKG; системный установщик добавит GiftFinder в Applications |
+| Linux x64 · Ubuntu/Debian · DEB | [![Скачать Linux DEB x64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Linux-x64.deb) | Открыть пакет системным установщиком; glibc 2.35+ |
+| Linux x64 · Fedora · RPM | [![Скачать Linux RPM x64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Linux-x64.rpm) | Открыть пакет системным установщиком; glibc 2.35+ |
+| Linux ARM64 · Ubuntu/Debian · DEB | [![Скачать Linux DEB ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Linux-arm64.deb) | Открыть пакет системным установщиком; glibc 2.39+ |
+| Linux ARM64 · Fedora · RPM | [![Скачать Linux RPM ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Linux-arm64.rpm) | Открыть пакет системным установщиком; glibc 2.39+ |
+| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0-android.1/GiftFinder-0.9.0-Android-arm64-v8a.apk) | Открыть APK и подтвердить установку средствами Android |
 
 <p align="center">
   <a href="docs/USER_GUIDE.md">Руководство</a>
@@ -67,6 +69,10 @@ GiftFinder сам разбирает страницы Fragment и получае
 1. Нажмите **«Скачать»** напротив своей системы в таблице выше.
 2. Выберите коллекцию, подборку или нужные фильтры и нажмите **«Показать»**.
 3. Сравните цены и откройте подходящее предложение на площадке.
+
+На главной странице можно искать коллекции отдельно: введите **«маска»** или **Myth Mask** в поле над карточками. В комплект входит обложка маски и все 134 улучшенные модели; обложка видна и без сети.
+
+Приложение проверяет новую версию при запуске. Нажмите **«Обновления приложения» → «Установить обновление»**: GiftFinder скачает подходящий установщик с GitHub, проверит SHA-256 и передаст его системе. На Windows программа закроется и откроется после установки. На macOS и Linux завершите системную установку и снова откройте GiftFinder. На Android пункт обновления находится в меню действий; при первой установке обновления Android может запросить разрешение на установку из GiftFinder. Настройки и избранное сохраняются. Без нажатия кнопки новая версия не устанавливается.
 
 Python для готовых сборок не нужен. Настольные пакеты без коммерческой подписи; Android APK подписан постоянным ключом проекта. При обновлении настройки, избранное и сохранённые поиски остаются в пользовательском профиле. Android получил отдельный сенсорный интерфейс; это предварительная версия, проверенная в эмуляторе, пока без проверки на физическом ARM64-телефоне и живого поиска по всем площадкам. [Подробности запуска, системные требования и статус iOS](docs/PLATFORMS.md).
 

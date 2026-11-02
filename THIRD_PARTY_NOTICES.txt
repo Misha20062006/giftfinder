@@ -145,3 +145,6 @@ AndroidX Core 1.15.0 (Android update installer FileProvider)
 Source: https://android.googlesource.com/platform/frameworks/support/
 License: Apache License 2.0 — https://www.apache.org/licenses/LICENSE-2.0
 The Android package uses AndroidX Core and its declared transitive dependencies for private cached APK sharing.
+
+The bundled Myth Mask collection cover is Telegram gift artwork from Gift Changes.
+Its URL and SHA-256 are recorded in giftfinder/preview_seed/SOURCES-collection-covers.json.

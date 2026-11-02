@@ -28,6 +28,13 @@ def main():
         assert len(window.catalog.data['collections']) >= 124
         assert len(window.catalog.model_rows) >= 7940
         assert len(window.catalog.backdrop_lookup) == 80
+        window.catalog_search.setText('маска');settle(window)
+        assert [row['name'] for row in window.home_model.rows] == ['Myth Mask']
+        assert len(window.catalog.facets('Myth Mask')['models']) == 134
+        from giftfinder.previews import asset_url
+        assert window.assets.image(asset_url('collection','Myth Mask',size=256)) is not None
+        window.grab().save(str(target/'myth-mask.png'))
+        window.catalog_search.clear();settle(window)
         assert len(window.ratebook.currencies()) >= 160
         assert ('Myth Mask','Enderman') in window.catalog.themes['minecraft']['members']
         assert window.theme_model.rowCount()==len(window.catalog.themes)==20

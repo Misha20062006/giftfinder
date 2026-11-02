@@ -325,6 +325,9 @@ def patch_buildozer(stage, output, app_version, architecture, *, compilation=Non
     if not any(value.rsplit('.', 1)[-1] == 'INTERNET' for value in permissions):
         permissions.add('INTERNET')
     permissions.add('REQUEST_INSTALL_PACKAGES')
+    dependencies = [value.strip() for value in config.get('app', 'android.gradle_dependencies', fallback='').split(',') if value.strip()]
+    if INPUTS['android_updates']['androidx_core'] not in dependencies:
+        dependencies.append(INPUTS['android_updates']['androidx_core'])
     major, minor, patch = map(int, app_version.split('.'))
     fields = {
         'package.name': 'giftfinder', 'package.domain': 'org.giftfinder',
@@ -341,7 +344,7 @@ def patch_buildozer(stage, output, app_version, architecture, *, compilation=Non
         'android.archs': architecture, 'android.api': '35', 'android.minapi': '28', 'android.ndk_api': '28',
         'android.accept_sdk_license': 'True', 'android.permissions': ','.join(sorted(permissions)),
         'android.enable_androidx': 'True',
-        'android.gradle_dependencies': INPUTS['android_updates']['androidx_core'],
+        'android.gradle_dependencies': ','.join(dependencies),
         'android.release_artifact': 'apk', 'android.debug_artifact': 'apk',
         'android.no-byte-compile-python': 'True', 'orientation': 'all', 'fullscreen': '0',
         'p4a.hook': str(ROOT / 'mobile/android_hook.py'),
