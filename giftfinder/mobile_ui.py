@@ -48,15 +48,16 @@ def list_view(view, delegate, height):
     touch_scroll_list(view)
 
 
-def touch_scroll_list(view):
+def touch_scroll_list(view, mouse=False):
     view.setVerticalScrollMode(QListView.ScrollMode.ScrollPerPixel)
-    touch_scroll_area(view)
+    touch_scroll_area(view, mouse=mouse)
 
 
-def touch_scroll_area(area):
+def touch_scroll_area(area, mouse=False):
     if not hasattr(area, 'touch_scroll_guard'):
-        QScroller.grabGesture(area.viewport(), QScroller.ScrollerGestureType.TouchGesture)
-        area.touch_scroll_guard = TouchScrollGuard(area)
+        gesture = QScroller.ScrollerGestureType.LeftMouseButtonGesture if mouse else QScroller.ScrollerGestureType.TouchGesture
+        QScroller.grabGesture(area.viewport(), gesture)
+        area.touch_scroll_guard = TouchScrollGuard(area, mouse=mouse)
 
 
 def is_scrolling(view):
@@ -66,8 +67,9 @@ def is_scrolling(view):
 
 class TouchScrollGuard(QObject):
     """Cancel a drag's click, including delayed Qt mouse events and child controls."""
-    def __init__(self, view):
+    def __init__(self, view, mouse=False):
         super().__init__(view)
+        self.mouse_gesture = mouse
         self.scroller = QScroller.scroller(view.viewport())
         self.origin = None
         self.dragged = False
@@ -109,7 +111,7 @@ class TouchScrollGuard(QObject):
         mouse = not touch
         # Qt can synthesize a mouse press/release after the touch gesture ends.
         # Those events must retain the actual finger movement, not reset it.
-        if touch or (mouse and event.source() == Qt.MouseEventSource.MouseEventNotSynthesized):
+        if touch or (mouse and (self.mouse_gesture or event.source() == Qt.MouseEventSource.MouseEventNotSynthesized)):
             position = None
             if touch and event.points():
                 position = event.points()[0].globalPosition()
@@ -232,7 +234,8 @@ class MobileSearchSelector(SearchSelector):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.items.setAccessibleIdentifier('mobileCurrencyList')
-        touch_scroll_list(self.items)
+        # QWidget popups translate touch into mouse events in Qt 6.12.
+        touch_scroll_list(self.items, mouse=True)
 
     def filter_items(self, text):
         super().filter_items(text)

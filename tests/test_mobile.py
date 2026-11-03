@@ -498,6 +498,7 @@ def test_mobile_card_drag_never_activates_and_next_tap_works(window, app, name):
     assert clicked == []
     if name in ('home_grid', 'theme_grid'): assert window.filter_dialog is None
     if name == 'view': assert not window.dialogs
+    QScroller.scroller(viewport).stop()
     QTest.mouseClick(viewport, Qt.MouseButton.LeftButton, pos=start)
     app.processEvents()
     assert clicked == [0]
@@ -533,6 +534,35 @@ def test_mobile_lists_scroll_with_touch_without_activation(window, app, touch_de
     sequence.release(0, point, view.viewport()).commit()
     app.processEvents()
     assert clicked == [row]
+
+
+def test_currency_popup_scrolls_the_mouse_events_generated_from_touch(window, app):
+    # Qt intentionally turns touch into mouse input for Qt.Popup windows.
+    window.currency.showPopup(); settle(window)
+    view = window.currency.items; viewport = view.viewport()
+    before = window.currency.currentData()
+    sequence = [(QEvent.Type.MouseButtonPress, QPoint(80, 280), Qt.MouseButton.LeftButton)]
+    sequence += [(QEvent.Type.MouseMove, QPoint(80, 280-step*20), Qt.MouseButton.LeftButton) for step in range(1, 11)]
+    sequence += [(QEvent.Type.MouseButtonRelease, QPoint(80, 80), Qt.MouseButton.NoButton)]
+    for timestamp, (kind, point, buttons) in enumerate(sequence, 1):
+        event = QMouseEvent(kind, QPointF(point), QPointF(point), QPointF(viewport.mapToGlobal(point)),
+                            Qt.MouseButton.NoButton if kind == QEvent.Type.MouseMove else Qt.MouseButton.LeftButton,
+                            buttons, Qt.KeyboardModifier.NoModifier, Qt.MouseEventSource.MouseEventSynthesizedByQt)
+        event.setTimestamp(timestamp*20)
+        app.sendEvent(viewport, event); QTest.qWait(20)
+    QTest.qWait(60); QScroller.scroller(viewport).stop()
+    assert view.verticalScrollBar().value() > 0
+    assert window.currency.currentData() == before and window.currency.popup.isVisible()
+    point = QPoint(30, 30)
+    expected = window.currency.entries[view.itemAt(point).data(Qt.ItemDataRole.UserRole)][1]
+    for kind, buttons in ((QEvent.Type.MouseButtonPress, Qt.MouseButton.LeftButton),
+                          (QEvent.Type.MouseButtonRelease, Qt.MouseButton.NoButton)):
+        event = QMouseEvent(kind, QPointF(point), QPointF(point), QPointF(viewport.mapToGlobal(point)),
+                            Qt.MouseButton.LeftButton, buttons, Qt.KeyboardModifier.NoModifier,
+                            Qt.MouseEventSource.MouseEventSynthesizedByQt)
+        app.sendEvent(viewport, event)
+    app.processEvents()
+    assert window.currency.currentData() == expected and not window.currency.popup.isVisible()
 
 
 def test_drag_on_filter_category_does_not_open_popup(window, app):
