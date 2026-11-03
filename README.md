@@ -17,7 +17,7 @@
 | Linux x64 · Fedora · RPM | [![Скачать Linux RPM x64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Linux-x64.rpm) | Открыть пакет системным установщиком; glibc 2.35+ |
 | Linux ARM64 · Ubuntu/Debian · DEB | [![Скачать Linux DEB ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Linux-arm64.deb) | Открыть пакет системным установщиком; glibc 2.39+ |
 | Linux ARM64 · Fedora · RPM | [![Скачать Linux RPM ARM64](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0/GiftFinder-0.9.0-Linux-arm64.rpm) | Открыть пакет системным установщиком; glibc 2.39+ |
-| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.0-android.1/GiftFinder-0.9.0-Android-arm64-v8a.apk) | Открыть APK и подтвердить установку средствами Android |
+| Android 9+ · ARM64 · APK · preview | [![Скачать Android APK](docs/images/download.svg)](https://github.com/Misha20062006/giftfinder/releases/download/v0.9.1-android.1/GiftFinder-0.9.1-Android-arm64-v8a.apk) | Открыть APK и подтвердить установку средствами Android |
 
 <p align="center">
   <a href="docs/USER_GUIDE.md">Руководство</a>
