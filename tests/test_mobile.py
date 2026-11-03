@@ -565,6 +565,23 @@ def test_currency_popup_scrolls_the_mouse_events_generated_from_touch(window, ap
     assert window.currency.currentData() == expected and not window.currency.popup.isVisible()
 
 
+def test_filter_fling_finishes_without_rewinding_or_selecting(window, app, touch_device):
+    window.open_filters(); settle(window)
+    dialog = window.filter_dialog; view = dialog.grid
+    before = dialog.state
+    previous = 0
+    for _ in range(2):
+        swipe_up(view, touch_device)
+        scroller = QScroller.scroller(view.viewport())
+        for _ in range(200):
+            if scroller.state() == QScroller.State.Inactive: break
+            QTest.qWait(25)
+        assert scroller.state() == QScroller.State.Inactive
+        assert view.verticalScrollBar().value() > previous
+        previous = view.verticalScrollBar().value()
+        assert dialog.state == before and dialog.category == 'collections'
+
+
 def test_drag_on_filter_category_does_not_open_popup(window, app):
     window.open_filters(); settle(window)
     category = window.filter_dialog.category_select

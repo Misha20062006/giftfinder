@@ -603,6 +603,7 @@ def scroll_snapshot(adb, pid, area):
 
 
 def native_list_swipes(adb, output, pid, area):
+    previous = 0
     for attempt in range(2):
         tree = native_hierarchy(adb, output, area + '-before-' + str(attempt))
         listing = native_find(tree, lambda n: native_id(n, area), area)
@@ -621,6 +622,9 @@ def native_list_swipes(adb, output, pid, area):
             if time.monotonic() >= deadline:
                 raise RuntimeError(f'Android scrolling did not settle for {area}: {state}')
             time.sleep(0.1)
+        if not state['dragged'] or state['scroll_value'] <= previous:
+            raise RuntimeError(f'Android finger swipe did not keep forward progress for {area}: {state}')
+        previous = state['scroll_value']
     state = scroll_snapshot(adb, pid, area)
     if not state['dragged'] or state['scroll_value'] <= 0:
         raise RuntimeError(f'Android finger swipes did not scroll {area}: {state}')

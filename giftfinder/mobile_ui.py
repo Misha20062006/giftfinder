@@ -8,8 +8,8 @@ import io
 import os
 
 from PySide6.QtCore import QEvent, QFile, QIODevice, QObject, QPoint, QPointF, QRect, QRectF, QSize, QStandardPaths, Qt, QTimer, QUrl
-from PySide6.QtGui import QColor, QDesktopServices, QFont, QMouseEvent, QPainter, QPen
-from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout,
+from PySide6.QtGui import QColor, QDesktopServices, QFont, QMouseEvent, QPainter, QPen, QWindow
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFileDialog, QGridLayout,
     QHBoxLayout, QLabel, QLayout, QListView, QListWidget, QListWidgetItem, QMenu,
     QScrollArea, QScroller, QSizeGrip, QSizePolicy, QStyledItemDelegate, QVBoxLayout, QWidget)
 
@@ -48,13 +48,15 @@ def list_view(view, delegate, height):
     touch_scroll_list(view)
 
 
-def touch_scroll_list(view, mouse=False):
+def touch_scroll_list(view, mouse=True):
     view.setVerticalScrollMode(QListView.ScrollMode.ScrollPerPixel)
     touch_scroll_area(view, mouse=mouse)
 
 
-def touch_scroll_area(area, mouse=False):
+def touch_scroll_area(area, mouse=True):
     if not hasattr(area, 'touch_scroll_guard'):
+        # Use the same global-coordinate mouse stream on Android main windows,
+        # dialogs and popups; Qt translates their touchscreen input for us.
         gesture = QScroller.ScrollerGestureType.LeftMouseButtonGesture if mouse else QScroller.ScrollerGestureType.TouchGesture
         QScroller.grabGesture(area.viewport(), gesture)
         area.touch_scroll_guard = TouchScrollGuard(area, mouse=mouse)
@@ -73,6 +75,9 @@ class TouchScrollGuard(QObject):
         self.scroller = QScroller.scroller(view.viewport())
         self.origin = None
         self.dragged = False
+        self.touch_seen = False
+        self.input_window = None
+        self.press_timestamp = None
         self.viewport = view.viewport()
         self.cancelling = False
         self.scroller.stateChanged.connect(self.scroller_changed)
@@ -102,16 +107,31 @@ class TouchScrollGuard(QObject):
                 QEvent.Type.TouchEnd, QEvent.Type.TouchCancel, QEvent.Type.MouseButtonPress,
                 QEvent.Type.MouseMove, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick):
             return False
-        if not self.owns(obj):
+        touch = kind in (QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate, QEvent.Type.TouchEnd)
+        window_event = isinstance(obj, QWindow)
+        if window_event:
+            # Observe the original window input before the gesture recognizer
+            # consumes it or replays a delayed mouse press to a child widget.
+            position = event.points()[0].globalPosition() if touch and event.points() else None
+            if position is None and hasattr(event, 'globalPosition'):
+                position = event.globalPosition()
+            owned = position is not None and self.owns(QApplication.widgetAt(position.toPoint()))
+            if kind in (QEvent.Type.TouchBegin, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonDblClick):
+                self.input_window = obj if owned else None
+            elif self.input_window is obj:
+                owned = True
+            if not owned:
+                return False
+        elif not self.owns(obj):
             return False
         if kind == QEvent.Type.TouchCancel:
             self.dragged = True
             return False
-        touch = kind in (QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate, QEvent.Type.TouchEnd)
         mouse = not touch
         # Qt can synthesize a mouse press/release after the touch gesture ends.
         # Those events must retain the actual finger movement, not reset it.
-        if touch or (mouse and (self.mouse_gesture or event.source() == Qt.MouseEventSource.MouseEventNotSynthesized)):
+        if touch or (mouse and (event.source() != Qt.MouseEventSource.MouseEventSynthesizedByQt
+                               or (self.mouse_gesture and not self.touch_seen))):
             position = None
             if touch and event.points():
                 position = event.points()[0].globalPosition()
@@ -119,11 +139,16 @@ class TouchScrollGuard(QObject):
                 position = event.globalPosition()
             if position is not None:
                 if kind in (QEvent.Type.TouchBegin, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonDblClick):
-                    self.origin = position
-                    self.dragged = self.scroller.state() in (QScroller.State.Dragging, QScroller.State.Scrolling)
+                    if touch or self.origin is None or self.press_timestamp != event.timestamp():
+                        self.origin = position
+                        self.press_timestamp = event.timestamp()
+                        self.dragged = self.scroller.state() in (QScroller.State.Dragging, QScroller.State.Scrolling)
+                    if touch: self.touch_seen = True
                 elif self.origin is not None and (position - self.origin).manhattanLength() >= QApplication.startDragDistance():
                     self.dragged = True
-        if kind == QEvent.Type.MouseButtonRelease and self.dragged:
+        if window_event and kind in (QEvent.Type.TouchEnd, QEvent.Type.MouseButtonRelease):
+            self.input_window = None
+        if not window_event and kind == QEvent.Type.MouseButtonRelease and self.dragged:
             # Deliver an out-of-bounds release instead of swallowing it: Qt
             # must clear pressed/down state without activating the card/button.
             outside = QPointF(-1000000, -1000000)
@@ -131,7 +156,11 @@ class TouchScrollGuard(QObject):
                                     event.modifiers(), event.source())
             self.cancelling = True
             try:
-                QApplication.sendEvent(obj, cancelled)
+                parent = obj.parentWidget()
+                receiver = parent if isinstance(parent, QAbstractItemView) and parent.viewport() is obj else obj
+                # Cancel the control directly. Sending this artificial position
+                # through the recognizer again would corrupt flick velocity.
+                receiver.mouseReleaseEvent(cancelled)
             finally:
                 self.cancelling = False
             return True
