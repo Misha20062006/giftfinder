@@ -625,6 +625,9 @@ def catalog_and_currency_scroll_test(adb, output, pid):
         if state['mode'] != 'catalog' or state['filter_category'] is not None:
             raise RuntimeError('Swiping a mobile card activated a search/filter')
     tree = native_hierarchy(adb, output, 'currency-scroll-start')
+    # Display-currency controls belong to the results/favorites toolbar.
+    native_tap(adb, native_find(tree, lambda n: native_label(n, 'Favorites'), 'Favorites navigation'))
+    tree = native_hierarchy(adb, output, 'currency-favorites-toolbar')
     native_tap(adb, native_find(tree, lambda n: native_id(n, 'mobileCurrencyButton'), 'currency selector'))
     state = native_list_swipes(adb, output, pid, 'mobileCurrencyList')
     before = state['currency']
@@ -639,6 +642,9 @@ def catalog_and_currency_scroll_test(adb, output, pid):
     after = scroll_snapshot(adb, pid, 'mobileCurrencyList')
     if after['dragged'] or after['currency'] == before:
         raise RuntimeError('Ordinary currency tap after swipes did not select a new currency')
+    native_tap(adb, native_find(tree, lambda n: native_label(n, 'Catalog'), 'Catalog navigation'))
+    tree = native_hierarchy(adb, output, 'catalog-after-currency-check')
+    native_find(tree, lambda n: native_id(n, 'mobileCatalogList'), 'restored main catalog')
 
 
 def filter_scroll_test(adb, output, pid):
