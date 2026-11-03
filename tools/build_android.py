@@ -611,6 +611,16 @@ def native_list_swipes(adb, output, pid, area):
              str((x1+x2)//2), str(y1+(y2-y1)//5), '350'], timeout=15)
         tree = native_hierarchy(adb, output, area + '-after-' + str(attempt))
         native_find(tree, lambda n: native_id(n, area), area + ' after swipe')
+        # Accessibility can become idle while kinetic scrolling still runs.
+        # Finish each gesture before injecting the next independent swipe.
+        deadline = time.monotonic() + 15
+        while True:
+            state = scroll_snapshot(adb, pid, area)
+            if state['scroller_state'] == 'Inactive':
+                break
+            if time.monotonic() >= deadline:
+                raise RuntimeError(f'Android scrolling did not settle for {area}: {state}')
+            time.sleep(0.1)
     state = scroll_snapshot(adb, pid, area)
     if not state['dragged'] or state['scroll_value'] <= 0:
         raise RuntimeError(f'Android finger swipes did not scroll {area}: {state}')

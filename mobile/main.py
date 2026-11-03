@@ -95,6 +95,8 @@ def install_smoke_key_trace(window):
             dialog = getattr(window, 'filter_dialog', None)
             record = {'area': area.accessibleIdentifier(),
                       'scroll_value': area.verticalScrollBar().value(),
+                      'scroll_maximum': area.verticalScrollBar().maximum(),
+                      'scroller_state': area.touch_scroll_guard.scroller.state().name,
                       'dragged': area.touch_scroll_guard.dragged,
                       'mode': window.mode, 'currency': window.currency.currentData(),
                       'filter_category': dialog.category if dialog else None,
