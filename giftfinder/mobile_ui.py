@@ -7,8 +7,8 @@ from decimal import Decimal
 import io
 import os
 
-from PySide6.QtCore import QEvent, QFile, QIODevice, QObject, QPoint, QRect, QRectF, QSize, QStandardPaths, Qt, QTimer, QUrl
-from PySide6.QtGui import QColor, QDesktopServices, QFont, QPainter, QPen
+from PySide6.QtCore import QEvent, QFile, QIODevice, QObject, QPoint, QPointF, QRect, QRectF, QSize, QStandardPaths, Qt, QTimer, QUrl
+from PySide6.QtGui import QColor, QDesktopServices, QFont, QMouseEvent, QPainter, QPen
 from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout,
     QHBoxLayout, QLabel, QLayout, QListView, QListWidget, QListWidgetItem, QMenu,
     QScrollArea, QScroller, QSizeGrip, QSizePolicy, QStyledItemDelegate, QVBoxLayout, QWidget)
@@ -45,13 +45,18 @@ def list_view(view, delegate, height):
     view.setGridSize(QSize(max(1, view.viewport().width()), height))
     view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
     view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-    QScroller.grabGesture(view.viewport(), QScroller.ScrollerGestureType.TouchGesture)
+    touch_scroll_list(view)
 
 
 def touch_scroll_list(view):
     view.setVerticalScrollMode(QListView.ScrollMode.ScrollPerPixel)
-    QScroller.grabGesture(view.viewport(), QScroller.ScrollerGestureType.TouchGesture)
-    view.touch_scroll_guard = TouchScrollGuard(view)
+    touch_scroll_area(view)
+
+
+def touch_scroll_area(area):
+    if not hasattr(area, 'touch_scroll_guard'):
+        QScroller.grabGesture(area.viewport(), QScroller.ScrollerGestureType.TouchGesture)
+        area.touch_scroll_guard = TouchScrollGuard(area)
 
 
 def is_scrolling(view):
@@ -60,14 +65,30 @@ def is_scrolling(view):
 
 
 class TouchScrollGuard(QObject):
-    """Keep the gesture's drag result until the next genuine press."""
+    """Cancel a drag's click, including delayed Qt mouse events and child controls."""
     def __init__(self, view):
         super().__init__(view)
         self.scroller = QScroller.scroller(view.viewport())
         self.origin = None
         self.dragged = False
+        self.viewport = view.viewport()
+        self.cancelling = False
         self.scroller.stateChanged.connect(self.scroller_changed)
-        view.viewport().installEventFilter(self)
+        # The application filter sees input before QScroller consumes it, and
+        # also sees gestures beginning on a button inside a QScrollArea.
+        QApplication.instance().installEventFilter(self)
+
+    def owns(self, obj):
+        while isinstance(obj, QWidget):
+            if obj is self.viewport:
+                return True
+            parent = obj.parentWidget()
+            # A nested list owns its input; the enclosing form must not retain
+            # that list's drag when the user next taps an unrelated control.
+            if parent is not None and hasattr(parent, 'touch_scroll_guard'):
+                return False
+            obj = parent
+        return False
 
     def scroller_changed(self, state):
         if state in (QScroller.State.Dragging, QScroller.State.Scrolling):
@@ -75,8 +96,17 @@ class TouchScrollGuard(QObject):
 
     def eventFilter(self, obj, event):
         kind = event.type()
+        if self.cancelling or kind not in (QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate,
+                QEvent.Type.TouchEnd, QEvent.Type.TouchCancel, QEvent.Type.MouseButtonPress,
+                QEvent.Type.MouseMove, QEvent.Type.MouseButtonRelease, QEvent.Type.MouseButtonDblClick):
+            return False
+        if not self.owns(obj):
+            return False
+        if kind == QEvent.Type.TouchCancel:
+            self.dragged = True
+            return False
         touch = kind in (QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate, QEvent.Type.TouchEnd)
-        mouse = kind in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseMove, QEvent.Type.MouseButtonRelease)
+        mouse = not touch
         # Qt can synthesize a mouse press/release after the touch gesture ends.
         # Those events must retain the actual finger movement, not reset it.
         if touch or (mouse and event.source() == Qt.MouseEventSource.MouseEventNotSynthesized):
@@ -86,11 +116,23 @@ class TouchScrollGuard(QObject):
             elif mouse:
                 position = event.globalPosition()
             if position is not None:
-                if kind in (QEvent.Type.TouchBegin, QEvent.Type.MouseButtonPress):
+                if kind in (QEvent.Type.TouchBegin, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonDblClick):
                     self.origin = position
                     self.dragged = self.scroller.state() in (QScroller.State.Dragging, QScroller.State.Scrolling)
                 elif self.origin is not None and (position - self.origin).manhattanLength() >= QApplication.startDragDistance():
                     self.dragged = True
+        if kind == QEvent.Type.MouseButtonRelease and self.dragged:
+            # Deliver an out-of-bounds release instead of swallowing it: Qt
+            # must clear pressed/down state without activating the card/button.
+            outside = QPointF(-1000000, -1000000)
+            cancelled = QMouseEvent(kind, outside, outside, outside, event.button(), event.buttons(),
+                                    event.modifiers(), event.source())
+            self.cancelling = True
+            try:
+                QApplication.sendEvent(obj, cancelled)
+            finally:
+                self.cancelling = False
+            return True
         return False
 
 
@@ -187,6 +229,11 @@ class MobileOfferDelegate(QStyledItemDelegate):
 
 
 class MobileSearchSelector(SearchSelector):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.items.setAccessibleIdentifier('mobileCurrencyList')
+        touch_scroll_list(self.items)
+
     def filter_items(self, text):
         super().filter_items(text)
         for i in range(self.items.count()):
@@ -251,6 +298,7 @@ class MobileFilterDialog(FilterDialog):
         self.category_select.currentIndexChanged.connect(lambda _: self.change_tab(self.category_select.currentData()))
         form.addWidget(self.category_select); form.addWidget(touch(self.search))
         list_view(self.grid, MobileTileDelegate(self.renderer, self.grid, self.is_selected), 92)
+        self.grid.setAccessibleIdentifier('mobileFilterList')
         self.grid.setFixedHeight(276); form.addWidget(self.grid)
         self.advanced_toggle = touch(button(tr('price')+' · '+tr('number')+' · '+tr('market'), self.toggle_advanced, 'quiet', 'chevron'))
         self.advanced_toggle.setCheckable(True); form.addWidget(self.advanced_toggle)
@@ -270,7 +318,7 @@ class MobileFilterDialog(FilterDialog):
         self.advanced.setVisible(bool(self.minimum.text() or self.maximum.text() or self.number.text()))
         self.advanced_toggle.setChecked(not self.advanced.isHidden())
         scroll.setWidget(content); layout.addWidget(scroll, 1)
-        QScroller.grabGesture(scroll.viewport(), QScroller.ScrollerGestureType.TouchGesture)
+        touch_scroll_area(scroll)
         self.form_scroll = scroll
         self.error.setWordWrap(True); layout.addWidget(self.error)
         footer = QHBoxLayout()
@@ -325,7 +373,7 @@ class MobileDetailsDialog(DetailsDialog):
         contents.addWidget(touch(button('copy_link', lambda: QApplication.clipboard().setText(url))))
         contents.addWidget(touch(self.favorite)); contents.addStretch()
         scroll.setWidget(body); layout.addWidget(scroll, 1)
-        QScroller.grabGesture(scroll.viewport(), QScroller.ScrollerGestureType.TouchGesture)
+        touch_scroll_area(scroll)
         self.redraw()
 
 
@@ -366,6 +414,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         self.active_scroll = QScrollArea(); self.active_scroll.setWidgetResizable(True); self.active_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         self.active_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff); self.active_scroll.setWidget(self.active_widget)
         self.active_scroll.setMaximumHeight(90); self.active_scroll.hide(); outer.addWidget(self.active_scroll)
+        touch_scroll_area(self.active_scroll)
         self._old_tools = steal_layout(self.tools_widget)
         tools = QGridLayout(self.tools_widget); tools.setContentsMargins(0,0,0,0); tools.setSpacing(6)
         self.counter.setWordWrap(True); tools.addWidget(self.counter, 0, 0)
@@ -383,11 +432,15 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         self.mobile_catalog_row=QHBoxLayout(self.mobile_catalog_header);self.mobile_catalog_row.setContentsMargins(0,0,0,0)
         self.mobile_catalog_row.addWidget(touch(self.theme_toggle));home_layout.addWidget(self.mobile_catalog_header)
         list_view(self.theme_grid, MobileTileDelegate(self.renderer, self.theme_grid), 92); home_layout.addWidget(self.theme_grid)
+        self.theme_grid.setAccessibleIdentifier('mobileThemeList')
         home_layout.addWidget(self.catalog_note)
         home_layout.addWidget(touch(self.catalog_search))
         list_view(self.home_grid, MobileTileDelegate(self.renderer, self.home_grid), 92); home_layout.addWidget(self.home_grid, 1)
+        self.home_grid.setAccessibleIdentifier('mobileCatalogList')
         self.stack.insertWidget(0, home); self.stack.setCurrentIndex(0)
         list_view(self.view, MobileOfferDelegate(self), 148)
+        self.view.setAccessibleIdentifier('mobileOfferList')
+        self.currency.setAccessibleIdentifier('mobileCurrencyButton')
         self.empty_title.setWordWrap(True); outer.addWidget(self.stack, 1)
         navigation = QHBoxLayout()
         navigation.addWidget(touch(self.nav_catalog, 52), 1); navigation.addWidget(touch(self.nav_favorites, 52), 1)
@@ -505,6 +558,7 @@ QComboBox QAbstractItemView::item { min-height: 44px; }
         scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         body = label(text() if callable(text) else text, 'muted', True); body.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         scroll.setWidget(body); layout.addWidget(scroll, 1); layout.addWidget(touch(button('cancel', dialog.reject)))
+        touch_scroll_area(scroll)
         dialog.retranslate = lambda: (refresh_tree(dialog), body.setText(text() if callable(text) else text))
         self.keep_dialog(dialog); return dialog
 

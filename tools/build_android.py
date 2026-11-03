@@ -592,6 +592,61 @@ def main_popup_and_language_test(adb, output, pid):
     return swipes
 
 
+def scroll_snapshot(adb, pid, area):
+    logs = run([adb, 'logcat', '-d', '--pid', pid, '-v', 'brief'], capture=True, timeout=30)
+    prefix = 'GIFTFINDER_ANDROID_SCROLL_STATE '
+    rows = [json.loads(line.split(prefix, 1)[1]) for line in logs.splitlines() if prefix in line]
+    matches = [row for row in rows if row['area'] == area]
+    if not matches:
+        raise RuntimeError(f'No real Android input snapshot for {area}')
+    return matches[-1]
+
+
+def native_list_swipes(adb, output, pid, area):
+    for attempt in range(2):
+        tree = native_hierarchy(adb, output, area + '-before-' + str(attempt))
+        listing = native_find(tree, lambda n: native_id(n, area), area)
+        x1, y1, x2, y2 = native_bounds(listing)
+        run([adb, 'shell', 'input', 'swipe', str((x1+x2)//2), str(y1+(y2-y1)*4//5),
+             str((x1+x2)//2), str(y1+(y2-y1)//5), '350'], timeout=15)
+        tree = native_hierarchy(adb, output, area + '-after-' + str(attempt))
+        native_find(tree, lambda n: native_id(n, area), area + ' after swipe')
+    state = scroll_snapshot(adb, pid, area)
+    if not state['dragged'] or state['scroll_value'] <= 0:
+        raise RuntimeError(f'Android finger swipes did not scroll {area}: {state}')
+    with (output / (area + '-scrolled.png')).open('wb') as stream:
+        subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream, timeout=20)
+    return state
+
+
+def catalog_and_currency_scroll_test(adb, output, pid):
+    for area in ('mobileCatalogList', 'mobileThemeList'):
+        state = native_list_swipes(adb, output, pid, area)
+        if state['mode'] != 'catalog' or state['filter_category'] is not None:
+            raise RuntimeError('Swiping a mobile card activated a search/filter')
+    tree = native_hierarchy(adb, output, 'currency-scroll-start')
+    native_tap(adb, native_find(tree, lambda n: native_id(n, 'mobileCurrencyButton'), 'currency selector'))
+    state = native_list_swipes(adb, output, pid, 'mobileCurrencyList')
+    before = state['currency']
+    tree = native_hierarchy(adb, output, 'currency-after-swipes')
+    listing = native_find(tree, lambda n: native_id(n, 'mobileCurrencyList'), 'currency list after swipes')
+    x1, y1, x2, y2 = native_bounds(listing)
+    run([adb, 'shell', 'input', 'tap', str((x1+x2)//2), str(y1+min(60, (y2-y1)//4))], timeout=15)
+    tree = native_hierarchy(adb, output, 'currency-after-ordinary-tap')
+    native_find(tree, lambda n: native_id(n, 'mobileCurrencyButton'), 'currency selector after tap')
+    if any(native_id(n, 'mobileCurrencyList') and native_bounds(n) for n in tree.iter('node')):
+        raise RuntimeError('Ordinary currency tap after swipes did not close its popup')
+    after = scroll_snapshot(adb, pid, 'mobileCurrencyList')
+    if after['dragged'] or after['currency'] == before:
+        raise RuntimeError('Ordinary currency tap after swipes did not select a new currency')
+
+
+def filter_scroll_test(adb, output, pid):
+    state = native_list_swipes(adb, output, pid, 'mobileFilterList')
+    if state['filter_category'] != 'collections' or state['filter_summary']:
+        raise RuntimeError('Swiping the filter list selected a collection or changed its draft')
+
+
 def category_popup_draft_test(adb, output, pid):
     draft = 'egg'
     tree = native_hierarchy(adb, output, 'category-draft-start')
@@ -984,6 +1039,7 @@ def emulator_test(args):
     if len(colors) < 16:
         raise RuntimeError('Android screenshot is blank or nearly blank')
     language_swipes = main_popup_and_language_test(adb, output, pid)
+    catalog_and_currency_scroll_test(adb, output, pid)
     tree = native_hierarchy(adb, output, 'home-accessibility')
     filters = next((node for node in tree.iter('node') if
                     node.get('text') == 'Filters' or node.get('content-desc') == 'Filters'), None)
@@ -1003,6 +1059,7 @@ def emulator_test(args):
         raise RuntimeError('Crash detected while opening the mobile filter sheet')
     with (output / 'android-filters.png').open('wb') as stream:
         subprocess.run([adb, 'exec-out', 'screencap', '-p'], check=True, stdout=stream)
+    filter_scroll_test(adb, output, pid)
     category_popup_draft_test(adb, output, pid)
     ime_before = run([adb, 'shell', 'dumpsys', 'input_method'], capture=True, timeout=30)
     (output / 'input-method-before-back.txt').write_text(ime_before, encoding='utf-8')
@@ -1080,6 +1137,9 @@ def emulator_test(args):
                 'category_popup_one_back_preserved_filter_and_draft': True,
                 'language_finger_swipes_reached_japanese': True, 'language_swipes_injected': language_swipes,
                 'language_normal_tap_selected_japanese_and_restored_english': True,
+                'catalog_and_theme_finger_swipes_without_activation': True,
+                'filter_finger_swipes_preserved_draft': True,
+                'currency_finger_swipes_and_next_tap': True,
                 'python_ssl_and_sqlite_runtime_checks': True, 'qt_ssl_backend_runtime_check': True,
                 'uncached_public_image_loaded_over_https': True,
                 'accessible_filters_button_tapped': True, 'mobile_filters_sheet_opened': True,

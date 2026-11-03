@@ -6,8 +6,8 @@ import os
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 
 import pytest
-from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QRect, Qt
-from PySide6.QtGui import QDesktopServices, QKeyEvent
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, QPointF, QRect, Qt
+from PySide6.QtGui import QDesktopServices, QKeyEvent, QMouseEvent
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QFileDialog, QListWidget, QMenu, QScroller
 
@@ -365,6 +365,7 @@ def test_filter_category_opens_from_one_touch_tap_and_back_keeps_draft(window, a
 def test_filter_category_waits_for_release_then_accepts_a_new_row_tap(window, app):
     window.open_filters(); dialog = window.filter_dialog
     dialog.search.setText('egg'); category = dialog.category_select
+    settle(window)
     selected = []; category.activated.connect(selected.append)
     QTest.mousePress(category, Qt.MouseButton.LeftButton)
     app.processEvents()
@@ -459,6 +460,124 @@ def swipe_up(view, device):
         sequence.move(0, QPoint(x, start-step*22), viewport).commit()
     sequence.release(0, QPoint(x, start-220), viewport).commit()
     QTest.qWait(60)
+
+
+def drag_in_place(widget, app, distance=None):
+    """Move within one card/control, where Qt would still emit clicked."""
+    start = widget.rect().center()
+    end = start + QPoint(0, distance or QApplication.startDragDistance()+2)
+    QTest.mousePress(widget, Qt.MouseButton.LeftButton, pos=start)
+    event = QMouseEvent(QEvent.Type.MouseMove, QPointF(end), QPointF(widget.mapToGlobal(end)),
+                        Qt.MouseButton.NoButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier)
+    app.sendEvent(widget, event)
+    QTest.mouseRelease(widget, Qt.MouseButton.LeftButton, pos=end)
+    app.processEvents()
+
+
+@pytest.mark.parametrize('name', ['home_grid', 'theme_grid', 'view', 'filter_grid', 'currency'])
+def test_mobile_card_drag_never_activates_and_next_tap_works(window, app, name):
+    if name == 'filter_grid':
+        window.open_filters(); view = window.filter_dialog.grid
+    elif name == 'currency':
+        window.currency.showPopup(); view = window.currency.items
+    elif name == 'view':
+        window.mode = 'search'; window.offers = [offer()]; window.render_offers(); view = window.view
+    else:
+        view = getattr(window, name)
+    settle(window)
+    clicked = []; view.clicked.connect(lambda index: clicked.append(index.row()))
+    # Keep both positions inside the same visible card/row.
+    viewport = view.viewport()
+    start = view.visualRect(view.model().index(0, 0)).center()
+    QTest.mousePress(viewport, Qt.MouseButton.LeftButton, pos=start)
+    end = start + QPoint(0, QApplication.startDragDistance()+2)
+    app.sendEvent(viewport, QMouseEvent(QEvent.Type.MouseMove, QPointF(end), QPointF(viewport.mapToGlobal(end)),
+                  Qt.MouseButton.NoButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier))
+    QTest.mouseRelease(viewport, Qt.MouseButton.LeftButton, pos=end)
+    app.processEvents()
+    assert clicked == []
+    if name in ('home_grid', 'theme_grid'): assert window.filter_dialog is None
+    if name == 'view': assert not window.dialogs
+    QTest.mouseClick(viewport, Qt.MouseButton.LeftButton, pos=start)
+    app.processEvents()
+    assert clicked == [0]
+
+
+@pytest.mark.parametrize('name', ['home_grid', 'theme_grid', 'view', 'filter_grid'])
+def test_mobile_lists_scroll_with_touch_without_activation(window, app, touch_device, name):
+    if name == 'filter_grid':
+        window.open_filters(); view = window.filter_dialog.grid
+        before = window.filter_dialog.state
+    elif name == 'view':
+        window.mode = 'search'
+        window.offers = [replace(offer(), slug=f'EasterEgg-{n}', number=n) for n in range(1, 31)]
+        window.render_offers(); view = window.view
+    else:
+        view = getattr(window, name)
+    settle(window)
+    clicked = []; view.clicked.connect(lambda index: clicked.append(index.row()))
+    for _ in range(2):
+        swipe_up(view, touch_device)
+        QScroller.scroller(view.viewport()).stop()
+        assert clicked == []
+    assert view.verticalScrollBar().value() > 0
+    if name in ('home_grid', 'theme_grid'): assert window.filter_dialog is None and window.mode == 'catalog'
+    if name == 'view': assert not window.dialogs
+    if name == 'filter_grid': assert window.filter_dialog.state == before
+    point = QPoint(30, 30)
+    row = view.indexAt(point).row()
+    assert row >= 0
+    sequence = QTest.touchEvent(view.viewport(), touch_device)
+    sequence.press(0, point, view.viewport()).commit()
+    QTest.qWait(30)
+    sequence.release(0, point, view.viewport()).commit()
+    app.processEvents()
+    assert clicked == [row]
+
+
+def test_drag_on_filter_category_does_not_open_popup(window, app):
+    window.open_filters(); settle(window)
+    category = window.filter_dialog.category_select
+    drag_in_place(category, app)
+    assert not category.view().isVisible()
+    QTest.mouseClick(category, Qt.MouseButton.LeftButton)
+    app.processEvents()
+    assert category.view().isVisible()
+
+
+def test_delayed_synthesized_click_after_card_swipe_is_cancelled(window, app, touch_device):
+    view = window.home_grid; viewport = view.viewport()
+    clicked = []; view.clicked.connect(lambda index: clicked.append(index.row()))
+    swipe_up(view, touch_device)
+    QScroller.scroller(viewport).stop()
+    point = QPointF(30, 30); global_point = QPointF(viewport.mapToGlobal(point.toPoint()))
+    for kind, buttons in ((QEvent.Type.MouseButtonPress, Qt.MouseButton.LeftButton),
+                          (QEvent.Type.MouseButtonRelease, Qt.MouseButton.NoButton)):
+        app.sendEvent(viewport, QMouseEvent(kind, point, point, global_point, Qt.MouseButton.LeftButton,
+                      buttons, Qt.KeyboardModifier.NoModifier, Qt.MouseEventSource.MouseEventSynthesizedByQt))
+    app.processEvents()
+    assert clicked == [] and window.filter_dialog is None
+    # A new real finger tap starts a new gesture immediately.
+    row = view.indexAt(point.toPoint()).row()
+    sequence = QTest.touchEvent(viewport, touch_device)
+    sequence.press(0, point.toPoint(), viewport).commit()
+    QTest.qWait(30)
+    sequence.release(0, point.toPoint(), viewport).commit()
+    app.processEvents()
+    assert clicked == [row] and window.filter_dialog is not None
+
+
+def test_drag_on_filter_market_keeps_setting_and_next_tap_toggles(window, app):
+    window.open_filters(); dialog = window.filter_dialog
+    dialog.advanced_toggle.click(); settle(window)
+    check = next(iter(dialog.market_checks.values()))
+    dialog.form_scroll.ensureWidgetVisible(check); settle(window)
+    before = check.isChecked()
+    drag_in_place(check, app)
+    assert check.isChecked() == before
+    assert not check.isDown()
+    QTest.mouseClick(check, Qt.MouseButton.LeftButton)
+    assert check.isChecked() != before
 
 
 def test_language_list_scrolls_by_touch_without_selecting_a_language(window, app, touch_device):

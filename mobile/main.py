@@ -83,11 +83,24 @@ def install_smoke_key_trace(window):
     if os.environ.get('GIFT_FINDER_ANDROID_SMOKE') != '1':
         return None
     from PySide6.QtCore import QEvent, QObject, Qt, QTimer
-    from PySide6.QtGui import QGuiApplication
+    from PySide6.QtGui import QGuiApplication, QScrollEvent
     from PySide6.QtWidgets import QApplication, QStyle, QStyleOptionComboBox
     import json
 
     class KeyTrace(QObject):
+        def scroll_snapshot(self, area):
+            import shiboken6
+            if not shiboken6.isValid(area):
+                return
+            dialog = getattr(window, 'filter_dialog', None)
+            record = {'area': area.accessibleIdentifier(),
+                      'scroll_value': area.verticalScrollBar().value(),
+                      'dragged': area.touch_scroll_guard.dragged,
+                      'mode': window.mode, 'currency': window.currency.currentData(),
+                      'filter_category': dialog.category if dialog else None,
+                      'filter_summary': dialog.summary.text() if dialog else None}
+            print('GIFTFINDER_ANDROID_SCROLL_STATE ' + json.dumps(record, sort_keys=True), flush=True)
+
         @staticmethod
         def widget_identity(widget):
             return None if widget is None else {'class': widget.metaObject().className(),
@@ -113,7 +126,20 @@ def install_smoke_key_trace(window):
                           'input_method_visible': QGuiApplication.inputMethod().isVisible()}
                 print('GIFTFINDER_ANDROID_KEY_EVENT ' + json.dumps(record, sort_keys=True), flush=True)
             elif event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease,
-                                  QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate, QEvent.Type.TouchEnd):
+                                  QEvent.Type.TouchBegin, QEvent.Type.TouchUpdate, QEvent.Type.TouchEnd,
+                                  QEvent.Type.Scroll):
+                if (event.type() in (QEvent.Type.TouchEnd, QEvent.Type.MouseButtonRelease)
+                        or (event.type() == QEvent.Type.Scroll
+                            and event.scrollState() == QScrollEvent.ScrollState.ScrollFinished)):
+                    area = target
+                    while area is not None and hasattr(area, 'parentWidget'):
+                        if hasattr(area, 'touch_scroll_guard'):
+                            if area.accessibleIdentifier():
+                                QTimer.singleShot(0, lambda a=area: self.scroll_snapshot(a))
+                            break
+                        area = area.parentWidget()
+                if event.type() == QEvent.Type.Scroll:
+                    return False
                 dialog = getattr(window, 'filter_dialog', None)
                 category = getattr(dialog, 'category_select', None)
                 if category is not None and category.isVisible():
